@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Sessão Única - Realtime DB</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: Arial, sans-serif; background:#f0f2f5; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+  .container { background:#fff; width:320px; padding:20px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,.12); text-align:center; }
+  input, button { width:100%; padding:12px; margin:10px 0; border-radius:6px; border:1px solid #dcdfe6; font-size:16px; }
+  button { background:#4CAF50; color:#fff; border:none; cursor:pointer; transition:.2s; }
+  button:hover { background:#43a047; }
+  #logoutBtn { background:#e74c3c; } #logoutBtn:hover { background:#d8433e; }
+  .muted { color:#667; font-size:12px; margin-top:8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Sessão única</h2>
+  <div id="loginForm">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Senha">
+    <button id="loginBtn">Entrar</button>
+    <div class="muted">Seu login fica ativo neste dispositivo. Novo login em outro aparelho encerra aqui.</div>
+  </div>
+  <div id="loggedIn" style="display:none;">
+    <p>Você está logado!</p>
+    <button id="logoutBtn">Sair</button>
+  </div>
+</div>
+
+<!-- Firebase compat -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
+  authDomain: "cliente-movicel.firebaseapp.com",
+  databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
+  projectId: "cliente-movicel",
+  storageBucket: "cliente-movicel.firebasestorage.app",
+  messagingSenderId: "215414688375",
+  appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
+  measurementId: "G-7F1RGP9GHV"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+// Persistência do Auth
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {});
+
+// Helpers Android bridge
+function hasAndroid() { return !!(window.Android); }
+function jsLog(msg) { try { hasAndroid() ? Android.log(String(msg)) : console.log(msg); } catch(e){} }
+
+function getLocalSessionKey() {
+  try {
+    const k = hasAndroid() ? Android.getSessionKey() : (localStorage.getItem("sessionKey") || "");
+    return (k || "").trim();
+  } catch(e) { return (localStorage.getItem("sessionKey") || "").trim(); }
+}
+
+function setLocalSessionKey(k) {
+  try { if (hasAndroid()) Android.setSessionKey(String(k || "")); } catch(e){}
+  try { localStorage.setItem("sessionKey", String(k || "")); } catch(e){}
+}
+
+function getUidPref() {
+  try {
+    const u = hasAndroid() ? Android.getUid() : (localStorage.getItem("uid") || "");
+    return (u || "").trim();
+  } catch(e) { return (localStorage.getItem("uid") || "").trim(); }
+}
+
+function setUidPref(uid) {
+  try { if (hasAndroid()) Android.setUid(String(uid || "")); } catch(e){}
+  try { localStorage.setItem("uid", String(uid || "")); } catch(e){}
+}
+
+function generateSessionKey() {
+  try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch(e){}
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
+
+// UI
+function showLogged(state) {
+  document.getElementById("loginForm").style.display = state ? "none" : "block";
+  document.getElementById("loggedIn").style.display = state ? "block" : "none";
+}
+
+// Login
+async function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if (!email || !password) { alert("Preencha email e senha"); return; }
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    await iniciarSessao(cred.user.uid);
+  } catch (e) {
+    alert("Erro no login: " + (e && e.message ? e.message : e));
+  }
+}
+
+async function iniciarSessao(uid) {
+  setUidPref(uid);
+
+  let sessionKey = getLocalSessionKey();
+  if (!sessionKey) {
+    sessionKey = generateSessionKey();
+    setLocalSessionKey(sessionKey);
+  }
+
+  await db.ref("users/" + uid + "/sessionKey").set(sessionKey);
+  monitorSession(uid);
+  showLogged(true);
+  jsLog("Sessão iniciada. sessionKey=" + sessionKey);
+}
+
+function monitorSession(uid) {
+  db.ref("users/" + uid + "/sessionKey").on("value", snap => {
+    const serverKey = (snap && snap.val()) || "";
+    const localKey = getLocalSessionKey();
+    if (serverKey && localKey && serverKey !== localKey) {
+      // Outro dispositivo assumiu a sessão
+      if (hasAndroid() && typeof Android.sessionInvalidated === "function") {
+        Android.sessionInvalidated("Sua conta foi acessada em outro dispositivo.");
+      } else {
+        alert("Sua conta foi acessada em outro dispositivo.");
+      }
+      logout(); // Limpa local
+    }
+  });
+}
+
+function logout() {
+  try { auth.signOut(); } catch(e){}
+  setLocalSessionKey("");
+  showLogged(false);
+}
+
+// Eventos UI
+document.getElementById("loginBtn").addEventListener("click", login);
+document.getElementById("logoutBtn").addEventListener("click", logout);
+
+// Restore de sessão
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    setUidPref(user.uid);
+    const sk = getLocalSessionKey();
+    if (sk) {
+      // Reaplica a sessão atual deste dispositivo
+      await db.ref("users/" + user.uid + "/sessionKey").set(sk);
+      monitorSession(user.uid);
+      showLogged(true);
+      jsLog("Sessão restaurada com sessionKey existente.");
+    } else {
+      await iniciarSessao(user.uid);
+    }
+  } else {
+    showLogged(false);
+  }
+});
+</script>
+</body>
+</html>

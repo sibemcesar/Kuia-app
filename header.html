@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Vizin+</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f0ff;
+    }
+
+    /* Splash com altura do header */
+    #splash {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: linear-gradient(270deg, #6a0dad, #9b4dff, #6a0dad);
+        background-size: 400% 400%;
+        animation: gradientMove 4s ease infinite;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 9999;
+        overflow: hidden;
+        color: white;
+    }
+
+    @keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Loader circular minimalista */
+    .loader {
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.4);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 4px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Slogan com fade-in */
+    .slogan {
+        font-size: 14px;
+        font-weight: bold;
+        opacity: 0;
+        animation: fadeIn 1.2s ease forwards;
+        animation-delay: 0.5s;
+        white-space: nowrap;
+    }
+
+    @keyframes fadeIn {
+        to { opacity: 1; }
+    }
+
+    header {
+        background: linear-gradient(135deg, #6a0dad, #9b4dff);
+        color: white;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        height: 43px;
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    nav {
+        flex: 1;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-left: 15px;
+    }
+
+    button {
+        background: transparent;
+        border: none;
+        padding: 6px;
+        cursor: pointer;
+        transition: transform 0.2s, opacity 0.2s;
+    }
+
+    button:hover {
+        transform: scale(1.15);
+        opacity: 0.8;
+    }
+
+    svg {
+        width: 26px;
+        height: 26px;
+        stroke: white;
+        fill: none;
+        stroke-width: 2;
+    }
+   .tip {    
+  font-size: 12px;       /* tamanho pequeno */
+  font-weight: bold;   /* peso normal */
+  line-height: 1.4;      /* altura de linha confortável */
+  text-align: center;    /* centraliza o texto */
+  max-width: 90%;        /* evita colar nas bordas */
+  color: #fff;           /* cor do texto */
+}
+  
+</style>
+</head>
+<body>
+
+<!-- Splash -->
+<div id="splash">
+    <div class="loader"></div>
+    <div class="slogan"><div class="tip" id="tip">Carregando dica...</div>
+</div>
+</div>
+
+<header>
+    <h1>Kuia+</h1>
+    <nav>
+        <button onclick="AndroidBridge.mostrar(1)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="16" rx="2" ry="2"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </button>
+        <button onclick="AndroidBridge.mostrar(2)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+        </button>
+        <button onclick="AndroidBridge.mostrar(3)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+        </button>
+        <button onclick="AndroidBridge.mostrar(4)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </button>
+        <button onclick="AndroidBridge.mostrar(5)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+        </button>
+    </nav>
+</header>
+
+<script>
+function mostrarSplash() {
+    document.getElementById("splash").style.display = "flex";
+    if (window.AndroidBridge4 && AndroidBridge4.setSplashPresente) {
+        AndroidBridge4.setSplashPresente(true);
+    }
+}
+
+function esconderSplash() {
+    document.getElementById("splash").style.display = "none";
+    if (window.AndroidBridge4 && AndroidBridge4.setSplashPresente) {
+        AndroidBridge4.setSplashPresente(false);
+    }
+}
+
+function verificarInternet() {
+    if (!navigator.onLine) {
+        mostrarSplash();
+        return;
+    }
+
+    fetch("https://www.gstatic.com/generate_204", {cache: "no-store"})
+        .then(() => {
+            setTimeout(() => {
+                esconderSplash();
+            }, 10000);
+        })
+        .catch(() => {
+            mostrarSplash();
+        });
+}
+
+verificarInternet();
+setInterval(verificarInternet, 5000);
+</script>
+    <script>
+  const tips = [
+  "Mantenha seu perfil sempre lindo e atualizado.",
+  "Use hashtags certeiras para alcançar mais gente.",
+  "Converse nos comentários e faça novas amizades.",
+  "Publique com carinho e frequência para engajar.",
+  "Aproveite tendências e crie do seu jeito.",
+  "Ative notificações para não perder nada.",
+  "Salve posts que te inspiram para rever depois.",
+  "Use o modo escuro e cuide da bateria.",
+  "Convide amigos e ganhe+ juntos.",
+  "Ganhe recompensas só por usar o Kuia+ todo dia.",
+  "Quanto mais ativo, mais você ganha.",
+  "Fique ativo para não ter problemas no saque.",
+  "Compartilhe seu link e cresça rapidinho.",
+  "Entre nos desafios e multiplique seus ganhos.",
+  "Acesse todo dia e garanta seu bônus.",
+  "Curta e comente para ser mais visto.",
+  "Aproveite promoções e ganhe mais fácil.",
+  "Cumprimente novos usuários e amplie sua rede.",
+  "Explore todos os recursos do Kuia+ e brilhe."
+];
+
+  const tipEl = document.getElementById('tip');
+
+  function showRandomTip() {
+    const randomIndex = Math.floor(Math.random() * tips.length);
+    tipEl.textContent = tips[randomIndex];
+    tipEl.style.animation = 'none';
+    tipEl.offsetHeight; // força reflow para reiniciar animação
+    tipEl.style.animation = '';
+  }
+
+  // Mostra uma dica imediatamente
+  showRandomTip();
+  // Troca a cada 2 segundos
+  setInterval(showRandomTip, 4000);
+</script>
+</body>
+</html>

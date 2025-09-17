@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chat Movicel</title>
+ 
+<style>
+:root{
+  --bg:#f2f5f7; --card:#fff; --line:#e6e9ef; --text:#1f2937; --muted:#6b7280;
+  --brand:#1a73e8; --in:#ffffff; --out:#1a73e8; --out-text:#ffffff; --radius:14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#181818; --card:#2a2a2a; --line:#404040; --text:#ffffff; --muted:#a0a0a0;
+    --brand:#4285f4; --in:#3a3a3a; --out:#4285f4; --out-text:#ffffff;
+  }
+}
+
+*{box-sizing:border-box}
+body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+#app{display:grid;grid-template-columns:100% 1fr;width:100%;height:100vh;max-height:100vh}
+
+/* Splash Screen */
+.splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+
+.splash-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-logo {
+  width: 120px;
+  height: 120px;
+  background: white;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.splash-title {
+  color: white;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.splash-subtitle {
+  color: rgba(255,255,255,0.8);
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.splash-loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.splash-status {
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  margin-top: 20px;
+  text-align: center;
+  min-height: 20px;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* PIN Security */
+.pin-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 90000;
+  backdrop-filter: blur(10px);
+}
+
+.pin-modal {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 350px;
+  width: calc(100% - 40px);
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.pin-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.pin-subtitle {
+  color: var(--muted);
+  margin-bottom: 30px;
+  font-size: 14px;
+}
+
+.pin-input {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.pin-digit {
+  width: 50px;
+  height: 50px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  background: var(--card);
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.pin-digit:focus {
+  border-color: var(--brand);
+  outline: none;
+  transform: scale(1.05);
+}
+
+.pin-digit.filled {
+  background: var(--brand);
+  color: white;
+  border-color: var(--brand);
+}
+
+.pin-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.pin-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pin-btn.primary {
+  background: var(--brand);
+  color: white;
+}
+
+.pin-btn.secondary {
+  background: var(--line);
+  color: var(--text);
+}
+
+.pin-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.pin-error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 10px;
+  display: none;
+}
+
+.sidebar, .chat {
+  display: none;
+}
+.sidebar.active, .chat.active {
+  display: flex;
+}
+
+.sidebar{background:var(--card);border-right:1px solid var(--line);flex-direction:column}
+.topbar{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px }
+.me{display:flex;align-items:center;gap:10px;flex:1}
+
+.me .avatar{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  object-fit:cover;
+  background:linear-gradient(135deg, #667eea, #764ba2);
+  border: 2px solid var(--line);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.me .avatar.loaded {
+  background: none;
+}
+
+.me .avatar:hover {
+  transform: scale(1.05);
+  border-color: var(--brand);
+}
+
+.me .info{display:flex;flex-direction:column}
+.me .info .name{font-weight:600;font-size:14px}
+.me .info .email{font-size:12px;color:var(--muted)}
+
+.actions{display:flex;gap:8px}
+.actions button{color:#fff;border:0;border-radius:0px;padding:0px 0px;cursor:pointer;transition:all 0.2s ease}
+.actions button:hover{opacity:0.9;transform:translateY(-1px)}
+
+.search{padding:8px 12px;border-bottom:1px solid var(--line)}
+.search input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
+
+.user-list{list-style:none;margin:0;padding:0;overflow:auto;flex:1}
+.user-item{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--line);transition:background-color 0.2s ease}
+.user-item:hover{background:rgba(26,115,232,0.05)}
+
+.avatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  object-fit:cover;
+  background:linear-gradient(135deg, #667eea, #764ba2);
+  border: 2px solid var(--line);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.avatar.loaded {
+  background: none;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  border-color: var(--brand);
+}
+
+.u-main{display:flex;flex-direction:column;min-width:0}
+.u-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+.u-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.u-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.u-time{font-size:11px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;transition:all 0.2s ease}
+.dot.online{background:#10b981;box-shadow:0 0 6px rgba(16,185,129,0.4)}
+.dot.offline{background:#9ca3af}
+
+.chat{flex-direction:column; width:100%; height:100vh;max-height:100vh}
+.chat-header{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);background:var(--card)}
+.chat-header .avatar{width:40px;height:40px}
+.title{display:flex;flex-direction:column;flex:1}
+.title .name{font-weight:700;font-size:16px}
+.title .status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:2px}
+
+/* Chat Back Button */
+.chat-back {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 18px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-back:hover {
+  background: var(--line);
+  transform: scale(1.05);
+}
+
+/* Chat Actions */
+.chat-actions{display:flex;gap:8px;margin-left:auto}
+.chat-btn{background:none;border:1px solid var(--line);color:var(--text);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;transition:all 0.2s ease}
+.chat-btn:hover{background:var(--line)}
+.chat-btn.block{border-color:#ef4444;color:#ef4444}
+.chat-btn.block:hover{background:#ef4444;color:white}
+.chat-btn.unblock{border-color:#10b981;color:#10b981}
+.chat-btn.unblock:hover{background:#10b981;color:white}
+
+.messages{flex:1;overflow:auto;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
+
+/* Mensagens com Avatares e Status */
+.row{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px}
+.row.in{justify-content:flex-start}
+.row.out{justify-content:flex-end;flex-direction:row-reverse}
+
+.message-avatar{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  object-fit:cover;
+  background:linear-gradient(135deg, #667eea, #764ba2);
+  border: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 10px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.message-avatar.loaded {
+  background: none;
+}
+
+.message-wrapper{
+  display:flex;
+  flex-direction:column;
+  max-width:70%;
+}
+
+.bubble{
+  padding:10px 12px;
+  border-radius:16px;
+  line-height:1.35;
+  word-wrap:break-word;
+  overflow-wrap:anywhere;
+  box-shadow:0 1px 2px rgba(0,0,0,0.1);
+}
+
+.in .bubble{
+  background:var(--in);
+  border-bottom-left-radius:4px;
+}
+
+.out .bubble{
+  background:var(--brand);
+  color:var(--out-text);
+  border-bottom-right-radius:4px;
+}
+
+.msg-img{border-radius:10px;max-width:100%;cursor:pointer;display:block}
+.meta{font-size:11px;color:var(--muted);margin-top:4px;padding:0 4px;display:flex;align-items:center;gap:6px}
+
+/* Message Status Icons */
+.message-status {
+  font-size: 10px;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+
+.message-status.sent {
+  color: #6b7280;
+}
+
+.message-status.delivered {
+  color: #3b82f6;
+}
+
+.message-status.read {
+  color: #10b981;
+}
+
+.composer{display:none;gap:8px;padding:10px;border-top:1px solid var(--line);background:var(--card)}
+.composer button{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:0 0px;cursor:pointer;height:40px;transition:all 0.2s ease}
+.composer button:hover{opacity:0.9;transform:translateY(-1px)}
+
+#textInput{flex:1;min-height:40px;max-height:120px;resize:none;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
+#btnImage{width:40px;display:grid;place-items:center}
+
+.viewer{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;z-index:1000}
+.viewer img{max-width:95vw;max-height:90vh;border-radius:12px}
+.viewer-close{position:fixed;top:16px;right:16px;background:#111;color:#fff;border:0;border-radius:10px;padding:8px 12px;cursor:pointer}
+
+.auth{position:fixed;inset:0;background:rgba(15,23,42,0.8);display:none;align-items:center;justify-content:center;padding:20px;z-index:1100;backdrop-filter:blur(4px)}
+.auth-card{background:var(--card);border-radius:16px;max-width:380px;width:100%;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
+.auth-card h2{margin:0;color:var(--text)}
+.auth-card input{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
+.row-line{display:flex;gap:8px}
+.row-line>*{flex:1}
+
+.profile{position:fixed;inset:0;background:rgba(15,23,42,0.8);display:none;align-items:center;justify-content:center;padding:20px;z-index:1200;backdrop-filter:blur(4px)}
+.profile-card{background:var(--card);border-radius:16px;max-width:420px;width:100%;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
+.profile-card h3{margin:0;color:var(--text)}
+.profile-card label{color:var(--text);font-weight:500}
+.profile-card input{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
+.help{font-size:12px;color:var(--muted)}
+.link{color:#DEBCCE;text-decoration:none}
+.hidden{display:none}
+
+/* PIN Settings */
+.pin-settings {
+  margin: 15px 0;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.pin-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pin-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand);
+}
+
+/* Blocked Users Modal */
+.blocked-modal{position:fixed;inset:0;background:rgba(15,23,42,0.8);display:none;align-items:center;justify-content:center;padding:20px;z-index:1300;backdrop-filter:blur(4px)}
+.blocked-card{background:var(--card);border-radius:16px;max-width:500px;width:100%;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);max-height:70vh;overflow:hidden}
+.blocked-card h3{margin:0;color:var(--text)}
+.blocked-list{flex:1;overflow:auto;margin:10px 0}
+.blocked-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+.blocked-item .avatar{width:40px;height:40px}
+.blocked-item .info{flex:1}
+.blocked-item .name{font-weight:600;margin-bottom:4px}
+.blocked-item .email{font-size:12px;color:var(--muted)}
+.unblock-btn{background:#10b981;color:white;border:0;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px}
+.unblock-btn:hover{background:#059669}
+
+.loading-placeholder {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.back-button {
+  display: inline-flex;
+  background-color: transparent;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 6px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  transform: scale(1.05);
+  background: var(--line);
+}
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.toast {
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transform: translateX(100%);
+  animation: slideIn 0.3s ease forwards;
+}
+
+.toast.success { background: #10b981; }
+.toast.error { background: #ef4444; }
+.toast.info { background: #3b82f6; }
+
+@keyframes slideIn { to { transform: translateX(0); } }
+@keyframes slideOut { to { transform: translateX(100%); } }
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .message-wrapper { max-width: 85%; }
+  .row { gap: 6px; }
+  .message-avatar { width: 28px; height: 28px; font-size: 9px; }
+  .chat-actions { gap: 4px; }
+  .chat-btn { padding: 4px 8px; font-size: 11px; }
+  .pin-input { gap: 10px; }
+  .pin-digit { width: 45px; height: 45px; font-size: 20px; }
+}
+  .icon {
+  background-color: #fff;   /* fundo branco */
+  display: inline-flex;     /* centraliza o SVG */
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;       /* opcional: cantos levemente arredondados */
+  padding: 4px;             /* espaço interno */
+}
+
+.icon svg {
+  width: 34px;              /* tamanho do ícone */
+  height: 34px;
+                /* preenchimento preto */
+}
+</style>
+</head>
+<body>
+<script>
+  window.onload = function() {
+    setTimeout(function() {
+      var splash = document.getElementById("splashScreen");
+      if (splash) {
+        splash.style.display = "none";
+      }
+    }, 30000);
+  };
+</script>
+ <script>
+window.addEventListener("load", function() {
+  const splash = document.getElementById("splashScreen");
+  const pin = document.getElementById("pinOverlay");
+  const pinCheckbox = document.getElementById("pinEnabled");
+
+  // Mostra o splash primeiro
+  splash.style.display = "flex";
+
+  // Depois de 3s, esconde o splash
+  setTimeout(() => {
+    splash.style.display = "none";
+
+    // Só mostra o PIN se o checkbox estiver marcado
+    if (pinCheckbox && pinCheckbox.checked) {
+      pin.style.display = "flex";
+    }
+  }, 30000); // tempo do splash
+});
+</script>
+<div  class="splash-screen" id="splashScreen">
+  <div class="splash-logo">💬</div>
+  <div class="splash-title">Bate-papo</div>
+  <div class="splash-subtitle">  Carregando suas mensagens </div>
+  <div class="splash-loader"></div>
+  <div class="splash-status" id="splashStatus">Iniciando aplicação...</div>
+</div>
+
+<!-- PIN Security -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-modal">
+    <div class="pin-title"> Segurança</div>
+    <div class="pin-subtitle" id="pinSubtitle">Digite seu PIN de 4 dígitos</div>
+    <div class="pin-input">
+      <input type="password" class="pin-digit" maxlength="1" data-index="0">
+      <input type="password" class="pin-digit" maxlength="1" data-index="1">
+      <input type="password" class="pin-digit" maxlength="1" data-index="2">
+      <input type="password" class="pin-digit" maxlength="1" data-index="3">
+    </div>
+    <div class="pin-buttons">
+      <button class="pin-btn secondary" id="pinCancel">Cancelar</button>
+      <button class="pin-btn primary" id="pinConfirm">Confirmar</button>
+    </div>
+    <div class="pin-error" id="pinError">PIN incorreto. Tente novamente.</div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="topbar">     
+      <div class="me">
+        <img src="" id="meAvatar" class="avatar" alt="Meu Avatar">
+        <div class="info">
+          <div id="meName" class="name">Carregando...</div>
+          <div id="meEmail" class="email">—</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnEdit" title="Editar Perfil"><!-- Chat seguro com fundo branco (48x48) -->
+<span class="icon" aria-hidden="true">
+ <!-- Cadeado com fundo branco e ícone preto -->
+<svg width="20" height="20" viewBox="0 0 24 24"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cadeado">
+  <title>Cadeado</title>
+  <!-- Fundo branco -->
+  <rect width="24" height="24" fill="white"/>
+  <!-- Corpo do cadeado -->
+  <rect x="5.5" y="10" width="13" height="8.5" rx="1.8"
+        stroke="black" stroke-width="1.8" fill="none"/>
+  <!-- Arco do cadeado -->
+  <path d="M8.5 10V8a3.5 3.5 0 0 1 7 0v2"
+        stroke="black" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <!-- Miolo -->
+  <circle cx="12" cy="14.5" r="0.9" fill="black"/>
+</svg>
+</span></button>
+        <button id="btnBlocked" title="Usuários Bloqueados"><!-- Ícone alternativo de perfil bloqueado com fundo branco -->
+<span class="icon" aria-hidden="true">
+  <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"
+       role="img" aria-label="Perfil bloqueado">
+    <title>Perfil bloqueado</title>
+    <!-- Fundo branco -->
+    <rect width="50" height="50" fill="#FFFFFF" rx="8"/>
+
+    <!-- Silhueta do perfil -->
+    <circle cx="18" cy="18" r="6" stroke="#000000" stroke-width="2" fill="none"/>
+    <path d="M8 36c0-5.5 4.5-10 10-10s10 4.5 10 10" 
+          stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+    <!-- Cadeado ao lado -->
+    <rect x="28" y="22" width="10" height="7" rx="1.5"
+          stroke="#000000" stroke-width="2" fill="none"/>
+    <path d="M31 22v-2a3 3 0 1 1 6 0v2" 
+          stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="33" cy="25.5" r="1" fill="#000000"/>
+  </svg>
+</span></button>
+        <button style="display:none;" id="btnLogout" title="Sair">🚪</button>
+      </div>
+    </div>
+    <div class="search">
+      <input id="search" placeholder="Pesquisar usuários..." />
+    </div>
+    <ul id="userList" class="user-list"></ul>
+  </aside>
+
+  <section class="chat">
+    <header class="chat-header">
+      <button class="chat-back" id="chatBack" title="Voltar">←</button>
+      <img id="chatAvatar" class="avatar" alt="Avatar do contato">
+      <div class="title">
+        <div id="chatName" class="name">Selecione um usuário</div>
+        <div class="status">
+          <span id="chatDot" class="dot offline"></span>
+          <span id="chatStatus">—</span>
+        </div>
+      </div>
+      <div class="chat-actions">
+        <button id="blockBtn" class="chat-btn block" style="display:none">🚫 Bloquear</button>
+        <button id="unblockBtn" class="chat-btn unblock" style="display:none">✅ Desbloquear</button>
+      </div>
+    </header>
+    <div id="messages" class="messages"></div>
+    <div id="composer" class="composer">
+      <button id="btnImage" title="Enviar imagem"><!-- Ícone de imagem com fundo branco -->
+<!-- Ícone de imagem transparente (herda a cor via currentColor) -->
+<span class="icon" aria-hidden="true" style="color:#fff">
+  <!-- Ícone de imagem com fundo branco e ícone preto -->
+<svg width="24" height="24" viewBox="0 0 24 24"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Imagem">
+  <title>Imagem</title>
+  <!-- Fundo branco -->
+  <rect width="24" height="24" fill="white"/>
+  <!-- Moldura -->
+  <rect x="3" y="5" width="18" height="14" rx="2"
+        stroke="black" stroke-width="1.8" fill="none"/>
+  <!-- Montanha -->
+  <path d="M5 15l4-4 4 4 4-5 4 5"
+        stroke="black" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Sol -->
+  <circle cx="9" cy="9" r="1.5" fill="black"/>
+</svg>
+</span></button>
+      <input id="imageInput" type="file" accept="image/*" class="hidden" />
+      <textarea id="textInput" rows="1" placeholder="Digite uma mensagem"></textarea>
+      <button style="
+  background-color: white;
+  color: black;
+  border: none;" id="btnSend"><!-- Ícone de enviar mensagem com fundo branco e ícone preto -->
+<!-- Ícone de enviar mensagem (avião de papel) com fundo branco e ícone preto -->
+<svg width="34" height="34" viewBox="0 0 24 24"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Enviar mensagem">
+  <title>Enviar mensagem</title>
+  <!-- Fundo branco -->
+  <rect width="24" height="24" fill="white"/>
+  <!-- Avião de papel -->
+  <path d="M3 20L21 12L3 4V10L15 12L3 14V20Z"
+        fill="black"/>
+</svg></button>
+    </div>
+  </section>
+</div>
+
+<div id="viewer" class="viewer">
+  <img id="viewerImg" alt="">
+  <button class="viewer-close" id="viewerClose">Fechar</button>
+</div>
+
+<div id="auth" class="auth">
+  <div style="display:none;"  class="auth-card">
+    <h2>Entrar</h2>
+    <p class="help">Use a sessão existente ou entre agora.</p>
+    <div class="row-line">
+      <button id="btnGoogle" style="background:#ea4335">Google</button>
+      <button id="btnAnon">Anônimo</button>
+    </div>
+    <p class="help">Após entrar, você poderá definir nome e foto.</p>
+  </div>
+</div>
+
+<div id="profile" class="profile">
+  <div class="profile-card">    
+      <input style="display:none;" id="pName" placeholder="Seu nome" />
+    <div class="row-line">
+      <div style="display:none">
+        <label>Foto (URL)</label>
+        <input style="display:none;" id="pAvatar" placeholder="https://..." />
+      </div>
+      <div>
+        <label style="display:none;">Adicione sua foto</label>
+        <input style="display:none;" id="pFile" type="file" accept="image/*" />
+      </div>
+    </div>
+    <div style="display:none;" class="help">A foto pode ser enviada e hospedada automaticamente.</div>
+    
+    <!-- PIN Settings -->
+    <div class="pin-settings">
+      <div class="pin-toggle">
+        <input type="checkbox" id="pinEnabled">
+        <label for="pinEnabled">Ativar PIN de segurança</label>
+      </div>
+      <div class="help">Protege o acesso ao suas conversas com um PIN de 4 dígitos</div>
+      <div id="pinSetup" style="display:none;">
+        <label>Novo PIN (4 dígitos)</label>
+        <input id="newPin" type="password" maxlength="4" placeholder="••••" />
+      </div>
+    </div>
+    
+    <div class="row-line">
+      <button id="pSave" style="
+  background-color: #10b981; /* verde */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+">
+  Salvar
+</button>
+
+<button id="pClose" style="
+  background-color: #6b7280; /* cinza */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+">
+  Fechar
+</button>  </div>
+  </div>
+</div>
+
+<div id="blockedModal" class="blocked-modal">
+  <div class="blocked-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+      <h3>Usuários Bloqueados</h3>
+      <button id="closeBlockedModal" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text)">×</button>
+    </div>
+    <div class="blocked-list" id="blockedList">
+    </div>
+    <p class="help">Usuários bloqueados não aparecem na sua lista de contatos e não podem enviar mensagens para você.</p>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
+  authDomain: "cliente-movicel.firebaseapp.com",
+  databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
+  projectId: "cliente-movicel",
+  storageBucket: "cliente-movicel.firebasestorage.app",
+  messagingSenderId: "215414688375",
+  appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
+  measurementId: "G-7F1RGP9GHV"
+};
+
+const IMGBB_KEY = "e073e02267a1f0259cd69c562e780659";
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+let me = null;
+let meProfile = null;
+let currentChat = null;
+let currentChatUser = null;
+let userStatusCache = {};
+let userPreviewCache = {};
+let usersCache = {};
+let blockedUsers = {};
+let messageStatusCache = {};
+
+// Loading state management
+let loadingState = {
+  auth: false,
+  profile: false,
+  users: false,
+  statuses: false,
+  previews: false,
+  blocked: false
+};
+
+const el = (id)=>document.getElementById(id);
+const splashScreen = el("splashScreen");
+const splashStatus = el("splashStatus");
+const pinOverlay = el("pinOverlay");
+const pinSubtitle = el("pinSubtitle");
+const pinDigits = document.querySelectorAll(".pin-digit");
+const pinCancel = el("pinCancel");
+const pinConfirm = el("pinConfirm");
+const pinError = el("pinError");
+const meAvatar = el("meAvatar");
+const meName = el("meName");
+const meEmail = el("meEmail");
+const userList = el("userList");
+const search = el("search");
+const chatBack = el("chatBack");
+const chatAvatar = el("chatAvatar");
+const chatName = el("chatName");
+const chatStatus = el("chatStatus");
+const chatDot = el("chatDot");
+const messagesEl = el("messages");
+const composer = el("composer");
+const textInput = el("textInput");
+const btnSend = el("btnSend");
+const btnImage = el("btnImage");
+const imageInput = el("imageInput");
+const viewer = el("viewer");
+const viewerImg = el("viewerImg");
+const viewerClose = el("viewerClose");
+const authModal = el("auth");
+const btnGoogle = el("btnGoogle");
+const btnAnon = el("btnAnon");
+const profileModal = el("profile");
+const pName = el("pName");
+const pAvatar = el("pAvatar");
+const pFile = el("pFile");
+const pSave = el("pSave");
+const pClose = el("pClose");
+const btnEdit = el("btnEdit");
+const btnLogout = el("btnLogout");
+const toastContainer = el("toastContainer");
+const btnBlocked = el("btnBlocked");
+const blockedModal = el("blockedModal");
+const closeBlockedModal = el("closeBlockedModal");
+const blockedList = el("blockedList");
+const blockBtn = el("blockBtn");
+const unblockBtn = el("unblockBtn");
+const pinEnabled = el("pinEnabled");
+const pinSetup = el("pinSetup");
+const newPin = el("newPin");
+
+// Update splash status
+function updateSplashStatus(message) {
+  splashStatus.textContent = message;
+  console.log('📍 Loading:', message);
+}
+
+// Check if all data is loaded
+function checkAllDataLoaded() {
+  const allLoaded = Object.values(loadingState).every(state => state);
+  console.log('📊 Loading state:', loadingState, 'All loaded:', allLoaded);
+  
+  if (allLoaded) {
+    updateSplashStatus('Tudo pronto! Abrindo aplicação...');
+    setTimeout(() => {
+      hideSplashScreen();
+    }, 800);
+  }
+}
+
+// PIN Security System
+let appPin = localStorage.getItem('chatPin') || null;
+let pinMode = 'verify'; // 'verify' or 'setup'
+let currentPinInput = '';
+let pinAuthenticated = false;
+
+function initPinSystem() {
+  const pinEnabledStored = localStorage.getItem('pinEnabled') === 'true';
+  pinEnabled.checked = pinEnabledStored;
+  
+  pinEnabled.onchange = () => {
+    if (pinEnabled.checked) {
+      pinSetup.style.display = 'block';
+    } else {
+      pinSetup.style.display = 'none';
+      localStorage.removeItem('chatPin');
+      localStorage.removeItem('pinEnabled');
+      appPin = null;
+    }
+  };
+  
+  // Check if PIN is required
+  if (pinEnabledStored && appPin && !pinAuthenticated) {
+    // Wait for splash to finish, then show PIN
+    setTimeout(() => {
+      if (Object.values(loadingState).every(state => state)) {
+        showPinOverlay('verify');
+      }
+    }, 2000);
+  }
+}
+
+function showPinOverlay(mode) {
+  pinMode = mode;
+  currentPinInput = '';
+  
+  if (mode === 'verify') {
+    pinSubtitle.textContent = 'Digite seu PIN para acessar o app';
+  } else {
+    pinSubtitle.textContent = 'Defina um PIN de 4 dígitos';
+  }
+  
+  pinDigits.forEach(digit => {
+    digit.value = '';
+    digit.classList.remove('filled');
+  });
+  
+  pinError.style.display = 'none';
+  pinOverlay.style.display = 'flex';
+  pinDigits[0].focus();
+}
+
+function hidePinOverlay() {
+  pinOverlay.style.display = 'none';
+  pinAuthenticated = true;
+  
+  // If PIN was being verified and is now authenticated, ensure splash is hidden
+  if (pinMode === 'verify' && Object.values(loadingState).every(state => state)) {
+    hideSplashScreen();
+  }
+}
+
+// PIN input handling
+pinDigits.forEach((digit, index) => {
+  digit.oninput = (e) => {
+    const value = e.target.value;
+    if (value && /^\d$/.test(value)) {
+      digit.classList.add('filled');
+      if (index < 3) {
+        pinDigits[index + 1].focus();
+      }
+      updatePinInput();
+    }
+  };
+  
+  digit.onkeydown = (e) => {
+    if (e.key === 'Backspace' && !digit.value && index > 0) {
+      pinDigits[index - 1].focus();
+      pinDigits[index - 1].value = '';
+      pinDigits[index - 1].classList.remove('filled');
+      updatePinInput();
+    }
+  };
+});
+
+function updatePinInput() {
+  currentPinInput = Array.from(pinDigits).map(d => d.value).join('');
+  if (currentPinInput.length === 4) {
+    if (pinMode === 'verify') {
+      verifyPin();
+    }
+  }
+}
+
+function verifyPin() {
+  if (currentPinInput === appPin) {
+    hidePinOverlay();
+  } else {
+    showPinError();
+  }
+}
+
+function showPinError() {
+  pinError.style.display = 'block';
+  pinDigits.forEach(digit => {
+    digit.value = '';
+    digit.classList.remove('filled');
+  });
+  currentPinInput = '';
+  pinDigits[0].focus();
+}
+
+pinConfirm.onclick = () => {
+  if (currentPinInput.length === 4) {
+    if (pinMode === 'verify') {
+      verifyPin();
+    }
+  }
+};
+
+pinCancel.onclick = () => {
+  if (pinMode === 'verify') {
+    // Force reload if user cancels PIN verification
+    location.reload();
+  } else {
+    hidePinOverlay();
+  }
+};
+
+// Splash Screen
+function hideSplashScreen() {
+  // Only hide if PIN is not required or is authenticated
+  const pinRequired = localStorage.getItem('pinEnabled') === 'true' && appPin;
+  
+  if (!pinRequired || pinAuthenticated) {
+    splashScreen.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    console.log('🎉 App ready and splash hidden');
+  }
+}
+
+// Sistema de notificação sonora usando Web Audio API
+function createNotificationSound(frequency, duration) {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration);
+  } catch (error) {
+    console.log('Audio notification not available');
+  }
+}
+
+// Sistema de Toast
+function showToast(message, type = 'info', duration = 3000) {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  toastContainer.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// Dark mode
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  document.body.classList.add('dark');
+}
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+  if (event.matches) {
+    document.body.classList.add('dark');
+  } else {
+    document.body.classList.remove('dark');
+  }
+});
+
+// Função para gerar avatar com iniciais
+function getDefaultAvatar(name) {
+  const initials = (name || "U").split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  const colors = ['#1a73e8', '#34a853', '#ea4335', '#fbbc04', '#9c27b0', '#ff5722', '#607d8b', '#795548'];
+  const colorIndex = (name || "U").charCodeAt(0) % colors.length;
+  const color = colors[colorIndex];
+  
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='${encodeURIComponent(color)}'/><text x='32' y='38' text-anchor='middle' fill='white' font-family='Arial,sans-serif' font-size='20' font-weight='bold'>${encodeURIComponent(initials)}</text></svg>`;
+}
+
+// Função para carregar avatar com fallback robusto
+function loadAvatar(imgElement, avatarUrl, userName) {
+  if (!imgElement) return;
+  
+  imgElement.classList.remove('loaded');
+  
+  if (avatarUrl && avatarUrl.trim() && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
+    const testImg = new Image();
+    testImg.onload = () => {
+      imgElement.src = avatarUrl;
+      imgElement.classList.add('loaded');
+      imgElement.textContent = '';
+    };
+    testImg.onerror = () => {
+      setAvatarWithInitials(imgElement, userName);
+    };
+    testImg.src = avatarUrl;
+  } else {
+    setAvatarWithInitials(imgElement, userName);
+  }
+}
+
+function setAvatarWithInitials(imgElement, userName) {
+  const initials = (userName || "U").split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  imgElement.src = getDefaultAvatar(userName);
+  imgElement.classList.add('loaded');
+  imgElement.onerror = () => {
+    imgElement.style.display = 'flex';
+    imgElement.textContent = initials;
+    imgElement.src = '';
+  };
+}
+
+// Upload de imagem
+async function uploadToImgBB(file) {
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erro HTTP: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    if (data.success) {
+      return data.data.url;
+    } else {
+      throw new Error(data.error?.message || 'Falha no upload');
+    }
+  } catch (error) {
+    console.error('Erro no upload ImgBB:', error);
+    throw error;
+  }
+}
+
+// Função para verificar se usuário está bloqueado
+function isUserBlocked(userId) {
+  return blockedUsers && blockedUsers[userId] === true;
+}
+
+// Função para bloquear usuário
+async function blockUser(userId) {
+  try {
+    await db.ref(`blocked/${me.uid}/${userId}`).set(true);
+    blockedUsers[userId] = true;
+    showToast('Usuário bloqueado com sucesso', 'success');
+    renderUserList(Object.values(usersCache).filter(user => user.uid !== me.uid));
+    updateBlockButtons();
+  } catch (error) {
+    console.error('Erro ao bloquear usuário:', error);
+    showToast('Erro ao bloquear usuário', 'error');
+  }
+}
+
+// Função para desbloquear usuário
+async function unblockUser(userId) {
+  try {
+    await db.ref(`blocked/${me.uid}/${userId}`).remove();
+    delete blockedUsers[userId];
+    showToast('Usuário desbloqueado com sucesso', 'success');
+    renderUserList(Object.values(usersCache).filter(user => user.uid !== me.uid));
+    updateBlockButtons();
+    renderBlockedUsers();
+  } catch (error) {
+    console.error('Erro ao desbloquear usuário:', error);
+    showToast('Erro ao desbloquear usuário', 'error');
+  }
+}
+
+// Função para mostrar modal de confirmação personalizado
+function showConfirmDialog(message, onConfirm) {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1400;
+    backdrop-filter: blur(4px);
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 400px;
+      width: calc(100% - 40px);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+    ">
+      <p style="
+        color: var(--text);
+        margin: 0 0 20px 0;
+        font-size: 16px;
+        line-height: 1.5;
+      ">${message}</p>
+      <div style="
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+      ">
+        <button id="cancelBtn" style="
+          padding: 10px 20px;
+          border: 1px solid var(--line);
+          background: transparent;
+          color: var(--text);
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: all 0.2s ease;
+        ">Cancelar</button>
+        <button id="confirmBtn" style="
+          padding: 10px 20px;
+          background: #ef4444;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 14px;
+          transition: all 0.2s ease;
+        ">Confirmar</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Event listeners
+  modal.querySelector('#cancelBtn').onclick = () => {
+    document.body.removeChild(modal);
+  };
+  
+  modal.querySelector('#confirmBtn').onclick = () => {
+    document.body.removeChild(modal);
+    onConfirm();
+  };
+  
+  // Fechar clicando fora
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
+    }
+  };
+}
+
+// Atualizar botões de bloquear/desbloquear
+function updateBlockButtons() {
+  if (currentChatUser) {
+    const isBlocked = isUserBlocked(currentChatUser.uid);
+    blockBtn.style.display = isBlocked ? 'none' : 'block';
+    unblockBtn.style.display = isBlocked ? 'block' : 'none';
+  } else {
+    blockBtn.style.display = 'none';
+    unblockBtn.style.display = 'none';
+  }
+}
+
+// Renderizar lista de usuários bloqueados
+function renderBlockedUsers() {
+  blockedList.innerHTML = '';
+  
+  const blockedUserIds = Object.keys(blockedUsers).filter(uid => blockedUsers[uid]);
+  
+  if (blockedUserIds.length === 0) {
+    blockedList.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px">Nenhum usuário bloqueado</p>';
+    return;
+  }
+  
+  blockedUserIds.forEach(userId => {
+    const user = usersCache[userId];
+    if (!user) return;
+    
+    const item = document.createElement('div');
+    item.className = 'blocked-item';
+    
+    const avatar = document.createElement('img');
+    avatar.className = 'avatar';
+    loadAvatar(avatar, user.avatar, user.name);
+    
+    const info = document.createElement('div');
+    info.className = 'info';
+    
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = user.name || 'Usuário';
+    
+    const email = document.createElement('div');
+    email.className = 'email';
+    email.textContent = user.email || 'Email não disponível';
+    
+    info.appendChild(name);
+    info.appendChild(email);
+    
+    const unblockButton = document.createElement('button');
+    unblockButton.className = 'unblock-btn';
+    unblockButton.textContent = 'Desbloquear';
+    unblockButton.onclick = () => unblockUser(userId);
+    
+    item.appendChild(avatar);
+    item.appendChild(info);
+    item.appendChild(unblockButton);
+    
+    blockedList.appendChild(item);
+  });
+}
+
+// Message Status System
+function updateMessageStatus(messageId, status) {
+  messageStatusCache[messageId] = status;
+  
+  // Update UI
+  const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+  if (messageElement) {
+    const statusElement = messageElement.querySelector('.message-status');
+    if (statusElement) {
+      statusElement.className = `message-status ${status}`;
+      statusElement.textContent = getStatusIcon(status);
+    }
+  }
+}
+
+function getStatusIcon(status) {
+  switch (status) {
+    case 'sent': return '✓';
+    case 'delivered': return '✓✓';
+    case 'read': return '✓✓';
+    default: return '';
+  }
+}
+
+function goToHome() {
+  document.querySelector('.sidebar').classList.add('active');
+  document.querySelector('.chat').classList.remove('active');
+  currentChat = null;
+  currentChatUser = null;
+  composer.style.display = 'none';
+  chatName.textContent = 'Selecione um usuário';
+  chatStatus.textContent = '—';
+  chatDot.className = 'dot offline';
+  updateBlockButtons();
+}
+
+function now(){ return Date.now(); }
+function chatId(a,b){ return a<b ? a+"_"+b : b+"_"+a; }
+function formatTime(ts){
+  try{
+    const d=new Date(ts); 
+    return d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  }catch{ return "" }
+}
+function linkify(text){
+  return text.replace(/(https?:\/\/[^\s]+)/g,'<a class="link" href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
+// Initialize app
+document.addEventListener('DOMContentLoaded', () => {
+  updateSplashStatus('Iniciando sistema de segurança...');
+  initPinSystem();
+});
+
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    me = user;
+    loadingState.auth = true;
+    authModal.style.display = "none";
+    updateSplashStatus('Carregando perfil do usuário...');
+    await ensureProfile();
+    bindPresence();
+    bindUsers();
+    bindStatuses();
+    bindPreviews();
+    bindBlockedUsers();
+    bindMessageStatus();
+    checkAllDataLoaded();
+  }else{
+    authModal.style.display = "flex";
+    splashScreen.classList.add('hidden');
+  }
+});
+
+// Bind para usuários bloqueados
+function bindBlockedUsers() {
+  updateSplashStatus('Carregando usuários bloqueados...');
+  db.ref(`blocked/${me.uid}`).on('value', (snapshot) => {
+    blockedUsers = snapshot.val() || {};
+    loadingState.blocked = true;
+    console.log('Usuários bloqueados carregados:', blockedUsers);
+    renderUserList(Object.values(usersCache).filter(user => user.uid !== me.uid));
+    updateBlockButtons();
+    checkAllDataLoaded();
+  });
+}
+
+// Bind para status das mensagens
+function bindMessageStatus() {
+  db.ref(`messageStatus/${me.uid}`).on('value', (snapshot) => {
+    const statuses = snapshot.val() || {};
+    Object.keys(statuses).forEach(messageId => {
+      updateMessageStatus(messageId, statuses[messageId]);
+    });
+  });
+}
+
+btnGoogle.onclick = async ()=>{
+  try{
+    updateSplashStatus('Conectando com Google...');
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await auth.signInWithPopup(provider);
+    if(result.user && result.user.displayName && result.user.photoURL) {
+      const userData = {
+        name: result.user.displayName,
+        avatar: result.user.photoURL,
+        lastSeen: now()
+      };
+      await db.ref("users/"+result.user.uid).update(userData);
+    }
+  }catch(e){ 
+    console.error("Erro no login Google:", e);
+    showToast("Falha no login Google: "+e.message, 'error'); 
+  }
+};
+
+btnAnon.onclick = async ()=>{
+  try{ 
+    updateSplashStatus('Conectando anonimamente...');
+    await auth.signInAnonymously(); 
+  }
+  catch(e){ 
+    console.error("Erro no login anônimo:", e);
+    showToast("Falha no login anônimo: "+e.message, 'error'); 
+  }
+};
+
+btnLogout.onclick = async()=>{ 
+  await auth.signOut(); 
+  location.reload(); 
+};
+
+btnEdit.onclick = ()=> openProfile();
+pClose.onclick = ()=> profileModal.style.display = "none";
+chatBack.onclick = ()=> goToHome();
+
+// Event listeners para bloqueio
+btnBlocked.onclick = () => {
+  blockedModal.style.display = "flex";
+  renderBlockedUsers();
+};
+
+closeBlockedModal.onclick = () => {
+  blockedModal.style.display = "none";
+};
+
+blockBtn.onclick = () => {
+  if (currentChatUser) {
+    showConfirmDialog(`Tem certeza que deseja bloquear ${currentChatUser.name}?`, () => {
+      blockUser(currentChatUser.uid);
+    });
+  }
+};
+
+unblockBtn.onclick = () => {
+  if (currentChatUser) {
+    showConfirmDialog(`Tem certeza que deseja desbloquear ${currentChatUser.name}?`, () => {
+      unblockUser(currentChatUser.uid);
+    });
+  }
+};
+
+pFile.onchange = async (e)=>{
+  const file = e.target.files[0]; 
+  if(!file) return;
+  
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Arquivo muito grande! Máximo 5MB.', 'error');
+    return;
+  }
+
+  if (!file.type.startsWith('image/')) {
+    showToast('Selecione apenas arquivos de imagem.', 'error');
+    return;
+  }
+  
+  try {
+    showToast('Enviando foto...', 'info');
+    const url = await uploadToImgBB(file);
+    if(url){ 
+      pAvatar.value = url;
+      loadAvatar(meAvatar, url, pName.value || meProfile?.name || "Usuário");
+      showToast('Foto enviada com sucesso! 📸', 'success');
+    }
+  } catch(error) {
+    console.error("Erro ao fazer upload:", error);
+    showToast("Erro ao fazer upload da imagem", 'error');
+  }
+};
+
+pSave.onclick = async ()=>{
+  const name = pName.value.trim() || "Usuário";
+  const avatar = pAvatar.value.trim();
+  
+  // Handle PIN setup
+  if (pinEnabled.checked && newPin.value.trim()) {
+    const pin = newPin.value.trim();
+    if (pin.length === 4 && /^\d{4}$/.test(pin)) {
+      localStorage.setItem('chatPin', pin);
+      localStorage.setItem('pinEnabled', 'true');
+      appPin = pin;
+      pinAuthenticated = true; // Important: mark as authenticated when setting new PIN
+      showToast('PIN definido com sucesso! 🔐', 'success');
+    } else {
+      showToast('PIN deve ter exatamente 4 dígitos', 'error');
+      return;
+    }
+  } else if (!pinEnabled.checked) {
+    localStorage.removeItem('chatPin');
+    localStorage.removeItem('pinEnabled');
+    appPin = null;
+    pinAuthenticated = true; // No PIN required
+  }
+  
+  try {
+    const updates = { name, avatar, lastSeen: now() };
+    await db.ref("users/"+me.uid).update(updates);
+    
+    await me.updateProfile({ 
+      displayName: name, 
+      photoURL: avatar || null 
+    }).catch(()=>{});
+    
+    meProfile = {uid:me.uid, ...updates};
+    renderMe();
+    profileModal.style.display = "none";
+    showToast("Perfil atualizado com sucesso!", 'success');
+  } catch(error) {
+    console.error("Erro ao salvar perfil:", error);
+    showToast("Erro ao salvar perfil", 'error');
+  }
+};
+
+async function ensureProfile(){
+  try {
+    const snap = await db.ref("users/"+me.uid).get();
+    let profile = snap.val();
+    
+    if(!profile){
+      profile = { 
+        uid: me.uid, 
+        name: me.displayName || "Usuário", 
+        avatar: me.photoURL || "", 
+        lastSeen: now() 
+      };
+      await db.ref("users/"+me.uid).set(profile);
+    } else {
+      const needsUpdate = {};
+      if(me.displayName && me.displayName !== profile.name) {
+        needsUpdate.name = me.displayName;
+      }
+      if(me.photoURL && me.photoURL !== profile.avatar) {
+        needsUpdate.avatar = me.photoURL;
+      }
+      if(Object.keys(needsUpdate).length > 0) {
+        needsUpdate.lastSeen = now();
+        await db.ref("users/"+me.uid).update(needsUpdate);
+        profile = {...profile, ...needsUpdate};
+      }
+    }
+    
+    meProfile = profile;
+    loadingState.profile = true;
+    renderMe();
+    
+    if(me.displayName !== profile.name || me.photoURL !== (profile.avatar||"")){
+      try{ 
+        await me.updateProfile({
+          displayName: profile.name, 
+          photoURL: profile.avatar||null
+        }); 
+      }catch(e){
+        console.warn("Erro ao atualizar auth profile:", e);
+      }
+    }
+    
+    if(!profile.name || profile.name==="Usuário"){ 
+      openProfile(); 
+    }
+    
+    checkAllDataLoaded();
+  } catch(error) {
+    console.error("Erro ao carregar perfil:", error);
+    showToast("Erro ao carregar perfil", 'error');
+  }
+}
+
+function renderMe(){
+  if(!meProfile) return;
+  
+  loadAvatar(meAvatar, meProfile.avatar, meProfile.name);
+  meName.textContent = meProfile.name || "Usuário";
+  meEmail.textContent = me.email || (me.isAnonymous ? "Conectado como Anônimo" : "—");
+  pName.value = meProfile.name || "";
+  pAvatar.value = meProfile.avatar || "";
+}
+
+function openProfile(){ 
+  profileModal.style.display = "flex"; 
+  if(meProfile) {
+    pName.value = meProfile.name || "";
+    pAvatar.value = meProfile.avatar || "";
+  }
+}
+
+function bindPresence(){
+  const statusRef = db.ref("status/"+me.uid);
+  const isOffline = { 
+    state: "offline", 
+    lastSeen: firebase.database.ServerValue.TIMESTAMP,
+    timestamp: firebase.database.ServerValue.TIMESTAMP 
+  };
+  const isOnline = { 
+    state: "online", 
+    lastSeen: firebase.database.ServerValue.TIMESTAMP,
+    timestamp: firebase.database.ServerValue.TIMESTAMP 
+  };
+  
+  db.ref(".info/connected").on("value", snap=>{
+    if(snap.val() === true){
+      console.log('📡 Conectado ao Firebase');
+      statusRef.onDisconnect().set(isOffline).then(()=> {
+        console.log('📡 OnDisconnect configurado');
+        statusRef.set(isOnline).then(() => {
+          console.log('📡 Status online definido');
+        });
+      });
+    } else {
+      console.log('📡 Desconectado do Firebase');
+    }
+  });
+  
+  setInterval(()=> {
+    statusRef.update({ 
+      lastSeen: firebase.database.ServerValue.TIMESTAMP,
+      timestamp: firebase.database.ServerValue.TIMESTAMP 
+    });
+    db.ref("users/"+me.uid).update({ lastSeen: now() });
+  }, 30_000);
+}
+
+function bindUsers(){
+  updateSplashStatus('Carregando lista de usuários...');
+  db.ref("users").on("value", snap=>{
+    const all = snap.val() || {};
+    usersCache = all;
+    loadingState.users = true;
+    console.log('👥 Usuários carregados:', Object.keys(all).length);
+    const arr = Object.keys(all)
+      .filter(uid=>uid!==me.uid)
+      .map(uid=>({uid, ...all[uid]}))
+      .filter(user => user.name && user.name !== "");
+    renderUserList(arr);
+    checkAllDataLoaded();
+  });
+  search.oninput = ()=> filterUserList();
+}
+
+function bindStatuses(){
+  updateSplashStatus('Carregando status dos usuários...');
+  db.ref("status").on("value", snap=>{
+    const statuses = snap.val() || {};
+    userStatusCache = statuses;
+    loadingState.statuses = true;
+    console.log('📊 Status carregados:', Object.keys(statuses).length);
+    updateStatusIndicators();
+    checkAllDataLoaded();
+  });
+}
+
+function bindPreviews(){
+  updateSplashStatus('Carregando preview das conversas...');
+  db.ref("userChats/"+me.uid).on("value", snap=>{
+    userPreviewCache = snap.val() || {};
+    loadingState.previews = true;
+    filterUserList();
+    checkAllDataLoaded();
+  });
+}
+
+function renderUserList(users){
+  userList.innerHTML = "";
+  
+  const unblocked = users.filter(user => !isUserBlocked(user.uid));
+  
+  unblocked.sort((a,b)=>{
+    const la = userPreviewCache?.[a.uid]?.lastTime || 0;
+    const lb = userPreviewCache?.[b.uid]?.lastTime || 0;
+    if(lb!==la) return lb-la;
+    return (a.name||"").localeCompare(b.name||"");
+  });
+  
+  unblocked.forEach(u=>{
+    const li = document.createElement("li");
+    li.className = "user-item";
+    li.dataset.uid = u.uid;
+
+    const img = document.createElement("img");
+    img.className = "avatar";
+    img.alt = u.name || "Usuário";
+    loadAvatar(img, u.avatar, u.name);
+
+    const main = document.createElement("div");
+    main.className = "u-main";
+    const nm = document.createElement("div"); 
+    nm.className = "u-name"; 
+    nm.textContent = u.name || "Sem nome";
+    
+    const pv = document.createElement("div"); 
+    pv.className = "u-preview";
+    const preview = userPreviewCache?.[u.uid]?.lastText || "";
+    pv.innerHTML = preview ? sanitizePreview(preview) : "Nenhuma mensagem ainda";
+
+    main.appendChild(nm); 
+    main.appendChild(pv);
+
+    const right = document.createElement("div");
+    right.className = "u-right";
+    const time = document.createElement("div");
+    time.className = "u-time";
+    time.textContent = userPreviewCache?.[u.uid]?.lastTime ? 
+      formatTime(userPreviewCache?.[u.uid]?.lastTime) : "";
+    const dot = document.createElement("div");
+    const userStatus = userStatusCache?.[u.uid];
+    dot.className = "dot " + (userStatus?.state==="online" ? "online":"offline");
+    
+    right.appendChild(time); 
+    right.appendChild(dot);
+
+    li.appendChild(img); 
+    li.appendChild(main); 
+    li.appendChild(right);
+    li.onclick = ()=> openChat(u.uid, u);
+    userList.appendChild(li);
+  });
+  
+  filterUserList();
+  updateStatusIndicators();
+}
+
+function sanitizePreview(t){
+  const div = document.createElement("div"); 
+  div.innerText = t; 
+  let s = div.innerText;
+  if(s.length>40) s = s.slice(0,40)+"…";
+  return s;
+}
+
+function filterUserList(){
+  const q = (search.value||"").toLowerCase().trim();
+  [...userList.children].forEach(li=>{
+    const uid = li.dataset.uid;
+    const name = li.querySelector(".u-name").textContent.toLowerCase();
+    const preview = (userPreviewCache?.[uid]?.lastText||"").toLowerCase();
+    const show = !q || name.includes(q) || preview.includes(q);
+    li.style.display = show ? "" : "none";
+  });
+}
+
+function updateStatusIndicators(){
+  [...userList.children].forEach(li=>{
+    const uid = li.dataset.uid;
+    const dot = li.querySelector(".dot");
+    if(!dot) return;
+    const userStatus = userStatusCache?.[uid];
+    dot.className = "dot " + (userStatus?.state==="online" ? "online":"offline");
+  });
+  
+  if(currentChat){
+    const st = userStatusCache?.[currentChat];
+    chatDot.className = "dot " + (st?.state==="online" ? "online":"offline");
+    chatStatus.textContent = st?.state==="online" ? "online" : "offline";
+  }
+}
+
+let msgListenerRef = null;
+function openChat(uid, user){
+  currentChat = uid;
+  currentChatUser = user;
+  chatName.textContent = user.name || "—";
+  loadAvatar(chatAvatar, user.avatar, user.name);
+  
+  const st = userStatusCache?.[uid];
+  chatDot.className = "dot " + (st?.state==="online" ? "online":"offline");
+  chatStatus.textContent = st?.state==="online" ? "online" : "offline";
+  composer.style.display = "flex";
+  messagesEl.innerHTML = "";
+  
+  updateBlockButtons();
+  
+  // Mobile navigation
+  document.querySelector('.sidebar').classList.remove('active');
+  document.querySelector('.chat').classList.add('active');
+  
+  if(msgListenerRef) msgListenerRef.off();
+  const cid = chatId(me.uid, uid);
+  msgListenerRef = db.ref("chats/"+cid);
+  msgListenerRef.off();
+  msgListenerRef.limitToLast(200).on("child_added", snap=>{
+    const m = snap.val();
+    appendMessage(m);
+    if(m.from!==me.uid){ 
+      createNotificationSound(800, 0.2);
+      // Mark as delivered
+      updateMessageDeliveryStatus(snap.key);
+    }
+  });
+  
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function updateMessageDeliveryStatus(messageId) {
+  if (currentChat) {
+    db.ref(`messageStatus/${currentChat}/${messageId}`).set('delivered');
+  }
+}
+
+function appendMessage(m){
+  const row = document.createElement("div");
+  row.className = "row "+(m.from===me.uid?"out":"in");
+  row.dataset.messageId = m.id || 'msg_' + Date.now();
+  
+  const messageAvatar = document.createElement("img");
+  messageAvatar.className = "message-avatar";
+  messageAvatar.alt = "Avatar";
+  
+  if(m.from === me.uid) {
+    loadAvatar(messageAvatar, meProfile?.avatar, meProfile?.name);
+  } else {
+    const senderData = usersCache[m.from] || currentChatUser;
+    loadAvatar(messageAvatar, senderData?.avatar, senderData?.name);
+  }
+  
+  const messageWrapper = document.createElement("div");
+  messageWrapper.className = "message-wrapper";
+  
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  
+  if(m.type==="text"){
+    bubble.innerHTML = linkify(m.text);
+  }else if(m.type==="image"){
+    const img = document.createElement("img");
+    img.className = "msg-img";
+    img.src = m.url;
+    img.alt = "imagem";
+    img.onclick = ()=> openViewer(m.url);
+    bubble.appendChild(img);
+    if(m.caption){
+      const cap = document.createElement("div"); 
+      cap.style.marginTop="6px"; 
+      cap.innerHTML = linkify(m.caption);
+      bubble.appendChild(cap);
+    }
+  }
+  
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  meta.textContent = formatTime(m.time);
+  
+  // Add message status for sent messages
+  if (m.from === me.uid) {
+    const statusSpan = document.createElement("span");
+    statusSpan.className = "message-status sent";
+    statusSpan.textContent = getStatusIcon('sent');
+    meta.appendChild(statusSpan);
+  }
+  
+  messageWrapper.appendChild(bubble);
+  messageWrapper.appendChild(meta);
+  
+  row.appendChild(messageAvatar);
+  row.appendChild(messageWrapper);
+  
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+btnSend.onclick = sendText;
+textInput.addEventListener("keydown", (e)=>{
+  if(e.key==="Enter" && !e.shiftKey){ 
+    e.preventDefault(); 
+    sendText(); 
+  }
+});
+
+function sendText(){
+  const txt = (textInput.value||"").trim();
+  if(!txt || !currentChat) return;
+  const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  sendMessage({type:"text", text: txt, id: messageId});
+  textInput.value = "";
+  createNotificationSound(600, 0.15);
+}
+
+btnImage.onclick = ()=> imageInput.click();
+imageInput.onchange = async (e)=>{
+  const file = e.target.files?.[0]; 
+  if(!file || !currentChat) return;
+  
+  try {
+    showToast('Enviando imagem...', 'info');
+    const url = await uploadToImgBB(file);
+    if(!url) return;
+    const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    sendMessage({type:"image", url, id: messageId});
+    imageInput.value = "";
+    showToast('Imagem enviada! 📷', 'success');
+  } catch(error) {
+    console.error("Erro ao enviar imagem:", error);
+    showToast("Erro ao enviar imagem", 'error');
+  }
+};
+
+function sendMessage(payload){
+  const to = currentChat;
+  const cid = chatId(me.uid, to);
+  const m = { from: me.uid, to, time: now(), ...payload };
+  const updates = {};
+  const newKey = db.ref("chats/"+cid).push().key;
+  updates["/chats/"+cid+"/"+newKey] = m;
+
+  // Set initial message status
+  updates[`/messageStatus/${me.uid}/${payload.id}`] = 'sent';
+
+  const previewText = payload.type==="text" ? payload.text : "🖼️ Imagem";
+  const mePrev = { other: to, lastText: previewText, lastTime: m.time };
+  const toPrev = { other: me.uid, lastText: previewText, lastTime: m.time };
+  updates["/userChats/"+me.uid+"/"+to] = mePrev;
+  updates["/userChats/"+to+"/"+me.uid] = toPrev;
+
+  db.ref().update(updates);
+}
+
+function openViewer(url){
+  viewerImg.src = url;
+  viewer.style.display = "grid";
+}
+
+viewer.onclick = (e)=>{
+  if(e.target===viewer || e.target===viewerClose){ 
+    viewer.style.display = "none"; 
+    viewerImg.src=""; 
+  } 
+};
+
+viewerClose.onclick = ()=>{ 
+  viewer.style.display = "none"; 
+  viewerImg.src=""; 
+};
+
+[profileModal, blockedModal].forEach(modal => {
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+});
+
+composer.style.display = "none";
+
+// Mobile navigation
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.querySelector('.sidebar');
+  const chat = document.querySelector('.chat');
+
+  if (!sidebar || !chat) return;
+
+  sidebar.classList.add('active');
+  chat.classList.remove('active');
+});
+
+// Swipe gesture for mobile
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.querySelector('.chat').addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+document.querySelector('.chat').addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+});
+
+function handleSwipe() {
+  const swipeDistance = touchEndX - touchStartX;
+  if (swipeDistance > 80) {
+    goToHome();
+  }
+}
+</script>
+</body>
+</html>
