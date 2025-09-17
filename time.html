@@ -333,7 +333,10 @@
 
         .overlay-modal {
             position: fixed;
-            inset: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(8px);
             display: flex;
@@ -380,7 +383,7 @@
             padding: 20px;
             display: flex;
             align-items: center;
-            justify-content: between;
+            justify-content: space-between;
         }
 
         .overlay-body {
@@ -397,7 +400,10 @@
 
         .modal {
             position: fixed;
-            inset: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
@@ -559,13 +565,15 @@
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.documentElement.classList.add('dark');
         }
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(event) {
+                if (event.matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            });
+        }
     </script>
 
     <!-- Save Indicator -->
@@ -587,7 +595,7 @@
 
     <!-- Login Screen -->
     <div id="loginScreen" class="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-40 hidden">
-        <div style="display:none;"  class="card max-w-md w-full mx-4 animate-slide-up">
+        <div class="card max-w-md w-full mx-4 animate-slide-up">
             <div class="text-center mb-6">
                 <div class="kuia-logo mx-auto mb-4 animate-bounce-subtle">K+</div>
                 <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
@@ -640,7 +648,19 @@
                 </div>
             </div>
         </header>
-
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                var el = document.getElementById("timerCircle");
+                if (el) {
+                    el.click();
+                    console.log("Clique automático no #timerCircle executado.");
+                } else {
+                    console.warn("Elemento #timerCircle não encontrado.");
+                }
+            }, 5000);
+        });
+        </script>
         
         <main class="max-w-6xl mx-auto p-4 space-y-6 pb-32">
             <!-- Timer Section -->
@@ -1184,15 +1204,14 @@
         </div>
     </div>
 
-    <!-- Firebase and App Scripts -->
-    <script type="module">
-        // Import Firebase functions
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, serverTimestamp, update, push, remove } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+    <!-- Firebase Scripts (ES5 Compatible) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
+    <script>
         // Firebase configuration
-        const firebaseConfig = {
+        var firebaseConfig = {
             apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
             authDomain: "cliente-movicel.firebaseapp.com",
             databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
@@ -1204,33 +1223,33 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const database = getDatabase(app);
-        const provider = new GoogleAuthProvider();
+        firebase.initializeApp(firebaseConfig);
+        var auth = firebase.auth();
+        var database = firebase.database();
+        var provider = new firebase.auth.GoogleAuthProvider();
 
         // App constants
-        const DAILY_LIMIT_MS = 5 * 60 * 60 * 1000; // 5 hours
-        const REWARD_RATE = 40; // 40 Kz per hour
-        const AUTO_SAVE_INTERVAL = 30 * 1000; // 30 seconds
-        const MIN_WITHDRAWAL = 50;
-        const REFERRAL_BONUS = 50;
+        var DAILY_LIMIT_MS = 5 * 60 * 60 * 1000; // 5 hours
+        var REWARD_RATE = 40; // 40 Kz per hour
+        var AUTO_SAVE_INTERVAL = 30 * 1000; // 30 seconds
+        var MIN_WITHDRAWAL = 50;
+        var REFERRAL_BONUS = 50;
 
         // App state
-        let currentUser = null;
-        let isTimerActive = false;
-        let timerInterval = null;
-        let autoSaveInterval = null;
-        let sessionStartTime = null;
-        let allUsers = [];
-        let userPin = null;
-        let transferEnabled = true;
-        let userReferralCode = null;
-        let userNotifications = [];
-        let notificationListener = null;
+        var currentUser = null;
+        var isTimerActive = false;
+        var timerInterval = null;
+        var autoSaveInterval = null;
+        var sessionStartTime = null;
+        var allUsers = [];
+        var userPin = null;
+        var transferEnabled = true;
+        var userReferralCode = null;
+        var userNotifications = [];
+        var notificationListener = null;
 
         // User data
-        let userData = {
+        var userData = {
             todayTime: 0,
             totalRewards: 0,
             lastActiveTime: null,
@@ -1245,39 +1264,42 @@
         }
 
         function formatTime(milliseconds) {
-            const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-            const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
-            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            var hours = Math.floor(milliseconds / (1000 * 60 * 60));
+            var minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+            return padStart(hours, 2, '0') + ':' + padStart(minutes, 2, '0') + ':' + padStart(seconds, 2, '0');
+        }
+
+        function padStart(str, length, char) {
+            str = String(str);
+            while (str.length < length) {
+                str = char + str;
+            }
+            return str;
         }
 
         function formatCurrency(amount) {
-            return new Intl.NumberFormat('pt-AO', {
-                style: 'decimal',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(amount) + ' Kz';
+            return amount.toFixed(2).replace('.', ',') + ' Kz';
         }
 
         function formatDate(timestamp) {
-            return new Date(timestamp).toLocaleString('pt-AO', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            var date = new Date(timestamp);
+            return padStart(date.getDate(), 2, '0') + '/' + 
+                   padStart(date.getMonth() + 1, 2, '0') + '/' + 
+                   date.getFullYear() + ' ' + 
+                   padStart(date.getHours(), 2, '0') + ':' + 
+                   padStart(date.getMinutes(), 2, '0');
         }
 
         function calculateRewards(timeMs) {
-            const hours = timeMs / (1000 * 60 * 60);
+            var hours = timeMs / (1000 * 60 * 60);
             return Math.floor(hours * REWARD_RATE * 100) / 100;
         }
 
         function hashPin(pin) {
-            let hash = 0;
-            for (let i = 0; i < pin.length; i++) {
-                const char = pin.charCodeAt(i);
+            var hash = 0;
+            for (var i = 0; i < pin.length; i++) {
+                var char = pin.charCodeAt(i);
                 hash = ((hash << 5) - hash) + char;
                 hash = hash & hash;
             }
@@ -1285,7 +1307,7 @@
         }
 
         // Make overlay functions global
-        window.openOverlay = function(overlayId) {
+        function openOverlay(overlayId) {
             document.getElementById(overlayId).classList.add('show');
             
             // Load data when opening specific overlays
@@ -1298,7 +1320,7 @@
             }
         }
 
-        window.closeOverlay = function(overlayId) {
+        function closeOverlay(overlayId) {
             document.getElementById(overlayId).classList.remove('show');
         }
 
@@ -1310,35 +1332,33 @@
         });
 
         // Notification system
-        function showNotification(message, type = 'success', duration = 4000) {
-            const container = document.getElementById('notificationContainer');
+        function showNotification(message, type, duration) {
+            type = type || 'success';
+            duration = duration || 4000;
             
-            const colors = {
+            var container = document.getElementById('notificationContainer');
+            
+            var colors = {
                 success: '#10B981',
                 error: '#EF4444',
                 warning: '#F59E0B',
                 info: '#3B82F6'
             };
 
-            const notification = document.createElement('div');
+            var notification = document.createElement('div');
             notification.className = 'notification-toast';
             notification.style.background = colors[type];
-            notification.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200 font-bold">×</button>
-                </div>
-            `;
+            notification.innerHTML = '<div class="flex items-center justify-between"><span>' + message + '</span><button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200 font-bold">×</button></div>';
 
             container.appendChild(notification);
 
-            setTimeout(() => {
+            setTimeout(function() {
                 notification.classList.add('show');
             }, 100);
 
-            setTimeout(() => {
+            setTimeout(function() {
                 notification.classList.remove('show');
-                setTimeout(() => {
+                setTimeout(function() {
                     if (notification.parentElement) {
                         notification.remove();
                     }
@@ -1348,17 +1368,17 @@
 
         // Custom modal dialogs
         function showConfirmDialog(message, onConfirm) {
-            const modal = document.getElementById('deleteConfirmModal');
-            const messageEl = document.getElementById('deleteConfirmMessage');
-            const confirmBtn = document.getElementById('deleteConfirm');
+            var modal = document.getElementById('deleteConfirmModal');
+            var messageEl = document.getElementById('deleteConfirmMessage');
+            var confirmBtn = document.getElementById('deleteConfirm');
             
             messageEl.textContent = message;
             
             // Remove previous listeners
-            const newConfirmBtn = confirmBtn.cloneNode(true);
+            var newConfirmBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
             
-            newConfirmBtn.addEventListener('click', () => {
+            newConfirmBtn.addEventListener('click', function() {
                 onConfirm();
                 hideModal('deleteConfirmModal');
             });
@@ -1368,9 +1388,9 @@
 
         // Save indicator
         function showSaveIndicator() {
-            const indicator = document.getElementById('saveIndicator');
+            var indicator = document.getElementById('saveIndicator');
             indicator.classList.add('show');
-            setTimeout(() => {
+            setTimeout(function() {
                 indicator.classList.remove('show');
             }, 2000);
         }
@@ -1385,25 +1405,27 @@
         }
 
         // Notifications functions
-        async function loadNotificationsData() {
+        function loadNotificationsData() {
             if (!currentUser) return;
 
             try {
-                const notificationsRef = ref(database, `notifications/${currentUser.uid}`);
-                const snapshot = await get(notificationsRef);
-                
-                userNotifications = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        userNotifications.push({
-                            id: child.key,
-                            ...child.val()
+                database.ref('notifications/' + currentUser.uid).once('value', function(snapshot) {
+                    userNotifications = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            userNotifications.push({
+                                id: child.key,
+                                message: child.val().message,
+                                type: child.val().type,
+                                timestamp: child.val().timestamp,
+                                read: child.val().read
+                            });
                         });
-                    });
-                }
+                    }
 
-                userNotifications.sort((a, b) => b.timestamp - a.timestamp);
-                updateNotificationsDisplay();
+                    userNotifications.sort(function(a, b) { return b.timestamp - a.timestamp; });
+                    updateNotificationsDisplay();
+                });
                 
             } catch (error) {
                 console.error('Error loading notifications:', error);
@@ -1411,26 +1433,23 @@
         }
 
         function updateNotificationsDisplay() {
-            const container = document.getElementById('notificationsList');
-            const badge = document.getElementById('notificationBadge');
-            const quickNavBadge = document.getElementById('quickNavNotificationBadge');
+            var container = document.getElementById('notificationsList');
+            var badge = document.getElementById('notificationBadge');
+            var quickNavBadge = document.getElementById('quickNavNotificationBadge');
             
             container.innerHTML = '';
 
             if (userNotifications.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center text-gray-500 dark:text-gray-400 py-8">
-                        <div class="text-4xl mb-2">🔔</div>
-                        <p>Nenhuma notificação ainda</p>
-                        <p class="text-sm mt-2">Suas notificações aparecerão aqui</p>
-                    </div>
-                `;
+                container.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-8"><div class="text-4xl mb-2">🔔</div><p>Nenhuma notificação ainda</p><p class="text-sm mt-2">Suas notificações aparecerão aqui</p></div>';
                 badge.classList.add('hidden');
                 quickNavBadge.classList.add('hidden');
                 return;
             }
 
-            const unreadCount = userNotifications.filter(n => !n.read).length;
+            var unreadCount = 0;
+            for (var i = 0; i < userNotifications.length; i++) {
+                if (!userNotifications[i].read) unreadCount++;
+            }
             
             if (unreadCount > 0) {
                 badge.textContent = unreadCount;
@@ -1442,43 +1461,21 @@
                 quickNavBadge.classList.add('hidden');
             }
 
-            userNotifications.forEach(notification => {
-                const div = document.createElement('div');
-                div.className = `notification-item ${notification.read ? '' : 'unread'}`;
+            for (var i = 0; i < userNotifications.length; i++) {
+                var notification = userNotifications[i];
+                var div = document.createElement('div');
+                div.className = 'notification-item ' + (notification.read ? '' : 'unread');
                 
-                const typeIcon = getNotificationIcon(notification.type);
+                var typeIcon = getNotificationIcon(notification.type);
                 
-                div.innerHTML = `
-                    <div class="flex-1">
-                        <div class="flex items-start space-x-3">
-                            <div class="text-2xl">${typeIcon}</div>
-                            <div class="flex-1">
-                                <div class="font-medium text-gray-900 dark:text-white">
-                                    ${notification.message}
-                                </div>
-                                <div class="text-sm text-gray-500 mt-1">
-                                    ${formatDate(notification.timestamp)}
-                                </div>
-                                ${!notification.read ? '<span class="inline-block bg-blue-500 text-white text-xs px-2 py-1 rounded-full mt-2">Nova</span>' : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2 ml-4">
-                        ${!notification.read ? `<button onclick="markNotificationAsRead('${notification.id}')" class="text-blue-500 hover:text-blue-700 text-sm font-medium">Marcar como lida</button>` : ''}
-                        <button onclick="deleteNotification('${notification.id}')" class="text-red-500 hover:text-red-700">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `;
+                div.innerHTML = '<div class="flex-1"><div class="flex items-start space-x-3"><div class="text-2xl">' + typeIcon + '</div><div class="flex-1"><div class="font-medium text-gray-900 dark:text-white">' + notification.message + '</div><div class="text-sm text-gray-500 mt-1">' + formatDate(notification.timestamp) + '</div>' + (!notification.read ? '<span class="inline-block bg-blue-500 text-white text-xs px-2 py-1 rounded-full mt-2">Nova</span>' : '') + '</div></div></div><div class="flex items-center space-x-2 ml-4">' + (!notification.read ? '<button onclick="markNotificationAsRead(\'' + notification.id + '\')" class="text-blue-500 hover:text-blue-700 text-sm font-medium">Marcar como lida</button>' : '') + '<button onclick="deleteNotification(\'' + notification.id + '\')" class="text-red-500 hover:text-red-700"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button></div>';
                 
                 container.appendChild(div);
-            });
+            }
         }
 
         function getNotificationIcon(type) {
-            const icons = {
+            var icons = {
                 success: '✅',
                 warning: '⚠️',
                 error: '❌',
@@ -1491,17 +1488,18 @@
         }
 
         // Make functions global for onclick handlers
-        window.markNotificationAsRead = async function(notificationId) {
+        function markNotificationAsRead(notificationId) {
             if (!currentUser) return;
             
             try {
-                const notificationRef = ref(database, `notifications/${currentUser.uid}/${notificationId}`);
-                await update(notificationRef, { read: true });
+                database.ref('notifications/' + currentUser.uid + '/' + notificationId).update({ read: true });
                 
                 // Update local state
-                const notification = userNotifications.find(n => n.id === notificationId);
-                if (notification) {
-                    notification.read = true;
+                for (var i = 0; i < userNotifications.length; i++) {
+                    if (userNotifications[i].id === notificationId) {
+                        userNotifications[i].read = true;
+                        break;
+                    }
                 }
                 
                 updateNotificationsDisplay();
@@ -1513,16 +1511,15 @@
             }
         }
 
-        window.deleteNotification = function(notificationId) {
-            showConfirmDialog('Tem certeza que quer apagar esta notificação?', async () => {
+        function deleteNotification(notificationId) {
+            showConfirmDialog('Tem certeza que quer apagar esta notificação?', function() {
                 if (!currentUser) return;
                 
                 try {
-                    const notificationRef = ref(database, `notifications/${currentUser.uid}/${notificationId}`);
-                    await remove(notificationRef);
+                    database.ref('notifications/' + currentUser.uid + '/' + notificationId).remove();
                     
                     // Update local state
-                    userNotifications = userNotifications.filter(n => n.id !== notificationId);
+                    userNotifications = userNotifications.filter(function(n) { return n.id !== notificationId; });
                     updateNotificationsDisplay();
                     
                     showNotification('Notificação apagada', 'success', 2000);
@@ -1534,20 +1531,23 @@
             });
         }
 
-        async function markAllNotificationsAsRead() {
+        function markAllNotificationsAsRead() {
             if (!currentUser || userNotifications.length === 0) return;
             
             try {
-                const updates = {};
-                userNotifications.forEach(notification => {
-                    if (!notification.read) {
-                        updates[`notifications/${currentUser.uid}/${notification.id}/read`] = true;
-                        notification.read = true;
-                    }
-                });
+                var updates = {};
+                var hasUnread = false;
                 
-                if (Object.keys(updates).length > 0) {
-                    await update(ref(database), updates);
+                for (var i = 0; i < userNotifications.length; i++) {
+                    if (!userNotifications[i].read) {
+                        updates['notifications/' + currentUser.uid + '/' + userNotifications[i].id + '/read'] = true;
+                        userNotifications[i].read = true;
+                        hasUnread = true;
+                    }
+                }
+                
+                if (hasUnread) {
+                    database.ref().update(updates);
                     updateNotificationsDisplay();
                     showNotification('Todas as notificações foram marcadas como lidas', 'success');
                 } else {
@@ -1560,16 +1560,15 @@
             }
         }
 
-        async function deleteAllNotifications() {
+        function deleteAllNotifications() {
             if (!currentUser || userNotifications.length === 0) {
                 showNotification('Não há notificações para apagar', 'info');
                 return;
             }
 
-            showConfirmDialog(`Tem certeza que quer apagar todas as ${userNotifications.length} notificações?`, async () => {
+            showConfirmDialog('Tem certeza que quer apagar todas as ' + userNotifications.length + ' notificações?', function() {
                 try {
-                    const notificationsRef = ref(database, `notifications/${currentUser.uid}`);
-                    await remove(notificationsRef);
+                    database.ref('notifications/' + currentUser.uid).remove();
                     
                     userNotifications = [];
                     updateNotificationsDisplay();
@@ -1586,28 +1585,30 @@
         function startNotificationListener() {
             if (!currentUser || notificationListener) return;
             
-            const notificationsRef = ref(database, `notifications/${currentUser.uid}`);
-            notificationListener = onValue(notificationsRef, (snapshot) => {
+            notificationListener = database.ref('notifications/' + currentUser.uid).on('value', function(snapshot) {
                 if (snapshot.exists()) {
-                    const newNotifications = [];
-                    snapshot.forEach(child => {
+                    var newNotifications = [];
+                    snapshot.forEach(function(child) {
                         newNotifications.push({
                             id: child.key,
-                            ...child.val()
+                            message: child.val().message,
+                            type: child.val().type,
+                            timestamp: child.val().timestamp,
+                            read: child.val().read
                         });
                     });
                     
                     // Check for new notifications
-                    const oldIds = userNotifications.map(n => n.id);
-                    const newOnes = newNotifications.filter(n => !oldIds.includes(n.id));
+                    var oldIds = userNotifications.map(function(n) { return n.id; });
+                    var newOnes = newNotifications.filter(function(n) { return oldIds.indexOf(n.id) === -1; });
                     
                     if (newOnes.length > 0 && userNotifications.length > 0) {
-                        newOnes.forEach(notification => {
-                            showNotification(`Nova notificação: ${notification.message}`, 'info', 5000);
-                        });
+                        for (var i = 0; i < newOnes.length; i++) {
+                            showNotification('Nova notificação: ' + newOnes[i].message, 'info', 5000);
+                        }
                     }
                     
-                    userNotifications = newNotifications.sort((a, b) => b.timestamp - a.timestamp);
+                    userNotifications = newNotifications.sort(function(a, b) { return b.timestamp - a.timestamp; });
                     updateNotificationsDisplay();
                 }
             });
@@ -1615,7 +1616,7 @@
 
         function stopNotificationListener() {
             if (notificationListener) {
-                notificationListener();
+                database.ref('notifications/' + currentUser.uid).off('value', notificationListener);
                 notificationListener = null;
             }
         }
@@ -1639,9 +1640,9 @@
         function stopTimer() {
             if (!isTimerActive) return;
             
-            const now = Date.now();
+            var now = Date.now();
             if (sessionStartTime) {
-                const sessionDuration = now - sessionStartTime;
+                var sessionDuration = now - sessionStartTime;
                 userData.todayTime += sessionDuration;
                 sessionStartTime = null;
             }
@@ -1664,9 +1665,9 @@
         function updateTimer() {
             if (!isTimerActive || !sessionStartTime) return;
             
-            const now = Date.now();
-            const currentSessionTime = now - sessionStartTime;
-            const totalTodayTime = userData.todayTime + currentSessionTime;
+            var now = Date.now();
+            var currentSessionTime = now - sessionStartTime;
+            var totalTodayTime = userData.todayTime + currentSessionTime;
             
             if (totalTodayTime >= DAILY_LIMIT_MS) {
                 userData.todayTime = DAILY_LIMIT_MS;
@@ -1679,25 +1680,25 @@
         }
 
         function updateDisplay() {
-            const now = Date.now();
-            const currentSessionTime = isTimerActive && sessionStartTime ? now - sessionStartTime : 0;
-            const totalTodayTime = userData.todayTime + currentSessionTime;
+            var now = Date.now();
+            var currentSessionTime = isTimerActive && sessionStartTime ? now - sessionStartTime : 0;
+            var totalTodayTime = userData.todayTime + currentSessionTime;
             
             // Update timer display
             document.getElementById('todayTime').textContent = formatTime(totalTodayTime);
             document.getElementById('sessionTime').textContent = formatTime(currentSessionTime);
             
             // Update progress
-            const progressPercent = (totalTodayTime / DAILY_LIMIT_MS) * 100;
-            const timerCircle = document.getElementById('timerCircle');
-            timerCircle.style.setProperty('--progress', `${Math.min(progressPercent, 100)}%`);
+            var progressPercent = (totalTodayTime / DAILY_LIMIT_MS) * 100;
+            var timerCircle = document.getElementById('timerCircle');
+            timerCircle.style.setProperty('--progress', Math.min(progressPercent, 100) + '%');
             
-            document.getElementById('timeProgress').textContent = `${Math.min(progressPercent, 100).toFixed(1)}%`;
-            document.getElementById('timeProgressBar').style.width = `${Math.min(progressPercent, 100)}%`;
+            document.getElementById('timeProgress').textContent = Math.min(progressPercent, 100).toFixed(1) + '%';
+            document.getElementById('timeProgressBar').style.width = Math.min(progressPercent, 100) + '%';
             
             // Update rewards
-            const todayRewards = calculateRewards(totalTodayTime);
-            const totalAvailable = userData.totalRewards + todayRewards;
+            var todayRewards = calculateRewards(totalTodayTime);
+            var totalAvailable = userData.totalRewards + todayRewards;
             
             document.getElementById('todayRewards').textContent = formatCurrency(todayRewards);
             document.getElementById('totalRewards').textContent = formatCurrency(totalAvailable);
@@ -1709,33 +1710,21 @@
             
             // Update status
             document.getElementById('userStatus').textContent = isTimerActive ? 'Trabalhando' : 'Pausado';
-            document.getElementById('userStatus').className = `font-medium ${isTimerActive ? 'text-green-500' : 'text-gray-500'}`;
+            document.getElementById('userStatus').className = 'font-medium ' + (isTimerActive ? 'text-green-500' : 'text-gray-500');
             document.getElementById('transferStatus').textContent = transferEnabled ? 'Habilitado' : 'Desabilitado';
-            document.getElementById('transferStatus').className = `font-medium ${transferEnabled ? 'text-green-500' : 'text-red-500'}`;
+            document.getElementById('transferStatus').className = 'font-medium ' + (transferEnabled ? 'text-green-500' : 'text-red-500');
             
             // Update pending
             updatePendingDisplay();
         }
 
         function updatePendingDisplay() {
-            const pendingInfo = document.getElementById('pendingInfo');
+            var pendingInfo = document.getElementById('pendingInfo');
             
             if (userData.pendingWithdrawal) {
-                pendingInfo.innerHTML = `
-                    <div class="text-center">
-                        <div class="text-3xl mb-2">⏳</div>
-                        <div class="text-lg font-bold text-orange-500 mb-2">${formatCurrency(userData.pendingWithdrawal.amount)}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">Levantamento pendente</div>
-                        <div class="text-xs text-gray-500 mt-1">Aguardando aprovação</div>
-                    </div>
-                `;
+                pendingInfo.innerHTML = '<div class="text-center"><div class="text-3xl mb-2">⏳</div><div class="text-lg font-bold text-orange-500 mb-2">' + formatCurrency(userData.pendingWithdrawal.amount) + '</div><div class="text-sm text-gray-600 dark:text-gray-400">Levantamento pendente</div><div class="text-xs text-gray-500 mt-1">Aguardando aprovação</div></div>';
             } else {
-                pendingInfo.innerHTML = `
-                    <div class="text-center text-gray-500 dark:text-gray-400 py-4">
-                        <div class="text-3xl mb-2">✅</div>
-                        <p>Nenhum pedido pendente</p>
-                    </div>
-                `;
+                pendingInfo.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-4"><div class="text-3xl mb-2">✅</div><p>Nenhum pedido pendente</p></div>';
             }
         }
 
@@ -1743,7 +1732,7 @@
         function startAutoSave() {
             if (autoSaveInterval) clearInterval(autoSaveInterval);
             
-            autoSaveInterval = setInterval(() => {
+            autoSaveInterval = setInterval(function() {
                 if (currentUser && isTimerActive) {
                     saveUserData();
                     showSaveIndicator();
@@ -1759,14 +1748,13 @@
         }
 
         // Data functions
-        async function saveUserData() {
+        function saveUserData() {
             if (!currentUser) return;
             
-            const today = getTodayKey();
-            const userRef = ref(database, `users/${currentUser.uid}`);
+            var today = getTodayKey();
             
             try {
-                const saveData = {
+                var saveData = {
                     name: currentUser.displayName,
                     email: currentUser.email,
                     photoURL: currentUser.photoURL,
@@ -1774,7 +1762,7 @@
                     todayTime: userData.todayTime,
                     lastActiveTime: userData.lastActiveTime || Date.now(),
                     lastSaveDate: today,
-                    lastUpdate: serverTimestamp(),
+                    lastUpdate: firebase.database.ServerValue.TIMESTAMP,
                     pin: userPin,
                     transferEnabled: transferEnabled,
                     referralCode: userReferralCode,
@@ -1782,64 +1770,63 @@
                     pendingWithdrawal: userData.pendingWithdrawal
                 };
                 
-                await set(userRef, saveData);
+                database.ref('users/' + currentUser.uid).set(saveData);
                 
             } catch (error) {
                 console.error('Error saving user data:', error);
             }
         }
 
-        async function loadUserData() {
+        function loadUserData() {
             if (!currentUser) return;
             
-            const userRef = ref(database, `users/${currentUser.uid}`);
-            
             try {
-                const snapshot = await get(userRef);
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    const today = getTodayKey();
-                    
-                    userPin = data.pin;
-                    transferEnabled = data.transferEnabled !== false;
-                    userReferralCode = data.referralCode;
-                    userData.totalRewards = data.totalRewards || 0;
-                    userData.lastSaveDate = data.lastSaveDate;
-                    userData.lastTransferDate = data.lastTransferDate;
-                    userData.pendingWithdrawal = data.pendingWithdrawal || null;
-                    
-                    if (data.lastSaveDate === today) {
-                        userData.todayTime = data.todayTime || 0;
+                database.ref('users/' + currentUser.uid).once('value', function(snapshot) {
+                    if (snapshot.exists()) {
+                        var data = snapshot.val();
+                        var today = getTodayKey();
+                        
+                        userPin = data.pin;
+                        transferEnabled = data.transferEnabled !== false;
+                        userReferralCode = data.referralCode;
+                        userData.totalRewards = data.totalRewards || 0;
+                        userData.lastSaveDate = data.lastSaveDate;
+                        userData.lastTransferDate = data.lastTransferDate;
+                        userData.pendingWithdrawal = data.pendingWithdrawal || null;
+                        
+                        if (data.lastSaveDate === today) {
+                            userData.todayTime = data.todayTime || 0;
+                        } else {
+                            userData.todayTime = 0;
+                        }
+                        
+                        userData.lastActiveTime = data.lastActiveTime;
                     } else {
-                        userData.todayTime = 0;
+                        userData = {
+                            todayTime: 0,
+                            totalRewards: 0,
+                            lastActiveTime: Date.now(),
+                            pendingWithdrawal: null,
+                            lastTransferDate: null,
+                            lastSaveDate: getTodayKey()
+                        };
+                        transferEnabled = true;
                     }
                     
-                    userData.lastActiveTime = data.lastActiveTime;
-                } else {
-                    userData = {
-                        todayTime: 0,
-                        totalRewards: 0,
-                        lastActiveTime: Date.now(),
-                        pendingWithdrawal: null,
-                        lastTransferDate: null,
-                        lastSaveDate: getTodayKey()
-                    };
-                    transferEnabled = true;
-                }
-                
-                updateDisplay();
-                
-                if (!userPin) {
-                    setTimeout(() => showModal('pinSetupModal'), 2000);
-                }
+                    updateDisplay();
+                    
+                    if (!userPin) {
+                        setTimeout(function() { showModal('pinSetupModal'); }, 2000);
+                    }
 
-                if (!userReferralCode) {
-                    await createUserReferralCode();
-                } else {
-                    updateReferralDisplay();
-                }
+                    if (!userReferralCode) {
+                        createUserReferralCode();
+                    } else {
+                        updateReferralDisplay();
+                    }
 
-                await loadUserReferrals();
+                    loadUserReferrals();
+                });
                 
             } catch (error) {
                 console.error('Error loading user data:', error);
@@ -1848,53 +1835,52 @@
 
         // Referral functions
         function generateReferralCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = '';
-            for (let i = 0; i < 6; i++) {
+            var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            var result = '';
+            for (var i = 0; i < 6; i++) {
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
             }
             return result;
         }
 
-        async function createUserReferralCode() {
+        function createUserReferralCode() {
             if (!currentUser) return;
 
             try {
-                const userRef = ref(database, `users/${currentUser.uid}`);
-                const snapshot = await get(userRef);
-                
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    if (userData.referralCode) {
-                        userReferralCode = userData.referralCode;
-                        updateReferralDisplay();
-                        return;
+                database.ref('users/' + currentUser.uid).once('value', function(snapshot) {
+                    if (snapshot.exists()) {
+                        var userData = snapshot.val();
+                        if (userData.referralCode) {
+                            userReferralCode = userData.referralCode;
+                            updateReferralDisplay();
+                            return;
+                        }
                     }
-                }
 
-                let code;
-                let isUnique = false;
-                
-                while (!isUnique) {
-                    code = generateReferralCode();
-                    const codeRef = ref(database, `referralCodes/${code}`);
-                    const codeSnapshot = await get(codeRef);
-                    isUnique = !codeSnapshot.exists();
-                }
+                    function tryCreateCode() {
+                        var code = generateReferralCode();
+                        database.ref('referralCodes/' + code).once('value', function(codeSnapshot) {
+                            if (!codeSnapshot.exists()) {
+                                database.ref('referralCodes/' + code).set({
+                                    userId: currentUser.uid,
+                                    userName: currentUser.displayName,
+                                    createdAt: Date.now()
+                                });
 
-                const codeRef = ref(database, `referralCodes/${code}`);
-                await set(codeRef, {
-                    userId: currentUser.uid,
-                    userName: currentUser.displayName,
-                    createdAt: Date.now()
+                                database.ref('users/' + currentUser.uid).update({
+                                    referralCode: code
+                                });
+
+                                userReferralCode = code;
+                                updateReferralDisplay();
+                            } else {
+                                tryCreateCode(); // Try again with different code
+                            }
+                        });
+                    }
+
+                    tryCreateCode();
                 });
-
-                await update(userRef, {
-                    referralCode: code
-                });
-
-                userReferralCode = code;
-                updateReferralDisplay();
 
             } catch (error) {
                 console.error('Error creating referral code:', error);
@@ -1902,13 +1888,13 @@
         }
 
         function updateReferralDisplay() {
-            const codeEl = document.getElementById('userReferralCode');
+            var codeEl = document.getElementById('userReferralCode');
             if (codeEl && userReferralCode) {
                 codeEl.textContent = userReferralCode;
             }
         }
 
-        async function processReferralCode(code) {
+        function processReferralCode(code) {
             if (!code || !currentUser) return;
 
             code = code.trim().toUpperCase();
@@ -1919,46 +1905,44 @@
             }
 
             try {
-                const codeRef = ref(database, `referralCodes/${code}`);
-                const snapshot = await get(codeRef);
-                
-                if (!snapshot.exists()) {
-                    showReferralStatus('Código inválido.', 'error');
-                    return;
-                }
+                database.ref('referralCodes/' + code).once('value', function(snapshot) {
+                    if (!snapshot.exists()) {
+                        showReferralStatus('Código inválido.', 'error');
+                        return;
+                    }
 
-                const codeData = snapshot.val();
-                if (codeData.userId === currentUser.uid) {
-                    showReferralStatus('Não pode usar seu próprio código.', 'error');
-                    return;
-                }
+                    var codeData = snapshot.val();
+                    if (codeData.userId === currentUser.uid) {
+                        showReferralStatus('Não pode usar seu próprio código.', 'error');
+                        return;
+                    }
 
-                const userRef = ref(database, `users/${currentUser.uid}`);
-                const userSnapshot = await get(userRef);
-                if (userSnapshot.exists() && userSnapshot.val().usedReferralCode) {
-                    showReferralStatus('Você já usou um código.', 'warning');
-                    return;
-                }
+                    database.ref('users/' + currentUser.uid).once('value', function(userSnapshot) {
+                        if (userSnapshot.exists() && userSnapshot.val().usedReferralCode) {
+                            showReferralStatus('Você já usou um código.', 'warning');
+                            return;
+                        }
 
-                const pendingRef = ref(database, 'pendingReferrals');
-                await push(pendingRef, {
-                    referrerUserId: codeData.userId,
-                    referrerName: codeData.userName,
-                    newUserId: currentUser.uid,
-                    newUserName: currentUser.displayName,
-                    newUserEmail: currentUser.email,
-                    code: code,
-                    timestamp: Date.now(),
-                    status: 'pending'
+                        database.ref('pendingReferrals').push({
+                            referrerUserId: codeData.userId,
+                            referrerName: codeData.userName,
+                            newUserId: currentUser.uid,
+                            newUserName: currentUser.displayName,
+                            newUserEmail: currentUser.email,
+                            code: code,
+                            timestamp: Date.now(),
+                            status: 'pending'
+                        });
+
+                        database.ref('users/' + currentUser.uid).update({
+                            usedReferralCode: code,
+                            referredBy: codeData.userId
+                        });
+
+                        showReferralStatus('Código aplicado! Aguardando aprovação.', 'success');
+                        document.getElementById('newReferralCodeInput').value = '';
+                    });
                 });
-
-                await update(userRef, {
-                    usedReferralCode: code,
-                    referredBy: codeData.userId
-                });
-
-                showReferralStatus('Código aplicado! Aguardando aprovação.', 'success');
-                document.getElementById('newReferralCodeInput').value = '';
 
             } catch (error) {
                 console.error('Error processing referral:', error);
@@ -1967,58 +1951,56 @@
         }
 
         function showReferralStatus(message, type) {
-            const statusEl = document.getElementById('referralCodeStatus');
-            const colors = {
+            var statusEl = document.getElementById('referralCodeStatus');
+            var colors = {
                 success: 'bg-green-50 dark:bg-green-900/20 border-green-200 text-green-800',
                 error: 'bg-red-50 dark:bg-red-900/20 border-red-200 text-red-800',
                 warning: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 text-yellow-800'
             };
 
-            statusEl.className = `mt-3 p-3 border rounded-lg ${colors[type]}`;
+            statusEl.className = 'mt-3 p-3 border rounded-lg ' + colors[type];
             statusEl.textContent = message;
             statusEl.classList.remove('hidden');
 
-            setTimeout(() => {
+            setTimeout(function() {
                 statusEl.classList.add('hidden');
             }, 5000);
         }
 
-        async function loadUserReferrals() {
+        function loadUserReferrals() {
             if (!currentUser) return;
 
             try {
-                const referralsRef = ref(database, 'confirmedReferrals');
-                const snapshot = await get(referralsRef);
-                
-                let confirmed = 0;
-                let bonus = 0;
+                database.ref('confirmedReferrals').once('value', function(snapshot) {
+                    var confirmed = 0;
+                    var bonus = 0;
 
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        const referral = child.val();
-                        if (referral.referrerUserId === currentUser.uid) {
-                            confirmed++;
-                            bonus += REFERRAL_BONUS;
+                    if (snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            var referral = child.val();
+                            if (referral.referrerUserId === currentUser.uid) {
+                                confirmed++;
+                                bonus += REFERRAL_BONUS;
+                            }
+                        });
+                    }
+
+                    database.ref('pendingReferrals').once('value', function(pendingSnapshot) {
+                        var pending = 0;
+                        if (pendingSnapshot.exists()) {
+                            pendingSnapshot.forEach(function(child) {
+                                var referral = child.val();
+                                if (referral.referrerUserId === currentUser.uid && referral.status === 'pending') {
+                                    pending++;
+                                }
+                            });
                         }
-                    });
-                }
 
-                const pendingRef = ref(database, 'pendingReferrals');
-                const pendingSnapshot = await get(pendingRef);
-                
-                let pending = 0;
-                if (pendingSnapshot.exists()) {
-                    pendingSnapshot.forEach(child => {
-                        const referral = child.val();
-                        if (referral.referrerUserId === currentUser.uid && referral.status === 'pending') {
-                            pending++;
-                        }
+                        document.getElementById('confirmedReferrals').textContent = confirmed;
+                        document.getElementById('pendingReferrals').textContent = pending;
+                        document.getElementById('referralBonus').textContent = formatCurrency(bonus);
                     });
-                }
-
-                document.getElementById('confirmedReferrals').textContent = confirmed;
-                document.getElementById('pendingReferrals').textContent = pending;
-                document.getElementById('referralBonus').textContent = formatCurrency(bonus);
+                });
 
             } catch (error) {
                 console.error('Error loading referrals:', error);
@@ -2026,24 +2008,27 @@
         }
 
         // Load other users for transfer
-        async function loadUsers() {
+        function loadUsers() {
             try {
-                const usersRef = ref(database, 'users');
-                const snapshot = await get(usersRef);
-                
-                allUsers = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        if (child.key !== currentUser?.uid) {
-                            allUsers.push({
-                                id: child.key,
-                                ...child.val()
-                            });
-                        }
-                    });
-                }
+                database.ref('users').once('value', function(snapshot) {
+                    allUsers = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            if (child.key !== (currentUser ? currentUser.uid : null)) {
+                                allUsers.push({
+                                    id: child.key,
+                                    name: child.val().name,
+                                    email: child.val().email,
+                                    photoURL: child.val().photoURL,
+                                    totalRewards: child.val().totalRewards,
+                                    todayTime: child.val().todayTime
+                                });
+                            }
+                        });
+                    }
 
-                updateTransferUserOptions();
+                    updateTransferUserOptions();
+                });
 
             } catch (error) {
                 console.error('Error loading users:', error);
@@ -2051,72 +2036,54 @@
         }
 
         function updateTransferUserOptions() {
-            const select = document.getElementById('transferUserSelect');
+            var select = document.getElementById('transferUserSelect');
             select.innerHTML = '<option value="">Escolha um usuário...</option>';
             
-            allUsers.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.id;
-                option.textContent = user.name;
+            for (var i = 0; i < allUsers.length; i++) {
+                var option = document.createElement('option');
+                option.value = allUsers[i].id;
+                option.textContent = allUsers[i].name;
                 select.appendChild(option);
-            });
+            }
         }
 
         // History and leaderboard
-        window.loadHistoryData = async function() {
+        function loadHistoryData() {
             if (!currentUser) return;
             
             try {
-                const historyRef = ref(database, `transferHistory/${currentUser.uid}`);
-                const snapshot = await get(historyRef);
-                
-                const history = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        history.push(child.val());
-                    });
-                }
+                database.ref('transferHistory/' + currentUser.uid).once('value', function(snapshot) {
+                    var history = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            history.push(child.val());
+                        });
+                    }
 
-                history.sort((a, b) => b.timestamp - a.timestamp);
-                
-                const container = document.getElementById('historyList');
-                container.innerHTML = '';
+                    history.sort(function(a, b) { return b.timestamp - a.timestamp; });
+                    
+                    var container = document.getElementById('historyList');
+                    container.innerHTML = '';
 
-                if (history.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center text-gray-500 py-8">
-                            <div class="text-4xl mb-2">📋</div>
-                            <p>Nenhuma atividade ainda</p>
-                            <p class="text-sm mt-2">Suas transferências aparecerão aqui</p>
-                        </div>
-                    `;
-                    return;
-                }
+                    if (history.length === 0) {
+                        container.innerHTML = '<div class="text-center text-gray-500 py-8"><div class="text-4xl mb-2">📋</div><p>Nenhuma atividade ainda</p><p class="text-sm mt-2">Suas transferências aparecerão aqui</p></div>';
+                        return;
+                    }
 
-                history.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'history-item';
-                    
-                    const typeText = item.type === 'sent' ? 'Enviado para' : 'Recebido de';
-                    const typeColor = item.type === 'sent' ? 'text-red-500' : 'text-green-500';
-                    const typeIcon = item.type === 'sent' ? '📤' : '📥';
-                    const otherUser = item.type === 'sent' ? item.toName : item.fromName;
-                    
-                    div.innerHTML = `
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2 mb-1">
-                                <span class="text-lg">${typeIcon}</span>
-                                <div class="font-medium text-gray-900 dark:text-white">${typeText} ${otherUser}</div>
-                            </div>
-                            <div class="text-sm text-gray-500 ml-7">${formatDate(item.timestamp)}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-bold ${typeColor} text-lg">${formatCurrency(item.amount)}</div>
-                            <div class="text-xs text-gray-500">Concluído ✅</div>
-                        </div>
-                    `;
-                    
-                    container.appendChild(div);
+                    for (var i = 0; i < history.length; i++) {
+                        var item = history[i];
+                        var div = document.createElement('div');
+                        div.className = 'history-item';
+                        
+                        var typeText = item.type === 'sent' ? 'Enviado para' : 'Recebido de';
+                        var typeColor = item.type === 'sent' ? 'text-red-500' : 'text-green-500';
+                        var typeIcon = item.type === 'sent' ? '📤' : '📥';
+                        var otherUser = item.type === 'sent' ? item.toName : item.fromName;
+                        
+                        div.innerHTML = '<div class="flex-1"><div class="flex items-center space-x-2 mb-1"><span class="text-lg">' + typeIcon + '</span><div class="font-medium text-gray-900 dark:text-white">' + typeText + ' ' + otherUser + '</div></div><div class="text-sm text-gray-500 ml-7">' + formatDate(item.timestamp) + '</div></div><div class="text-right"><div class="font-bold ' + typeColor + ' text-lg">' + formatCurrency(item.amount) + '</div><div class="text-xs text-gray-500">Concluído ✅</div></div>';
+                        
+                        container.appendChild(div);
+                    }
                 });
 
             } catch (error) {
@@ -2125,69 +2092,50 @@
             }
         }
 
-        window.loadLeaderboardData = async function() {
+        function loadLeaderboardData() {
             try {
-                const usersRef = ref(database, 'users');
-                const snapshot = await get(usersRef);
-                
-                const users = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        users.push({
-                            id: child.key,
-                            ...child.val()
+                database.ref('users').once('value', function(snapshot) {
+                    var users = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach(function(child) {
+                            users.push({
+                                id: child.key,
+                                name: child.val().name,
+                                photoURL: child.val().photoURL,
+                                totalRewards: child.val().totalRewards || 0,
+                                todayTime: child.val().todayTime || 0
+                            });
                         });
-                    });
-                }
-
-                users.sort((a, b) => (b.totalRewards || 0) - (a.totalRewards || 0));
-                
-                const container = document.getElementById('leaderboardList');
-                container.innerHTML = '';
-
-                if (users.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center text-gray-500 py-8">
-                            <div class="text-4xl mb-2">🏆</div>
-                            <p>Nenhum usuário ainda</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                users.slice(0, 10).forEach((user, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'leaderboard-row';
-                    
-                    if (user.id === currentUser?.uid) {
-                        div.style.background = 'linear-gradient(135deg, #DBEAFE 0%, #93C5FD 100%)';
-                        div.style.borderLeft = '4px solid #3B82F6';
                     }
+
+                    users.sort(function(a, b) { return (b.totalRewards || 0) - (a.totalRewards || 0); });
                     
-                    const medals = ['🥇', '🥈', '🥉'];
-                    const position = index < 3 ? medals[index] : `${index + 1}º`;
-                    
-                    div.innerHTML = `
-                        <div class="flex items-center flex-1">
-                            <div class="text-2xl mr-4 font-bold">${position}</div>
-                            <img class="w-12 h-12 rounded-full mr-3 border-2 border-gray-200" src="${user.photoURL}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"48\" height=\"48\" fill=\"%23999\" viewBox=\"0 0 24 24\"><path d=\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\"/></svg>'">
-                            <div class="flex-1">
-                                <div class="font-medium text-gray-900 dark:text-white flex items-center">
-                                    ${user.name} 
-                                    ${user.id === currentUser?.uid ? '<span class="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Você</span>' : ''}
-                                </div>
-                                <div class="text-sm text-gray-500">
-                                    Tempo hoje: ${formatTime(user.todayTime || 0)}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-bold text-primary text-lg">${formatCurrency(user.totalRewards || 0)}</div>
-                            <div class="text-xs text-gray-500">Total ganho</div>
-                        </div>
-                    `;
-                    
-                    container.appendChild(div);
+                    var container = document.getElementById('leaderboardList');
+                    container.innerHTML = '';
+
+                    if (users.length === 0) {
+                        container.innerHTML = '<div class="text-center text-gray-500 py-8"><div class="text-4xl mb-2">🏆</div><p>Nenhum usuário ainda</p></div>';
+                        return;
+                    }
+
+                    var topUsers = users.slice(0, 10);
+                    for (var i = 0; i < topUsers.length; i++) {
+                        var user = topUsers[i];
+                        var div = document.createElement('div');
+                        div.className = 'leaderboard-row';
+                        
+                        if (user.id === (currentUser ? currentUser.uid : null)) {
+                            div.style.background = 'linear-gradient(135deg, #DBEAFE 0%, #93C5FD 100%)';
+                            div.style.borderLeft = '4px solid #3B82F6';
+                        }
+                        
+                        var medals = ['🥇', '🥈', '🥉'];
+                        var position = i < 3 ? medals[i] : (i + 1) + 'º';
+                        
+                        div.innerHTML = '<div class="flex items-center flex-1"><div class="text-2xl mr-4 font-bold">' + position + '</div><img class="w-12 h-12 rounded-full mr-3 border-2 border-gray-200" src="' + user.photoURL + '" alt="" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"48\\" height=\\"48\\" fill=\\"%23999\\" viewBox=\\"0 0 24 24\\"><path d=\\"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\\"/></svg>\'"><div class="flex-1"><div class="font-medium text-gray-900 dark:text-white flex items-center">' + user.name + ' ' + (user.id === (currentUser ? currentUser.uid : null) ? '<span class="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Você</span>' : '') + '</div><div class="text-sm text-gray-500">Tempo hoje: ' + formatTime(user.todayTime || 0) + '</div></div></div><div class="text-right"><div class="font-bold text-primary text-lg">' + formatCurrency(user.totalRewards || 0) + '</div><div class="text-xs text-gray-500">Total ganho</div></div>';
+                        
+                        container.appendChild(div);
+                    }
                 });
 
             } catch (error) {
@@ -2197,13 +2145,13 @@
         }
 
         // Withdrawal functions
-        async function processWithdrawal() {
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            const method = document.getElementById('paymentMethod').value;
-            const details = document.getElementById('paymentDetails').value.trim();
+        function processWithdrawal() {
+            var amount = parseFloat(document.getElementById('withdrawAmount').value);
+            var method = document.getElementById('paymentMethod').value;
+            var details = document.getElementById('paymentDetails').value.trim();
             
             if (!amount || amount < MIN_WITHDRAWAL) {
-                showNotification(`Valor mínimo: ${formatCurrency(MIN_WITHDRAWAL)}`, 'error');
+                showNotification('Valor mínimo: ' + formatCurrency(MIN_WITHDRAWAL), 'error');
                 return;
             }
             
@@ -2212,9 +2160,9 @@
                 return;
             }
             
-            const currentSessionTime = isTimerActive && sessionStartTime ? Date.now() - sessionStartTime : 0;
-            const todayRewards = calculateRewards(userData.todayTime + currentSessionTime);
-            const totalAvailable = userData.totalRewards + todayRewards;
+            var currentSessionTime = isTimerActive && sessionStartTime ? Date.now() - sessionStartTime : 0;
+            var todayRewards = calculateRewards(userData.todayTime + currentSessionTime);
+            var totalAvailable = userData.totalRewards + todayRewards;
             
             if (amount > totalAvailable) {
                 showNotification('Valor insuficiente!', 'error');
@@ -2222,13 +2170,13 @@
             }
 
             try {
-                const methodNames = {
+                var methodNames = {
                     'multicaixa': 'Multicaixa Express',
                     'unitel': 'Unitel Money',
                     'banco': 'Transferência Bancária'
                 };
 
-                const withdrawalData = {
+                var withdrawalData = {
                     userId: currentUser.uid,
                     userName: currentUser.displayName,
                     userEmail: currentUser.email,
@@ -2239,31 +2187,30 @@
                     requestDate: Date.now()
                 };
 
-                const withdrawalRef = ref(database, 'withdrawalRequests');
-                const newWithdrawalRef = await push(withdrawalRef, withdrawalData);
+                database.ref('withdrawalRequests').push(withdrawalData).then(function(newWithdrawalRef) {
+                    userData.totalRewards = 0;
+                    userData.todayTime = 0;
+                    userData.pendingWithdrawal = {
+                        id: newWithdrawalRef.key,
+                        amount: amount,
+                        timestamp: Date.now()
+                    };
 
-                userData.totalRewards = 0;
-                userData.todayTime = 0;
-                userData.pendingWithdrawal = {
-                    id: newWithdrawalRef.key,
-                    amount: amount,
-                    timestamp: Date.now()
-                };
-
-                await saveUserData();
-                updateDisplay();
-                hideModal('withdrawModal');
-                
-                if (isTimerActive) {
-                    stopTimer();
-                }
-                
-                showNotification(`Levantamento de ${formatCurrency(amount)} solicitado! ⏳`, 'success');
-                
-                // Clear form
-                document.getElementById('withdrawAmount').value = '';
-                document.getElementById('paymentMethod').value = '';
-                document.getElementById('paymentDetails').value = '';
+                    saveUserData();
+                    updateDisplay();
+                    hideModal('withdrawModal');
+                    
+                    if (isTimerActive) {
+                        stopTimer();
+                    }
+                    
+                    showNotification('Levantamento de ' + formatCurrency(amount) + ' solicitado! ⏳', 'success');
+                    
+                    // Clear form
+                    document.getElementById('withdrawAmount').value = '';
+                    document.getElementById('paymentMethod').value = '';
+                    document.getElementById('paymentDetails').value = '';
+                });
                 
             } catch (error) {
                 console.error('Error processing withdrawal:', error);
@@ -2273,19 +2220,19 @@
 
         // Transfer functions
         function canTransferToday() {
-            const today = getTodayKey();
+            var today = getTodayKey();
             return userData.lastTransferDate !== today;
         }
 
-        async function processTransfer() {
+        function processTransfer() {
             if (!canTransferToday()) {
                 showNotification('Você já transferiu hoje! Tente amanhã.', 'warning');
                 return;
             }
 
-            const recipientId = document.getElementById('transferUserSelect').value;
-            const amount = parseFloat(document.getElementById('transferAmount').value);
-            const pin = document.getElementById('transferPin').value;
+            var recipientId = document.getElementById('transferUserSelect').value;
+            var amount = parseFloat(document.getElementById('transferAmount').value);
+            var pin = document.getElementById('transferPin').value;
             
             if (!recipientId || !amount || !pin) {
                 showNotification('Preencha todos os campos!', 'error');
@@ -2297,9 +2244,9 @@
                 return;
             }
 
-            const currentSessionTime = isTimerActive && sessionStartTime ? Date.now() - sessionStartTime : 0;
-            const todayRewards = calculateRewards(userData.todayTime + currentSessionTime);
-            const totalAvailable = userData.totalRewards + todayRewards;
+            var currentSessionTime = isTimerActive && sessionStartTime ? Date.now() - sessionStartTime : 0;
+            var todayRewards = calculateRewards(userData.todayTime + currentSessionTime);
+            var totalAvailable = userData.totalRewards + todayRewards;
             
             if (amount > totalAvailable) {
                 showNotification('Valor insuficiente!', 'error');
@@ -2307,41 +2254,46 @@
             }
 
             try {
-                const recipient = allUsers.find(user => user.id === recipientId);
-                const now = Date.now();
-                const today = getTodayKey();
+                var recipient = null;
+                for (var i = 0; i < allUsers.length; i++) {
+                    if (allUsers[i].id === recipientId) {
+                        recipient = allUsers[i];
+                        break;
+                    }
+                }
+                
+                var now = Date.now();
+                var today = getTodayKey();
                 
                 if (sessionStartTime) {
-                    const currentSession = now - sessionStartTime;
+                    var currentSession = now - sessionStartTime;
                     userData.todayTime += currentSession;
                     sessionStartTime = now;
                 }
                 
-                const newSenderTotal = totalAvailable - amount;
+                var newSenderTotal = totalAvailable - amount;
                 userData.totalRewards = newSenderTotal;
                 userData.todayTime = 0;
                 userData.lastTransferDate = today;
                 
-                const senderRef = ref(database, `users/${currentUser.uid}`);
-                await update(senderRef, {
+                database.ref('users/' + currentUser.uid).update({
                     totalRewards: newSenderTotal,
                     todayTime: 0,
                     lastTransferDate: today,
-                    lastUpdate: serverTimestamp()
+                    lastUpdate: firebase.database.ServerValue.TIMESTAMP
                 });
                 
-                const recipientRef = ref(database, `users/${recipientId}`);
-                const recipientSnapshot = await get(recipientRef);
-                const recipientData = recipientSnapshot.val();
-                const newRecipientTotal = (recipientData.totalRewards || 0) + amount;
-                await update(recipientRef, {
-                    totalRewards: newRecipientTotal,
-                    lastUpdate: serverTimestamp()
+                database.ref('users/' + recipientId).once('value', function(recipientSnapshot) {
+                    var recipientData = recipientSnapshot.val();
+                    var newRecipientTotal = (recipientData.totalRewards || 0) + amount;
+                    database.ref('users/' + recipientId).update({
+                        totalRewards: newRecipientTotal,
+                        lastUpdate: firebase.database.ServerValue.TIMESTAMP
+                    });
                 });
                 
                 // Add transfer history
-                const historyRef = ref(database, `transferHistory/${currentUser.uid}`);
-                await push(historyRef, {
+                database.ref('transferHistory/' + currentUser.uid).push({
                     from: currentUser.uid,
                     fromName: currentUser.displayName,
                     to: recipientId,
@@ -2351,8 +2303,7 @@
                     type: 'sent'
                 });
                 
-                const recipientHistoryRef = ref(database, `transferHistory/${recipientId}`);
-                await push(recipientHistoryRef, {
+                database.ref('transferHistory/' + recipientId).push({
                     from: currentUser.uid,
                     fromName: currentUser.displayName,
                     to: recipientId,
@@ -2363,9 +2314,8 @@
                 });
 
                 // Send notification to recipient
-                const recipientNotifRef = ref(database, `notifications/${recipientId}`);
-                await push(recipientNotifRef, {
-                    message: `💰 ${currentUser.displayName} enviou ${formatCurrency(amount)} para você!`,
+                database.ref('notifications/' + recipientId).push({
+                    message: '💰 ' + currentUser.displayName + ' enviou ' + formatCurrency(amount) + ' para você!',
                     type: 'money',
                     timestamp: now,
                     read: false
@@ -2374,7 +2324,7 @@
                 updateDisplay();
                 hideModal('transferModal');
                 
-                showNotification(`Transferência de ${formatCurrency(amount)} realizada! 🚀`, 'success');
+                showNotification('Transferência de ' + formatCurrency(amount) + ' realizada! 🚀', 'success');
                 
                 // Clear form
                 document.getElementById('transferUserSelect').value = '';
@@ -2388,9 +2338,9 @@
         }
 
         // PIN functions
-        async function setupPin() {
-            const pin1 = document.getElementById('newPin').value;
-            const pin2 = document.getElementById('confirmPin').value;
+        function setupPin() {
+            var pin1 = document.getElementById('newPin').value;
+            var pin2 = document.getElementById('confirmPin').value;
             
             if (pin1.length !== 6 || !/^\d{6}$/.test(pin1)) {
                 showNotification('PIN deve ter 6 dígitos!', 'error');
@@ -2403,7 +2353,7 @@
             }
             
             userPin = hashPin(pin1);
-            await saveUserData();
+            saveUserData();
             
             hideModal('pinSetupModal');
             document.getElementById('newPin').value = '';
@@ -2413,38 +2363,41 @@
         }
 
         // Event listeners
-        document.getElementById('loginBtn').addEventListener('click', async () => {
+        document.getElementById('loginBtn').addEventListener('click', function() {
             try {
-                const referralCode = document.getElementById('referralCodeInput').value.trim().toUpperCase();
-                await signInWithPopup(auth, provider);
-                
-                if (referralCode) {
-                    setTimeout(() => {
-                        processReferralCode(referralCode);
-                    }, 2000);
-                }
+                var referralCode = document.getElementById('referralCodeInput').value.trim().toUpperCase();
+                auth.signInWithPopup(provider).then(function() {
+                    if (referralCode) {
+                        setTimeout(function() {
+                            processReferralCode(referralCode);
+                        }, 2000);
+                    }
+                }).catch(function(error) {
+                    console.error('Login error:', error);
+                    showNotification('Erro no login!', 'error');
+                });
             } catch (error) {
                 console.error('Login error:', error);
                 showNotification('Erro no login!', 'error');
             }
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
+        document.getElementById('logoutBtn').addEventListener('click', function() {
             try {
                 if (isTimerActive) {
                     stopTimer();
                 }
                 stopAutoSave();
                 stopNotificationListener();
-                await saveUserData();
-                await signOut(auth);
+                saveUserData();
+                auth.signOut();
             } catch (error) {
                 console.error('Logout error:', error);
             }
         });
 
         // Timer click
-        document.getElementById('timerCircle').addEventListener('click', () => {
+        document.getElementById('timerCircle').addEventListener('click', function() {
             if (isTimerActive) {
                 stopTimer();
             } else {
@@ -2453,7 +2406,7 @@
         });
 
         // Action buttons
-        document.getElementById('withdrawBtn').addEventListener('click', () => {
+        document.getElementById('withdrawBtn').addEventListener('click', function() {
             if (userData.pendingWithdrawal) {
                 showNotification('Você já tem um levantamento pendente!', 'warning');
                 return;
@@ -2461,7 +2414,7 @@
             showModal('withdrawModal');
         });
 
-        document.getElementById('transferBtn').addEventListener('click', () => {
+        document.getElementById('transferBtn').addEventListener('click', function() {
             if (!userPin) {
                 showNotification('Configure seu PIN primeiro!', 'warning');
                 showModal('pinSetupModal');
@@ -2475,45 +2428,54 @@
         });
 
         // Modal buttons
-        document.getElementById('withdrawCancel').addEventListener('click', () => hideModal('withdrawModal'));
+        document.getElementById('withdrawCancel').addEventListener('click', function() { hideModal('withdrawModal'); });
         document.getElementById('withdrawConfirm').addEventListener('click', processWithdrawal);
-        document.getElementById('transferCancel').addEventListener('click', () => hideModal('transferModal'));
+        document.getElementById('transferCancel').addEventListener('click', function() { hideModal('transferModal'); });
         document.getElementById('transferConfirm').addEventListener('click', processTransfer);
-        document.getElementById('pinSetupCancel').addEventListener('click', () => hideModal('pinSetupModal'));
+        document.getElementById('pinSetupCancel').addEventListener('click', function() { hideModal('pinSetupModal'); });
         document.getElementById('pinSetupConfirm').addEventListener('click', setupPin);
-        document.getElementById('deleteCancel').addEventListener('click', () => hideModal('deleteConfirmModal'));
+        document.getElementById('deleteCancel').addEventListener('click', function() { hideModal('deleteConfirmModal'); });
 
         // Notification actions
         document.getElementById('markAllAsRead').addEventListener('click', markAllNotificationsAsRead);
         document.getElementById('deleteAllNotifications').addEventListener('click', deleteAllNotifications);
 
         // Referral actions
-        document.getElementById('copyReferralCode').addEventListener('click', () => {
+        document.getElementById('copyReferralCode').addEventListener('click', function() {
             if (userReferralCode) {
-                navigator.clipboard.writeText(userReferralCode).then(() => {
+                // Fallback for older browsers
+                var textArea = document.createElement('textarea');
+                textArea.value = userReferralCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
                     showNotification('Código copiado! 📋', 'success');
-                });
+                } catch (err) {
+                    showNotification('Erro ao copiar código', 'error');
+                }
+                document.body.removeChild(textArea);
             }
         });
 
-        document.getElementById('submitReferralCode').addEventListener('click', () => {
-            const code = document.getElementById('newReferralCodeInput').value.trim();
+        document.getElementById('submitReferralCode').addEventListener('click', function() {
+            var code = document.getElementById('newReferralCodeInput').value.trim();
             if (code) {
                 processReferralCode(code);
             }
         });
 
         // Format inputs
-        document.getElementById('referralCodeInput').addEventListener('input', (e) => {
+        document.getElementById('referralCodeInput').addEventListener('input', function(e) {
             e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         });
 
-        document.getElementById('newReferralCodeInput').addEventListener('input', (e) => {
+        document.getElementById('newReferralCodeInput').addEventListener('input', function(e) {
             e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         });
 
         // Page visibility handling
-        document.addEventListener('visibilitychange', () => {
+        document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 if (isTimerActive) {
                     saveUserData();
@@ -2524,31 +2486,33 @@
         });
 
         // Before unload
-        window.addEventListener('beforeunload', () => {
+        window.addEventListener('beforeunload', function() {
             if (isTimerActive) {
                 saveUserData();
             }
         });
 
         // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 // Close any open overlays
-                document.querySelectorAll('.overlay-modal.show').forEach(overlay => {
-                    overlay.classList.remove('show');
-                });
+                var overlays = document.querySelectorAll('.overlay-modal.show');
+                for (var i = 0; i < overlays.length; i++) {
+                    overlays[i].classList.remove('show');
+                }
                 // Close any open modals
-                document.querySelectorAll('.modal.show').forEach(modal => {
-                    modal.classList.remove('show');
-                });
+                var modals = document.querySelectorAll('.modal.show');
+                for (var i = 0; i < modals.length; i++) {
+                    modals[i].classList.remove('show');
+                }
             }
         });
 
         // Auth state listener
-        onAuthStateChanged(auth, async (user) => {
-            const loadingScreen = document.getElementById('loadingScreen');
-            const loginScreen = document.getElementById('loginScreen');
-            const mainApp = document.getElementById('mainApp');
+        auth.onAuthStateChanged(function(user) {
+            var loadingScreen = document.getElementById('loadingScreen');
+            var loginScreen = document.getElementById('loginScreen');
+            var mainApp = document.getElementById('mainApp');
             
             loadingScreen.classList.add('hidden');
             
@@ -2558,9 +2522,9 @@
                 document.getElementById('userPhoto').src = user.photoURL;
                 document.getElementById('userName').textContent = user.displayName;
                 
-                await loadUserData();
-                await loadUsers();
-                await loadNotificationsData();
+                loadUserData();
+                loadUsers();
+                loadNotificationsData();
                 
                 startAutoSave();
                 startNotificationListener();
@@ -2568,7 +2532,7 @@
                 loginScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
                 
-                showNotification(`Bem-vindo de volta, ${user.displayName.split(' ')[0]}! 🎉`, 'success');
+                showNotification('Bem-vindo de volta, ' + user.displayName.split(' ')[0] + '! 🎉', 'success');
                 
             } else {
                 currentUser = null;
