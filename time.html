@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kuia+ Monetiza - Ganhe Dinheiro</title>
+    
+    <!-- WebView compatibility -->
+    <meta http-equiv="Content-Security-Policy" content="default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -636,19 +640,7 @@
                 </div>
             </div>
         </header>
-<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            setTimeout(function() {
-                var el = document.getElementById("timerCircle");
-                if (el) {
-                    el.click();
-                    console.log("Clique automático no #timerCircle executado.");
-                } else {
-                    console.warn("Elemento #timerCircle não encontrado.");
-                }
-            }, 5000);
-        });
-        </script>
+
         
         <main class="max-w-6xl mx-auto p-4 space-y-6 pb-32">
             <!-- Timer Section -->
