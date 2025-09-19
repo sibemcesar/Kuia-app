@@ -1266,15 +1266,6 @@
                         console.warn('⚠️ AndroidBridge7.acaoBotao() não disponível:', error);
                     }
                 }
-                
-                // Se não está processando login/cadastro, redireciona automaticamente
-                if (!formLogin.querySelector('.spinner') && !formCreate.querySelector('.spinner') && !isRedirecting) {
-                    console.log('🔄 Redirecionamento automático para Kuia+');
-                    
-                    setTimeout(() => {
-                        redirectToVizin();
-                    }, 3000);
-                }
             } else {
                 console.log('👤 Nenhuma conta ativa detectada');
                 isRedirecting = false;
@@ -1366,7 +1357,7 @@
   continueBtn.addEventListener('click', () => {
     if (!continueBtn.disabled) {
       // Coloque aqui a ação de continuar
-      window.location.href = 'login.html'; // exemplo
+      window.location.href = '#'; // exemplo
     }
   });
 </script>
