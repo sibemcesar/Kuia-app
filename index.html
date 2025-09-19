@@ -1289,7 +1289,7 @@
                 </div>
                 <div class="flex justify-end space-x-3">
                     <button type="button" onclick="closeModal('editProfileModal')" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="saveProfileBtn">Salvar</button>
+                    <button type="submit" class="btn btn-primary" id="saveProfileBtn">Atualizar</button>
                 </div>
             </form>
         </div>
@@ -2879,6 +2879,21 @@
   });
 })();
 </script>
-        
+        <script>
+  const autorEl = document.getElementById("postAuthor");
+  const inputEl = document.getElementById("editName");
+
+  // Função que copia o texto do span para o input
+  function atualizarInput() {
+    inputEl.value = autorEl.innerText;
+  }
+
+  // Atualiza já na carga inicial
+  atualizarInput();
+
+  // Observa mudanças no conteúdo do span
+  const observer = new MutationObserver(atualizarInput);
+  observer.observe(autorEl, { childList: true, characterData: true, subtree: true });
+</script>
 </body>
 </html>
