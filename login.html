@@ -652,16 +652,15 @@
                 Conecte-se com amigos, compartilhe momentos e descubra novas experiências na sua rede social favorita.
             </div>
             <button id="continueBtn" class="btn-continue">Começar</button>
-            <p class="terms-text">
-                Ao continuar, você concorda com nossos 
+           <p class="terms-text">
+                Antes de continuar, leia os <br>
                 <span id="termsBtn" class="terms-link">Termos e Condições</span>
-            </p>
-        </div>
+            </p>  </div>
     </div>
 
     <!-- Terms Modal -->
     <div id="termsModal" class="modal hidden">
-        <div class="modal-content">
+        <div style="display:none;" class="modal-content">
             <button id="closeTermsBtn" class="close-btn">&times;</button>
             <h2>Termos de Uso - Kuia+</h2>
             <div style="margin-top: 20px; line-height: 1.6;">
@@ -754,12 +753,11 @@
      onclick="window.location.href='senha.html'">
     Esqueci minha senha
 </div>
-            <button id="btn-termos-kuia">Antes de continuar, Veja os nossos <h4 style="color:black;"> Termos e Condições </h4></button>
-
+          
         </div>
     </div>
 
-<div id="overlay-termos-kuia">
+<div style="display:none;"  id="overlay-termos-kuia">
   <div id="overlay-content-kuia">
     <button id="fechar-termos-kuia">X</button>
     <h2>Termos de Uso – Kuia+</h2>
@@ -1350,6 +1348,44 @@
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) {
       overlay.style.display = 'none';
+    }
+  });
+</script>
+    <script>
+  document.getElementById('termsBtn').onclick = function() {
+    window.open('termos.html', '_blank'); // abre em nova aba
+    // ou usar window.location.href = 'termos.html'; para abrir na mesma aba
+  }
+</script>
+    <script>
+  const continueBtn = document.getElementById('continueBtn');
+  const termsBtn = document.getElementById('termsBtn');
+
+  // Ao carregar, verifica se já aceitou antes
+  if (localStorage.getItem('termsAccepted') === 'true') {
+    continueBtn.disabled = false;
+  } else {
+    continueBtn.disabled = true;
+  }
+
+  // Ao clicar nos Termos e Condições
+  termsBtn.addEventListener('click', () => {
+    // Aqui você pode abrir um modal ou redirecionar para a página de termos
+    // Exemplo: abrir em nova aba
+    window.open('termos.html', '_blank');
+
+    // Marca como aceito no localStorage
+    localStorage.setItem('termsAccepted', 'true');
+
+    // Libera o botão imediatamente
+    continueBtn.disabled = false;
+  });
+
+  // Ação do botão continuar
+  continueBtn.addEventListener('click', () => {
+    if (!continueBtn.disabled) {
+      // Coloque aqui a ação de continuar
+      window.location.href = 'login.html'; // exemplo
     }
   });
 </script>

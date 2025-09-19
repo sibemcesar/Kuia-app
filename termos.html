@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuia+ – Políticas</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #222;
+    --accent: #7b2ff7;
+    --accent2: #f107a3;
+    --muted: #666;
+    --card: #f9f9f9;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121212;
+      --fg: #f5f5f5;
+      --muted: #aaa;
+      --card: #1e1e1e;
+    }
+  }
+  body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+  }
+  header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent));
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  h1 { font-size: 1.1rem; margin: 0; flex: 1; text-align: center; }
+  .back-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  main {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  button {
+    padding: 14px;
+    font-size: 1rem;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--accent), var(--accent));
+    color: #fff;
+    cursor: pointer;
+  }
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 100;
+    padding-bottom: 40px;
+  }
+  .modal.active {
+    transform: translateX(0);
+  }
+  .modal header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent));
+    color: #fff;
+    position: sticky;
+    top: 0;
+  }
+  .modal h2 {
+    font-size: 1.1rem;
+    margin: 0;
+    flex: 1;
+    text-align: center;
+  }
+  .close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  h3 {
+    margin-top: 20px;
+    font-size: 1rem;
+    color: var(--accent);
+  }
+  p, li {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    padding: 0 16px;
+  }
+  ul { padding-left: 36px; }
+</style>
+</head>
+<body>
+
+<header>
+  <button class="back-btn" onclick="window.location.href='login.html'">←</button>
+  <h1>Centro do Kuia+</h1>
+</header>
+
+<main>
+  <button onclick="openModal('termos')"> Termos de Uso</button>
+  <button onclick="openModal('privacidade')"> Política de Privacidade</button>
+   <button onclick="openModal('tuto')"> Como usar o Kuia+</button>
+
+</main>
+
+<!-- Modal Termos -->
+<div id="modal-termos" class="modal">
+  <header>
+    <h2>Termos de Uso – Kuia+</h2>
+    <button class="close" onclick="closeModal('termos')">&times;</button>
+  </header>
+<p><strong>Última atualização:</strong> 15/09/2025</p>
+
+<h3>1. Definições e Escopo</h3>
+<p>O Kuia+ é uma rede social operada pelo Sibem César e a equipe Kuia+ Comunity, destinada a usuários que desejam interagir, publicar conteúdo e participar de campanhas promocionais. Estes termos se aplicam a todos os usuários, visitantes e anunciantes que utilizam a plataforma.</p>
+
+<h3>2. Idade Mínima e Elegibilidade</h3>
+<p>Para criar uma conta, o usuário deve ter pelo menos 18 anos ou a idade mínima exigida pela legislação local. Menores de idade só poderão utilizar a plataforma com autorização e supervisão de um responsável legal.</p>
+
+<h3>3. Responsabilidade do Usuário</h3>
+<p>Você é responsável por todas as ações realizadas na sua conta. O uso diário pode gerar recompensas. Ao convidar um novo usuário, ambos podem receber 50 Kz, desde que o convite seja aprovado pela equipe Kuia+ após análise de elegibilidade.</p>
+
+<h3>4. Recompensas por Atividade</h3>
+<p>Usuários ativos — que publicam, reagem, comentam e interagem com anúncios — podem receber até 500 Kz por dia, conforme critérios internos de avaliação.</p>
+
+<h3>5. Levantamentos</h3>
+<p>Todos os pedidos de levantamento passam por análise da equipe Kuia+. Apenas usuários ativos e qualificados recebem pagamento. A plataforma só é obrigada a pagar 20% do valor. Caso o valor total não esteja disponível, a equipe pagará o montante possível, sem prejuízo da retenção prevista.</p>
+
+<h3>6. Uso Proibido</h3>
+<p>É proibido publicar conteúdo ilegal, ofensivo ou que viole direitos de terceiros; utilizar bots, scripts automatizados ou práticas fraudulentas; enviar spam ou mensagens não solicitadas.</p>
+
+<h3>7. Publicações e Denúncias</h3>
+<p>Se uma publicação receber mais de 5 denúncias, ela poderá ser removida automaticamente.</p>
+
+<h3>8. Privacidade e Segurança</h3>
+<p>Seus dados são protegidos e nem mesmo a equipe Kuia+ tem acesso direto a eles. Você pode definir senha para proteger seu estado e mensagens. Apenas os participantes da conversa têm acesso ao conteúdo.</p>
+
+<h3>9. Transferências</h3>
+<p>É possível transferir valores para outros usuários, respeitando os limites e permissões de cada conta.</p>
+
+<h3>10. Propriedade Intelectual</h3>
+<p>Todo o conteúdo, marca, logotipo e layout do Kuia+ são protegidos por direitos autorais e de propriedade intelectual. É proibida a reprodução sem autorização.</p>
+
+<h3>11. Garantias</h3>
+<p>O Kuia+ garante recompensas pelo uso contínuo da plataforma, conforme tempo e atividades realizadas, mas não garante ganhos fixos ou permanentes.</p>
+
+<h3>12. Alterações nos Termos</h3>
+<p>O Kuia+ poderá alterar estes termos a qualquer momento. Mudanças relevantes serão comunicadas por meio da plataforma ou outros canais oficiais.</p>
+
+<h3>13. Rescisão de Conta</h3>
+<p>O Kuia+ poderá suspender ou encerrar contas que violem estes termos ou a legislação vigente.</p>
+
+<h3>14. Limitação de Responsabilidade</h3>
+<p>O Kuia+ não se responsabiliza por perdas indiretas, interrupções de serviço ou danos causados por terceiros.</p>
+
+<h3>15. Lei Aplicável e Foro</h3>
+<p>Estes termos são regidos pelas leis de Angola. Fica eleito o foro da comarca de Benguela, para dirimir quaisquer controvérsias.</p>
+
+<h3>16. Contato</h3>
+<p>Para dúvidas, denúncias ou solicitações, entre em contato pelo e-mail: <strong>suporte@kuia+.ao</strong></p></div>
+
+<!-- Modal Privacidade -->
+<div id="modal-privacidade" class="modal">
+  <header>
+      <h2>Política de Privacidade – Kuia+</h2>
+    <button class="close" onclick="closeModal('privacidade')">&times;</button>
+  </header>
+  <p><strong>Última atualização:</strong> 19/09/2025</p>
+
+<h3>1. Dados que coletamos</h3>
+<ul>
+  <li><strong>Conta:</strong> nome, e-mail, foto de perfil.</li>
+  <li><strong>Uso:</strong> postagens, comentários, reações, conexões, relatórios de falhas.</li>
+  <li><strong>Dispositivo:</strong> identificadores de app.</li>
+  <li><strong>Pagamentos:</strong> dados mínimos necessários para transferências e levantamentos.</li>
+</ul>
+
+<h3>2. Como usamos seus dados</h3>
+<ul>
+  <li>Fornecer e gerenciar sua conta e recursos do Kuia+.</li>
+  <li>Personalizar sua experiência e o conteúdo exibido.</li>
+  <li>Processar recompensas e transações.</li>
+  <li>Garantir segurança, prevenir fraudes e abusos.</li>
+  <li>Enviar comunicações sobre sua conta, suporte e mudanças de políticas.</li>
+  <li>Gerar estatísticas agregadas para melhorias de produto.</li>
+</ul>
+
+<h3>3. Bases legais para tratamento</h3>
+<ul>
+  <li><strong>Execução de contrato:</strong> para fornecer o serviço solicitado.</li>
+  <li><strong>Consentimento:</strong> para marketing opcional e cookies não essenciais.</li>
+  <li><strong>Interesse legítimo:</strong> para segurança, prevenção à fraude e melhorias.</li>
+  <li><strong>Obrigação legal:</strong> para cumprir leis e ordens judiciais.</li>
+</ul>
+
+<h3>4. Compartilhamento de dados</h3>
+<ul>
+  <li>Para cumprir obrigações legais ou proteger direitos e segurança de usuários e da plataforma.</li>
+  <li>Em caso de transferência pronviciais, aplicando salvaguardas adequadas.</li>
+</ul>
+
+<h3>5. Retenção e exclusão</h3>
+<ul>
+  <li>Manter dados pelo tempo necessário para fornecer o serviço e cumprir obrigações legais.</li>
+  <li>Você pode solicitar exclusão; alguns dados podem ser retidos por exigência legal ou prevenção de fraudes.</li>
+</ul>
+
+<h3>6. Seus direitos</h3>
+<ul>
+  <li>Acessar e obter cópia dos seus dados.</li>
+  <li>Corrigir informações imprecisas.</li>
+  <li>Solicitar exclusão de dados.</li>
+  <li>Solicitar portabilidade em formato estruturado.</li>
+  <li>Opor-se a determinados tratamentos e revogar consentimentos.</li>
+</ul>
+
+<h3>7. Segurança</h3>
+<ul>
+  <li>Uso de criptografia em trânsito, controles de acesso e monitoramento.</li>
+  <li>Nenhum sistema é inviolável; seguimos boas práticas e aprimoramos continuamente.</li>
+</ul>
+
+<h3>8. Crianças e adolescentes</h3>
+<p>Contas de menores de idade só podem ser criadas com autorização e supervisão de um responsável legal.</p>
+
+<h3>9. Cookies e tecnologias similares</h3>
+<p>Usamos cookies essenciais para funcionamento e, com seu consentimento, cookies de analytics para melhorar a experiência. Preferências podem ser gerenciadas no aviso de cookies.</p>
+
+<h3>10. Alterações e contato</h3>
+<p>Podemos atualizar esta política. Mudanças relevantes serão comunicadas no app.  
+Contato: <strong>privacidade@kuia.ao</strong> ou <strong>suporte@kuia.ao</strong></p>
+  <!-- Continue com os demais pontos da sua política -->
+</div>
+  <!-- Modal Privacidade -->
+<div id="modal-tuto" class="modal">
+  <header>
+      <h2>Tutorial de Uso – Kuia+</h2>
+    <button class="close" onclick="closeModal('tuto')">&times;</button>
+  </header>
+  <p><strong>Última atualização:</strong> 19/09/2025</p>
+
+<h3>1. Nome e Foto de Perfil</h3>
+<p>Por padrão, o nome e a foto de perfil não podem ser alterados após a criação da conta. Ao se cadastrar, insira seu nome real e uma foto verdadeira. Isso será fundamental para manter a credibilidade da sua conta e facilitar a verificação em caso de solicitação de levantamento no futuro.</p>
+
+<h3>2. Como Denunciar Conteúdo</h3>
+<p>Se encontrar algo que não gostou ou que viole as regras da plataforma, clique no ícone de bandeira 🚩 que aparece no canto do post. Sua denúncia será enviada para análise da equipe Kuia+.</p>
+
+<h3>3. Como Divulgar Conteúdo</h3>
+<p>Se quiser promover ou anunciar algo, entre em contato com o Suporte Kuia+ através das suas mensagens no aplicativo. Nossa equipe irá orientar sobre o processo e as regras de divulgação.</p>
+
+<h3>4. Como Bloquear ou Proteger Conversas</h3>
+<p>No bate-papo, no canto superior direito, há dois avatares 👥. Clique neles para bloquear um usuário ou proteger suas conversas com senha, garantindo mais privacidade.</p>
+  <!-- Continue com os demais pontos da sua política -->
+</div>
+
+<script>
+  function openModal(name) {
+    document.getElementById('modal-' + name).classList.add('active');
+  }
+  function closeModal(name) {
+    document.getElementById('modal-' + name).classList.remove('active');
+  }
+</script>
+
+</body>
+</html>
