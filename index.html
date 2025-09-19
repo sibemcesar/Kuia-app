@@ -1266,7 +1266,7 @@
             <form id="editProfileForm">
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Nome</label>
-                  <input type="text" id="editName" class="input-field" maxlength="50" required disabled>
+                  <input type="text" id="editName" class="input-field" maxlength="50" required readonly>
                 </div>
                 <div class="mb-4">
                     <label  class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
@@ -2880,20 +2880,44 @@
 })();
 </script>
         <script>
-  const autorEl = document.getElementById("postAuthor");
-  const inputEl = document.getElementById("editName");
+  // Espera até que os dois elementos existam no DOM
+  function esperarElemento(id, callback) {
+    const el = document.getElementById(id);
+    if (el) return callback(el);
 
-  // Função que copia o texto do span para o input
-  function atualizarInput() {
-    inputEl.value = autorEl.innerText;
+    const observador = new MutationObserver(() => {
+      const encontrado = document.getElementById(id);
+      if (encontrado) {
+        observador.disconnect();
+        callback(encontrado);
+      }
+    });
+
+    observador.observe(document.documentElement, { childList: true, subtree: true });
   }
 
-  // Atualiza já na carga inicial
-  atualizarInput();
+  // Quando ambos existirem, começa a sincronizar
+  esperarElemento('postAuthor', function(span) {
+    esperarElemento('editName', function(input) {
 
-  // Observa mudanças no conteúdo do span
-  const observer = new MutationObserver(atualizarInput);
-  observer.observe(autorEl, { childList: true, characterData: true, subtree: true });
+      function atualizarInput() {
+        const texto = (span.innerText || "").trim();
+        if (texto.length > 0) {
+          input.value = texto; // mesmo desativado, o value pode ser alterado
+        }
+      }
+
+      // Atualiza já na carga inicial
+      atualizarInput();
+
+      // Observa mudanças no conteúdo do span
+      const obs = new MutationObserver(atualizarInput);
+      obs.observe(span, { childList: true, characterData: true, subtree: true });
+
+      // Fallback: checa a cada 500ms caso algo mude sem disparar evento
+      setInterval(atualizarInput, 500);
+    });
+  });
 </script>
 </body>
 </html>
