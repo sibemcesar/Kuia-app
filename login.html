@@ -668,10 +668,10 @@
 <p>Ao usar nossa plataforma, você concorda com os seguintes termos:</p>
 
 <h4 style="margin: 20px 0 10px 0;">1. Responsabilidade do Usuário</h4>
-<p>Você é responsável por todas as ações realizadas no aplicativo. O uso diário pode gerar recompensas. Ao convidar um novo usuário, ambos podem receber 50 Kz, desde que o convite seja aprovado pela equipe Kuia+ após análise de elegibilidade.</p>
+<p>Você é responsável por todas as ações realizadas no aplicativo. O uso diário pode gerar recompensas. Ao convidar um novo usuário, ambos podem receber 50 Kz, desde que o convite seja aprovado pela equipe Kuia+ após análise de elegibilidade.</p>
 
 <h4 style="margin: 20px 0 10px 0;">2. Recompensas por Atividade</h4>
-<p>Usuários ativos — que publicam, reagem, comentam e interagem com anúncios — podem receber até 500 Kz por dia, conforme critérios internos de avaliação.</p>
+<p>Usuários ativos -- que publicam, reagem, comentam e interagem com anúncios -- podem receber até 500 Kz por dia, conforme critérios internos de avaliação.</p>
 
 <h4 style="margin: 20px 0 10px 0;">3. Levantamentos</h4>
 <p>Todos os pedidos de levantamento passam por análise da equipe Kuia+. Apenas usuários ativos e qualificados recebem pagamento. A plataforma retém 20% do valor solicitado. Caso o valor total não esteja disponível, a equipe pagará o montante possível, sem prejuízo da retenção prevista.</p>
@@ -760,7 +760,7 @@
 <div style="display:none;"  id="overlay-termos-kuia">
   <div id="overlay-content-kuia">
     <button id="fechar-termos-kuia">X</button>
-    <h2>Termos de Uso – Kuia+</h2>
+    <h2>Termos de Uso -- Kuia+</h2>
     <p><strong>Última atualização:</strong> 15/09/2025</p>
 
     <h3>1. Definições e Escopo</h3>
@@ -770,10 +770,10 @@
     <p>Para criar uma conta, o usuário deve ter pelo menos 18 anos ou a idade mínima exigida pela legislação local. Menores de idade só poderão utilizar a plataforma com autorização e supervisão de um responsável legal.</p>
 
     <h3>3. Responsabilidade do Usuário</h3>
-    <p>Você é responsável por todas as ações realizadas na sua conta. O uso diário pode gerar recompensas. Ao convidar um novo usuário, ambos podem receber 50 Kz, desde que o convite seja aprovado pela equipe Kuia+ após análise de elegibilidade.</p>
+    <p>Você é responsável por todas as ações realizadas na sua conta. O uso diário pode gerar recompensas. Ao convidar um novo usuário, ambos podem receber 50 Kz, desde que o convite seja aprovado pela equipe Kuia+ após análise de elegibilidade.</p>
 
     <h3>4. Recompensas por Atividade</h3>
-    <p>Usuários ativos — que publicam, reagem, comentam e interagem com anúncios — podem receber até 500 Kz por dia, conforme critérios internos de avaliação.</p>
+    <p>Usuários ativos -- que publicam, reagem, comentam e interagem com anúncios -- podem receber até 500 Kz por dia, conforme critérios internos de avaliação.</p>
 
     <h3>5. Levantamentos</h3>
     <p>Todos os pedidos de levantamento passam por análise da equipe Kuia+. Apenas usuários ativos e qualificados recebem pagamento. A plataforma só é obrigada a pagar 20% do valor. Caso o valor total não esteja disponível, a equipe pagará o montante possível, sem prejuízo da retenção prevista.</p>
@@ -862,9 +862,8 @@
         let currentForm = "login";
         let selectedPhoto = null;
         let isRedirecting = false;
-        let isUserInteracting = false;
+        let acaoBotaoCalled = false;
         let resetLoginCalled = false;
-        let authCheckTimeout = null;
 
         // Toast System
         function showToast(message, type = 'info', duration = 4000) {
@@ -1099,11 +1098,11 @@
             if (isRedirecting) return;
             isRedirecting = true;
 
-            // Ativar AndroidBridge quando login for concluído
+            // Comunicar com Android baseado na conta ativa
             try {
                 if (typeof AndroidBridge7 !== 'undefined' && AndroidBridge7.acaoBotao) {
                     AndroidBridge7.acaoBotao();
-                    console.log('✅ AndroidBridge7.acaoBotao() ativado com sucesso!');
+                    console.log('✅ AndroidBridge7.acaoBotao() ativado - conta ativa detectada!');
                 }
             } catch (error) {
                 console.warn('⚠️ AndroidBridge7 não disponível:', error);
@@ -1249,32 +1248,23 @@
             }
         });
 
-        // Detectar interação do usuário nos formulários
-        function trackUserInteraction() {
-            isUserInteracting = true;
-            if (authCheckTimeout) {
-                clearTimeout(authCheckTimeout);
-                authCheckTimeout = null;
-            }
-        }
-
-        // Adicionar listeners para detectar interação
-        formLogin.addEventListener('focusin', trackUserInteraction);
-        formLogin.addEventListener('input', trackUserInteraction);
-        formCreate.addEventListener('focusin', trackUserInteraction);
-        formCreate.addEventListener('input', trackUserInteraction);
-        toggleLink.addEventListener('click', trackUserInteraction);
-
-        // Auth state observer - AUTO REDIRECT + RESET LOGIN
+        // Auth state observer - Controle único de chamadas Android
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log('👤 Usuário autenticado no Kuia+:', user.email);
                 console.log('📸 Foto do perfil:', user.photoURL);
                 
-                // Cancelar timeout de reset se usuário fez login
-                if (authCheckTimeout) {
-                    clearTimeout(authCheckTimeout);
-                    authCheckTimeout = null;
+                // Comunicar com Android que há conta ativa (UMA VEZ)
+                if (!acaoBotaoCalled) {
+                    try {
+                        if (typeof AndroidBridge7 !== 'undefined' && AndroidBridge7.acaoBotao) {
+                            AndroidBridge7.acaoBotao();
+                            acaoBotaoCalled = true;
+                            console.log('✅ AndroidBridge7.acaoBotao() chamado - conta ativa detectada');
+                        }
+                    } catch (error) {
+                        console.warn('⚠️ AndroidBridge7.acaoBotao() não disponível:', error);
+                    }
                 }
                 
                 // Se não está processando login/cadastro, redireciona automaticamente
@@ -1286,29 +1276,20 @@
                     }, 3000);
                 }
             } else {
-                console.log('👤 Usuário não autenticado - iniciando timer de verificação');
+                console.log('👤 Nenhuma conta ativa detectada');
                 isRedirecting = false;
                 
-                // Só chamar resetLogin após 30 segundos SEM interação do usuário
-                if (!resetLoginCalled && !isUserInteracting) {
-                    authCheckTimeout = setTimeout(() => {
-                        // Verificar novamente se o usuário não está interagindo
-                        if (!isUserInteracting && !resetLoginCalled && !auth.currentUser) {
-                            try {
-                                if (typeof AndroidBridge7 !== 'undefined' && AndroidBridge7.resetLogin) {
-                                    AndroidBridge7.resetLogin();
-                                    resetLoginCalled = true;
-                                    console.log('🔄 AndroidBridge7.resetLogin() chamado após timeout - nenhuma conta ativa');
-                                    showToast('Sessão expirada. Sistema redefinido.', 'info', 5000);
-                                } else {
-                                    console.log('⚠️ AndroidBridge7.resetLogin() não disponível - modo desenvolvimento');
-                                }
-                            } catch (error) {
-                                console.error('❌ Erro ao chamar AndroidBridge7.resetLogin():', error);
-                                showToast('Erro ao redefinir sistema. Contate o suporte.', 'warning');
-                            }
+                // Comunicar com Android que não há conta ativa (UMA VEZ)
+                if (!resetLoginCalled) {
+                    try {
+                        if (typeof AndroidBridge7 !== 'undefined' && AndroidBridge7.resetLogin) {
+                            AndroidBridge7.resetLogin();
+                            resetLoginCalled = true;
+                            console.log('✅ AndroidBridge7.resetLogin() chamado - nenhuma conta ativa');
                         }
-                    }, 3000); // 3 segundos de espera
+                    } catch (error) {
+                        console.warn('⚠️ AndroidBridge7.resetLogin() não disponível:', error);
+                    }
                 }
             }
         });
