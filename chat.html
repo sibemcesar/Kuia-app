@@ -449,6 +449,28 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 }
 
 .msg-img{border-radius:10px;max-width:100%;cursor:pointer;display:block}
+
+/* Video Message Styles */
+.msg-video{
+  width: 100%;
+  max-width: 320px;
+  height: 180px;
+  border-radius: 10px;
+  border: none;
+  background: #000;
+  display: block;
+}
+
+.video-error {
+  background: var(--line);
+  color: var(--text);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12px;
+  max-width: 320px;
+}
+
 .meta{font-size:11px;color:var(--muted);margin-top:4px;padding:0 4px;display:flex;align-items:center;gap:6px}
 
 /* Message Status Icons */
@@ -475,7 +497,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 .composer button:hover{opacity:0.9;transform:translateY(-1px)}
 
 #textInput{flex:1;min-height:40px;max-height:120px;resize:none;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
-#btnImage{width:40px;display:grid;place-items:center}
+#btnImage, #btnVideo{width:40px;display:grid;place-items:center}
 
 .viewer{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;z-index:1000}
 .viewer img{max-width:95vw;max-height:90vh;border-radius:12px}
@@ -486,6 +508,16 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 .avatar-viewer img{max-width:80vw;max-height:80vh;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.5)}
 .avatar-viewer-close{position:fixed;top:20px;right:20px;background:rgba(255,255,255,0.2);color:#fff;border:0;border-radius:50%;width:50px;height:50px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;backdrop-filter:blur(10px)}
 .avatar-viewer-name{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);color:white;font-size:18px;font-weight:600;text-shadow:0 2px 10px rgba(0,0,0,0.5)}
+
+/* Video URL Modal */
+.video-modal{position:fixed;inset:0;background:rgba(15,23,42,0.8);display:none;align-items:center;justify-content:center;padding:20px;z-index:1150;backdrop-filter:blur(4px)}
+.video-modal-card{background:var(--card);border-radius:16px;max-width:450px;width:100%;padding:20px;display:flex;flex-direction:column;gap:15px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
+.video-modal-card h3{margin:0;color:var(--text)}
+.video-modal-card input{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
+.video-modal-buttons{display:flex;gap:10px;justify-content:flex-end}
+.video-modal-btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s ease}
+.video-modal-btn.primary{background:var(--brand);color:white}
+.video-modal-btn.secondary{background:var(--line);color:var(--text)}
 
 .auth{position:fixed;inset:0;background:rgba(15,23,42,0.8);display:none;align-items:center;justify-content:center;padding:20px;z-index:1100;backdrop-filter:blur(4px)}
 .auth-card{background:var(--card);border-radius:16px;max-width:380px;width:100%;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
@@ -607,8 +639,10 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   .chat-btn { padding: 4px 8px; font-size: 11px; }
   .pin-input { gap: 10px; }
   .pin-digit { width: 45px; height: 45px; font-size: 20px; }
+  .msg-video { max-width: 280px; height: 160px; }
 }
-  .icon {
+
+.icon {
   background-color: #fff;   /* fundo branco */
   display: inline-flex;     /* centraliza o SVG */
   align-items: center;
@@ -801,6 +835,24 @@ window.addEventListener("load", function() {
   <circle cx="9" cy="9" r="1.5" fill="black"/>
 </svg>
 </span></button>
+      <button id="btnVideo" title="Enviar vídeo"><!-- Ícone de vídeo com fundo branco -->
+<span class="icon" aria-hidden="true" style="color:#fff">
+<svg width="24" height="24" viewBox="0 0 24 24"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vídeo">
+  <title>Vídeo</title>
+  <!-- Fundo branco -->
+  <rect width="24" height="24" fill="white"/>
+  <!-- Câmera -->
+  <rect x="3" y="6" width="14" height="10" rx="2"
+        stroke="black" stroke-width="1.8" fill="none"/>
+  <!-- Lente -->
+  <path d="M17 8l3-2v8l-3-2"
+        stroke="black" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Play button -->
+  <path d="M9 9l3 2-3 2z"
+        fill="black"/>
+</svg>
+</span></button>
       <input id="imageInput" type="file" accept="image/*" class="hidden" />
       <textarea id="textInput" rows="1" placeholder="Digite uma mensagem"></textarea>
       <button style="
@@ -831,6 +883,19 @@ window.addEventListener("load", function() {
   <img id="avatarViewerImg" alt="">
   <button class="avatar-viewer-close" id="avatarViewerClose">×</button>
   <div class="avatar-viewer-name" id="avatarViewerName"></div>
+</div>
+
+<!-- Video URL Modal -->
+<div id="videoModal" class="video-modal">
+  <div class="video-modal-card">
+    <h3>Adicionar Vídeo</h3>
+    <p class="help">Cole a URL do vídeo (YouTube, Vimeo, etc.)</p>
+    <input id="videoUrlInput" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+    <div class="video-modal-buttons">
+      <button class="video-modal-btn secondary" id="videoCancelBtn">Cancelar</button>
+      <button class="video-modal-btn primary" id="videoSendBtn">Enviar</button>
+    </div>
+  </div>
 </div>
 
 <div id="auth" class="auth">
@@ -947,6 +1012,9 @@ let messageStatusCache = {};
 let friendsInChat = {}; // Lista de amigos que estão no chat
 let currentTab = 'my-chats';
 
+// Avatar Cache System
+let avatarCache = {};
+
 // Loading state management
 let loadingState = {
   auth: false,
@@ -984,6 +1052,7 @@ const composer = el("composer");
 const textInput = el("textInput");
 const btnSend = el("btnSend");
 const btnImage = el("btnImage");
+const btnVideo = el("btnVideo");
 const imageInput = el("imageInput");
 const viewer = el("viewer");
 const viewerImg = el("viewerImg");
@@ -992,6 +1061,10 @@ const avatarViewer = el("avatarViewer");
 const avatarViewerImg = el("avatarViewerImg");
 const avatarViewerClose = el("avatarViewerClose");
 const avatarViewerName = el("avatarViewerName");
+const videoModal = el("videoModal");
+const videoUrlInput = el("videoUrlInput");
+const videoCancelBtn = el("videoCancelBtn");
+const videoSendBtn = el("videoSendBtn");
 const authModal = el("auth");
 const btnGoogle = el("btnGoogle");
 const btnAnon = el("btnAnon");
@@ -1014,6 +1087,93 @@ const pinEnabled = el("pinEnabled");
 const pinSetup = el("pinSetup");
 const newPin = el("newPin");
 const btnNotif = el("btnNotif");
+
+// Avatar Cache Management
+function loadAvatarCache() {
+  try {
+    const cached = localStorage.getItem('chatAvatarCache');
+    if (cached) {
+      avatarCache = JSON.parse(cached);
+      console.log('📸 Avatar cache carregado:', Object.keys(avatarCache).length);
+    }
+  } catch (error) {
+    console.error('Erro ao carregar cache de avatares:', error);
+    avatarCache = {};
+  }
+}
+
+function saveAvatarCache() {
+  try {
+    localStorage.setItem('chatAvatarCache', JSON.stringify(avatarCache));
+  } catch (error) {
+    console.error('Erro ao salvar cache de avatares:', error);
+  }
+}
+
+function cacheAvatar(userId, avatarUrl) {
+  if (avatarUrl && avatarUrl.trim() && !avatarUrl.includes('data:image/svg')) {
+    avatarCache[userId] = {
+      url: avatarUrl,
+      timestamp: Date.now()
+    };
+    saveAvatarCache();
+  }
+}
+
+function getCachedAvatar(userId) {
+  const cached = avatarCache[userId];
+  if (cached) {
+    // Cache válido por 24 horas
+    const isValid = (Date.now() - cached.timestamp) < (24 * 60 * 60 * 1000);
+    if (isValid) {
+      return cached.url;
+    } else {
+      delete avatarCache[userId];
+      saveAvatarCache();
+    }
+  }
+  return null;
+}
+
+function clearAvatarCache() {
+  avatarCache = {};
+  localStorage.removeItem('chatAvatarCache');
+  showToast('Cache de avatares limpo', 'info');
+}
+
+// Video URL Processing
+function processVideoUrl(url) {
+  if (!url) return null;
+  
+  // YouTube
+  let youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+  if (youtubeMatch) {
+    return `https://www.youtube.com/embed/${youtubeMatch[1]}?rel=0&modestbranding=1`;
+  }
+  
+  // Vimeo
+  let vimeoMatch = url.match(/(?:vimeo\.com\/)([0-9]+)/);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  
+  // Dailymotion
+  let dailymotionMatch = url.match(/(?:dailymotion\.com\/video\/)([^&\n?#]+)/);
+  if (dailymotionMatch) {
+    return `https://www.dailymotion.com/embed/video/${dailymotionMatch[1]}`;
+  }
+  
+  // Direct video URLs
+  if (url.match(/\.(mp4|webm|ogg)(\?.*)?$/i)) {
+    return url;
+  }
+  
+  return null;
+}
+
+function isValidVideoUrl(url) {
+  return processVideoUrl(url) !== null;
+}
 
 // Tab Navigation
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1061,6 +1221,57 @@ avatarViewer.onclick = (e) => {
   if (e.target === avatarViewer) {
     avatarViewer.style.display = 'none';
     avatarViewerImg.src = '';
+  }
+};
+
+// Video Modal Functions
+btnVideo.onclick = () => {
+  videoModal.style.display = 'flex';
+  videoUrlInput.focus();
+};
+
+videoCancelBtn.onclick = () => {
+  videoModal.style.display = 'none';
+  videoUrlInput.value = '';
+};
+
+videoSendBtn.onclick = () => {
+  const url = videoUrlInput.value.trim();
+  if (!url) {
+    showToast('Digite uma URL de vídeo', 'error');
+    return;
+  }
+  
+  if (!isValidVideoUrl(url)) {
+    showToast('URL de vídeo não suportada. Use YouTube, Vimeo ou links diretos.', 'error');
+    return;
+  }
+  
+  if (!currentChat) {
+    showToast('Selecione um usuário para enviar o vídeo', 'error');
+    return;
+  }
+  
+  const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  sendMessage({type: "video", url: url, id: messageId});
+  
+  videoModal.style.display = 'none';
+  videoUrlInput.value = '';
+  showToast('Vídeo enviado! 🎥', 'success');
+};
+
+videoModal.onclick = (e) => {
+  if (e.target === videoModal) {
+    videoModal.style.display = 'none';
+    videoUrlInput.value = '';
+  }
+};
+
+// Enter key in video URL input
+videoUrlInput.onkeydown = (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    videoSendBtn.click();
   }
 };
 
@@ -1295,23 +1506,54 @@ function getDefaultAvatar(name) {
   return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='${encodeURIComponent(color)}'/><text x='32' y='38' text-anchor='middle' fill='white' font-family='Arial,sans-serif' font-size='20' font-weight='bold'>${encodeURIComponent(initials)}</text></svg>`;
 }
 
-// Função para carregar avatar com fallback robusto
-function loadAvatar(imgElement, avatarUrl, userName) {
+// Função para carregar avatar com cache e fallback robusto
+function loadAvatar(imgElement, avatarUrl, userName, userId = null) {
   if (!imgElement) return;
   
+  // Reset element state
   imgElement.classList.remove('loaded');
+  imgElement.textContent = '';
   
-  if (avatarUrl && avatarUrl.trim() && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
+  // Try to get from cache first
+  let urlToUse = avatarUrl;
+  if (userId) {
+    const cachedUrl = getCachedAvatar(userId);
+    if (cachedUrl) {
+      urlToUse = cachedUrl;
+    }
+  }
+  
+  if (urlToUse && urlToUse.trim() && urlToUse !== 'null' && urlToUse !== 'undefined' && !urlToUse.includes('data:image/svg')) {
     const testImg = new Image();
+    
     testImg.onload = () => {
-      imgElement.src = avatarUrl;
+      imgElement.src = urlToUse;
       imgElement.classList.add('loaded');
-      imgElement.textContent = '';
+      // Cache the successful URL
+      if (userId && urlToUse === avatarUrl) {
+        cacheAvatar(userId, avatarUrl);
+      }
     };
+    
     testImg.onerror = () => {
-      setAvatarWithInitials(imgElement, userName);
+      // If cached URL fails, try original URL if different
+      if (urlToUse !== avatarUrl && avatarUrl && avatarUrl.trim()) {
+        const retryImg = new Image();
+        retryImg.onload = () => {
+          imgElement.src = avatarUrl;
+          imgElement.classList.add('loaded');
+          cacheAvatar(userId, avatarUrl);
+        };
+        retryImg.onerror = () => {
+          setAvatarWithInitials(imgElement, userName);
+        };
+        retryImg.src = avatarUrl;
+      } else {
+        setAvatarWithInitials(imgElement, userName);
+      }
     };
-    testImg.src = avatarUrl;
+    
+    testImg.src = urlToUse;
   } else {
     setAvatarWithInitials(imgElement, userName);
   }
@@ -1535,7 +1777,7 @@ function renderBlockedUsers() {
     
     const avatar = document.createElement('img');
     avatar.className = 'avatar';
-    loadAvatar(avatar, user.avatar, user.name);
+    loadAvatar(avatar, user.avatar, user.name, userId);
     
     const info = document.createElement('div');
     info.className = 'info';
@@ -1615,6 +1857,7 @@ function linkify(text){
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
   updateSplashStatus('Iniciando sistema de segurança...');
+  loadAvatarCache();
   initPinSystem();
 });
 
@@ -1764,7 +2007,7 @@ pFile.onchange = async (e)=>{
     const url = await uploadToImgBB(file);
     if(url){ 
       pAvatar.value = url;
-      loadAvatar(meAvatar, url, pName.value || meProfile?.name || "Usuário");
+      loadAvatar(meAvatar, url, pName.value || meProfile?.name || "Usuário", me.uid);
       showToast('Foto enviada com sucesso! 📸', 'success');
     }
   } catch(error) {
@@ -1807,6 +2050,12 @@ pSave.onclick = async ()=>{
     }).catch(()=>{});
     
     meProfile = {uid:me.uid, ...updates};
+    
+    // Cache the new avatar
+    if (avatar) {
+      cacheAvatar(me.uid, avatar);
+    }
+    
     renderMe();
     profileModal.style.display = "none";
     showToast("Perfil atualizado com sucesso!", 'success');
@@ -1846,6 +2095,12 @@ async function ensureProfile(){
     
     meProfile = profile;
     loadingState.profile = true;
+    
+    // Cache my avatar
+    if (profile.avatar) {
+      cacheAvatar(me.uid, profile.avatar);
+    }
+    
     renderMe();
     
     if(me.displayName !== profile.name || me.photoURL !== (profile.avatar||"")){
@@ -1873,7 +2128,7 @@ async function ensureProfile(){
 function renderMe(){
   if(!meProfile) return;
   
-  loadAvatar(meAvatar, meProfile.avatar, meProfile.name);
+  loadAvatar(meAvatar, meProfile.avatar, meProfile.name, me.uid);
   meName.textContent = meProfile.name || "Usuário";
   meEmail.textContent = me.email || (me.isAnonymous ? "Conectado como Anônimo" : "—");
   pName.value = meProfile.name || "";
@@ -1931,10 +2186,15 @@ function bindUsers(){
     usersCache = all;
     loadingState.users = true;
     console.log('👥 Usuários carregados:', Object.keys(all).length);
-    const arr = Object.keys(all)
-      .filter(uid=>uid!==me.uid)
-      .map(uid=>({uid, ...all[uid]}))
-      .filter(user => user.name && user.name !== "");
+    
+    // Cache all user avatars
+    Object.keys(all).forEach(uid => {
+      const user = all[uid];
+      if (user.avatar) {
+        cacheAvatar(uid, user.avatar);
+      }
+    });
+    
     renderChatList();
     renderFriendsList();
     checkAllDataLoaded();
@@ -2038,7 +2298,7 @@ function createUserListItem(user, container, listType) {
     e.stopPropagation();
     openAvatarViewer(user.avatar, user.name);
   };
-  loadAvatar(img, user.avatar, user.name);
+  loadAvatar(img, user.avatar, user.name, user.uid);
 
   const main = document.createElement("div");
   main.className = "u-main";
@@ -2162,7 +2422,7 @@ function openChat(uid, user){
   currentChat = uid;
   currentChatUser = user;
   chatName.textContent = user.name || "—";
-  loadAvatar(chatAvatar, user.avatar, user.name);
+  loadAvatar(chatAvatar, user.avatar, user.name, user.uid);
   
   const st = userStatusCache?.[uid];
   chatDot.className = "dot " + (st?.state==="online" ? "online":"offline");
@@ -2210,11 +2470,11 @@ function appendMessage(m){
   messageAvatar.alt = "Avatar";
   
   if(m.from === me.uid) {
-    loadAvatar(messageAvatar, meProfile?.avatar, meProfile?.name);
+    loadAvatar(messageAvatar, meProfile?.avatar, meProfile?.name, me.uid);
     messageAvatar.onclick = () => openAvatarViewer(meProfile?.avatar, meProfile?.name);
   } else {
     const senderData = usersCache[m.from] || currentChatUser;
-    loadAvatar(messageAvatar, senderData?.avatar, senderData?.name);
+    loadAvatar(messageAvatar, senderData?.avatar, senderData?.name, m.from);
     messageAvatar.onclick = () => openAvatarViewer(senderData?.avatar, senderData?.name);
   }
   
@@ -2238,6 +2498,33 @@ function appendMessage(m){
       cap.style.marginTop="6px"; 
       cap.innerHTML = linkify(m.caption);
       bubble.appendChild(cap);
+    }
+  }else if(m.type==="video"){
+    const processedUrl = processVideoUrl(m.url);
+    if(processedUrl){
+      // Check if it's a direct video file
+      if(m.url.match(/\.(mp4|webm|ogg)(\?.*)?$/i)){
+        const video = document.createElement("video");
+        video.className = "msg-video";
+        video.src = processedUrl;
+        video.controls = true;
+        video.preload = "metadata";
+        bubble.appendChild(video);
+      } else {
+        // Iframe for embedded videos
+        const iframe = document.createElement("iframe");
+        iframe.className = "msg-video";
+        iframe.src = processedUrl;
+        iframe.frameBorder = "0";
+        iframe.allowFullscreen = true;
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        bubble.appendChild(iframe);
+      }
+    } else {
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "video-error";
+      errorDiv.textContent = "❌ Vídeo não suportado";
+      bubble.appendChild(errorDiv);
     }
   }
   
@@ -2310,7 +2597,12 @@ function sendMessage(payload){
   // Set initial message status
   updates[`/messageStatus/${me.uid}/${payload.id}`] = 'sent';
 
-  const previewText = payload.type==="text" ? payload.text : "🖼️ Imagem";
+  let previewText;
+  if(payload.type==="text") previewText = payload.text;
+  else if(payload.type==="image") previewText = "🖼️ Imagem";
+  else if(payload.type==="video") previewText = "🎥 Vídeo";
+  else previewText = "Mensagem";
+  
   const mePrev = { other: to, lastText: previewText, lastTime: m.time };
   const toPrev = { other: me.uid, lastText: previewText, lastTime: m.time };
   updates["/userChats/"+me.uid+"/"+to] = mePrev;
@@ -2336,7 +2628,7 @@ viewerClose.onclick = ()=>{
   viewerImg.src=""; 
 };
 
-[profileModal, blockedModal].forEach(modal => {
+[profileModal, blockedModal, videoModal].forEach(modal => {
   modal.onclick = (e) => {
     if (e.target === modal) {
       modal.style.display = "none";
