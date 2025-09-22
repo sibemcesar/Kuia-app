@@ -1270,10 +1270,22 @@
                 setLoading(btn, false);
                 showToast('Conta criada com sucesso! Bem-vindo ao Kuia+ 🎉', 'success');
                 
-                // Redirect to Vizin+ (que chama Android.restartApp())
+                // IMPORTANTE: Chamar Android.restartApp() após 1 segundo
                 setTimeout(() => {
-                    redirectToVizin();
-                }, 1000);
+                    try {
+                        if (typeof Android !== 'undefined' && Android.restartApp) {
+                            Android.restartApp();
+                            console.log('✅ Android.restartApp() disparado após criar conta!');
+                        } else {
+                            console.warn('⚠️ Android.restartApp() não disponível');
+                        }
+                    } catch (error) {
+                        console.error('❌ Erro ao chamar Android.restartApp():', error);
+                    }
+                    
+                    // Loading screen e redirecionamento
+                    loadingScreen.classList.remove('hidden');
+                }, 500);
                 
             } catch (error) {
                 setLoading(btn, false);
@@ -1400,6 +1412,31 @@
     // Aqui você pode abrir um modal ou redirecionar para a página de termos
     // Exemplo: abrir em nova aba
     window.open('termos.html', '_blank');
+
+    // Marca como aceito no localStorage
+    localStorage.setItem('termsAccepted', 'true');
+
+    // Libera o botão imediatamente
+    continueBtn.disabled = false;
+  });
+
+  // Ação do botão continuar
+  continueBtn.addEventListener('click', () => {
+    if (!continueBtn.disabled) {
+      // Coloque aqui a ação de continuar
+      window.location.href = '#'; // exemplo
+    }
+  });
+</script>
+    <script>
+document.getElementById("termsBtn").addEventListener("click", function() {
+  window.location.href = "termos.html"; 
+  // ou, para abrir em nova aba:
+  // window.open("termos.html", "_blank");
+});
+</script>
+</body>
+</html>termos.html', '_blank');
 
     // Marca como aceito no localStorage
     localStorage.setItem('termsAccepted', 'true');
