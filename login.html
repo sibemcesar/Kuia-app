@@ -757,7 +757,7 @@
             <!-- MELHORIA 1: Botão para acessar políticas na tela de login -->
             <div id="politicasLoginBtn" class="toggle-link" tabindex="0" role="button"
                  style="margin-top:10px; cursor:pointer; color:#667eea; text-align:center;">
-                Termos e Políticas
+                📋 Termos e Políticas
             </div>
           
         </div>
@@ -1270,100 +1270,46 @@
                 setLoading(btn, false);
                 showToast('Conta criada com sucesso! Reiniciando app...', 'success');
                 
-                // CRÍTICO: Chamar Android.restartApp() imediatamente
-                console.log('🔄 Tentando chamar Android.restartApp()...');
+                // CRÍTICO: Verificar se Android interface está disponível
+                console.log('🔍 Verificando Android interface...');
+                console.log('- typeof Android:', typeof Android);
+                console.log('- Android objeto:', Android);
                 
-                // Tentar múltiplas formas de chamar a função Android
-                let restartExecuted = false;
-                
-                // Método 1: Android.restartApp()
-                try {
-                    if (typeof Android !== 'undefined' && Android.restartApp) {
-                        console.log('✅ Método 1: Android.restartApp() encontrado!');
-                        Android.restartApp();
-                        restartExecuted = true;
-                        console.log('🚀 Android.restartApp() EXECUTADO COM SUCESSO!');
-                    }
-                } catch (error) {
-                    console.error('❌ Método 1 falhou:', error);
-                }
-                
-                // Método 2: window.Android.restartApp()
-                if (!restartExecuted) {
-                    try {
-                        if (typeof window.Android !== 'undefined' && window.Android.restartApp) {
-                            console.log('✅ Método 2: window.Android.restartApp() encontrado!');
-                            window.Android.restartApp();
-                            restartExecuted = true;
-                            console.log('🚀 window.Android.restartApp() EXECUTADO COM SUCESSO!');
-                        }
-                    } catch (error) {
-                        console.error('❌ Método 2 falhou:', error);
-                    }
-                }
-                
-                // Método 3: AndroidInterface.restartApp()
-                if (!restartExecuted) {
-                    try {
-                        if (typeof AndroidInterface !== 'undefined' && AndroidInterface.restartApp) {
-                            console.log('✅ Método 3: AndroidInterface.restartApp() encontrado!');
-                            AndroidInterface.restartApp();
-                            restartExecuted = true;
-                            console.log('🚀 AndroidInterface.restartApp() EXECUTADO COM SUCESSO!');
-                        }
-                    } catch (error) {
-                        console.error('❌ Método 3 falhou:', error);
-                    }
-                }
-                
-                // Método 4: Simular clique em botão (se existir)
-                if (!restartExecuted) {
-                    try {
-                        const restartBtn = document.querySelector('[onclick*="Android.restartApp"]');
-                        if (restartBtn) {
-                            console.log('✅ Método 4: Botão restart encontrado, clicando...');
-                            restartBtn.click();
-                            restartExecuted = true;
-                            console.log('🚀 Botão restart CLICADO COM SUCESSO!');
-                        }
-                    } catch (error) {
-                        console.error('❌ Método 4 falhou:', error);
-                    }
-                }
-                
-                // Método 5: Criar e clicar botão temporário
-                if (!restartExecuted) {
-                    try {
-                        console.log('✅ Método 5: Criando botão temporário...');
-                        const tempBtn = document.createElement('button');
-                        tempBtn.onclick = () => Android.restartApp();
-                        tempBtn.style.display = 'none';
-                        document.body.appendChild(tempBtn);
-                        tempBtn.click();
-                        document.body.removeChild(tempBtn);
-                        restartExecuted = true;
-                        console.log('🚀 Botão temporário EXECUTADO COM SUCESSO!');
-                    } catch (error) {
-                        console.error('❌ Método 5 falhou:', error);
-                    }
-                }
-                
-                if (!restartExecuted) {
-                    console.error('❌ NENHUM método de restart funcionou!');
-                    console.log('🔍 Variáveis disponíveis:');
-                    console.log('- Android:', typeof Android);
-                    console.log('- window.Android:', typeof window.Android);
-                    console.log('- AndroidInterface:', typeof AndroidInterface);
-                    
-                    showToast('Erro: Função de restart não encontrada. Reinicie manualmente.', 'error');
+                if (typeof Android !== 'undefined') {
+                    console.log('- Android.restartApp:', typeof Android.restartApp);
                 } else {
-                    console.log('🎉 RESTART EXECUTADO COM SUCESSO!');
+                    console.error('❌ Objeto Android não encontrado!');
                 }
                 
-                // Loading screen sempre
+                // Esperar um pouco para garantir que a interface está pronta
                 setTimeout(() => {
-                    loadingScreen.classList.remove('hidden');
-                }, 500);
+                    try {
+                        console.log('🚀 EXECUTANDO Android.restartApp()...');
+                        
+                        // Chamar a função exata do seu código Android
+                        Android.restartApp();
+                        
+                        console.log('✅ Android.restartApp() CHAMADO COM SUCESSO!');
+                        showToast('App reiniciando...', 'info');
+                        
+                        // Loading screen
+                        loadingScreen.classList.remove('hidden');
+                        
+                    } catch (error) {
+                        console.error('❌ ERRO ao chamar Android.restartApp():', error);
+                        console.error('❌ Detalhes do erro:', error.message);
+                        
+                        // Fallback: tentar window.Android
+                        try {
+                            console.log('🔄 Tentando window.Android.restartApp()...');
+                            window.Android.restartApp();
+                            console.log('✅ window.Android.restartApp() funcionou!');
+                        } catch (error2) {
+                            console.error('❌ window.Android também falhou:', error2);
+                            showToast('Erro: Não foi possível reiniciar automaticamente. Reinicie manualmente.', 'error');
+                        }
+                    }
+                }, 100); // Aguardar 100ms para garantir que a interface está pronta
                 
             } catch (error) {
                 setLoading(btn, false);
