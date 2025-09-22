@@ -233,6 +233,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   color: white;
   font-weight: 600;
   font-size: 12px;
+  cursor: pointer;
 }
 
 .me .avatar.loaded {
@@ -251,6 +252,46 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 .actions{display:flex;gap:8px}
 .actions button{color:#fff;border:0;border-radius:0px;padding:0px 0px;cursor:pointer;transition:all 0.2s ease}
 .actions button:hover{opacity:0.9;transform:translateY(-1px)}
+
+/* Tabs Navigation */
+.tabs-nav {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 8px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+}
+
+.tab-btn:hover {
+  background: var(--line);
+}
+
+.tab-content {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tab-content.active {
+  display: flex;
+}
 
 .search{padding:8px 12px;border-bottom:1px solid var(--line)}
 .search input{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
@@ -274,6 +315,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   font-weight: 600;
   font-size: 14px;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .avatar.loaded {
@@ -293,6 +335,27 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 .dot{width:10px;height:10px;border-radius:50%;transition:all 0.2s ease}
 .dot.online{background:#10b981;box-shadow:0 0 6px rgba(16,185,129,0.4)}
 .dot.offline{background:#9ca3af}
+
+/* Friend Action Button */
+.friend-action {
+  background: var(--brand);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.friend-action:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.friend-action.remove {
+  background: #ef4444;
+}
 
 .chat{flex-direction:column; width:100%; height:100vh;max-height:100vh}
 .chat-header{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);background:var(--card)}
@@ -352,6 +415,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   font-size: 10px;
   flex-shrink: 0;
   margin-top: 4px;
+  cursor: pointer;
 }
 
 .message-avatar.loaded {
@@ -416,6 +480,12 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 .viewer{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;z-index:1000}
 .viewer img{max-width:95vw;max-height:90vh;border-radius:12px}
 .viewer-close{position:fixed;top:16px;right:16px;background:#111;color:#fff;border:0;border-radius:10px;padding:8px 12px;cursor:pointer}
+
+/* Avatar Viewer */
+.avatar-viewer{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:1050;backdrop-filter:blur(4px)}
+.avatar-viewer img{max-width:80vw;max-height:80vh;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.5)}
+.avatar-viewer-close{position:fixed;top:20px;right:20px;background:rgba(255,255,255,0.2);color:#fff;border:0;border-radius:50%;width:50px;height:50px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;backdrop-filter:blur(10px)}
+.avatar-viewer-name{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);color:white;font-size:18px;font-weight:600;text-shadow:0 2px 10px rgba(0,0,0,0.5)}
 
 .auth{position:fixed;inset:0;background:rgba(15,23,42,0.8);display:none;align-items:center;justify-content:center;padding:20px;z-index:1100;backdrop-filter:blur(4px)}
 .auth-card{background:var(--card);border-radius:16px;max-width:380px;width:100%;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
@@ -614,11 +684,14 @@ window.addEventListener("load", function() {
 
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- Botão oculto para notificações Android -->
+<button id="btnNotif" onclick="Android.showNotification()" style="display:none;"></button>
+
 <div id="app">
   <aside class="sidebar">
     <div class="topbar">     
       <div class="me">
-        <img src="" id="meAvatar" class="avatar" alt="Meu Avatar">
+        <img src="" id="meAvatar" class="avatar" alt="Meu Avatar" onclick="openAvatarViewer(this.src, document.getElementById('meName').textContent)">
         <div class="info">
           <div id="meName" class="name">Carregando...</div>
           <div id="meEmail" class="email">—</div>
@@ -667,16 +740,34 @@ window.addEventListener("load", function() {
         <button style="display:none;" id="btnLogout" title="Sair">🚪</button>
       </div>
     </div>
-    <div class="search">
-      <input id="search" placeholder="Pesquisar usuários..." />
+
+    <!-- Tabs Navigation -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="my-chats">Meus Chats</button>
+      <button class="tab-btn" data-tab="all-friends">Todos Amigos</button>
     </div>
-    <ul id="userList" class="user-list"></ul>
+
+    <!-- Tab: Meus Chats -->
+    <div class="tab-content active" id="my-chats">
+      <div class="search">
+        <input id="searchChats" placeholder="Pesquisar conversas..." />
+      </div>
+      <ul id="chatList" class="user-list"></ul>
+    </div>
+
+    <!-- Tab: Todos Amigos -->
+    <div class="tab-content" id="all-friends">
+      <div class="search">
+        <input id="searchFriends" placeholder="Pesquisar amigos..." />
+      </div>
+      <ul id="friendsList" class="user-list"></ul>
+    </div>
   </aside>
 
   <section class="chat">
     <header class="chat-header">
       <button class="chat-back" id="chatBack" title="Voltar">←</button>
-      <img id="chatAvatar" class="avatar" alt="Avatar do contato">
+      <img id="chatAvatar" class="avatar" alt="Avatar do contato" onclick="openAvatarViewer(this.src, document.getElementById('chatName').textContent)">
       <div class="title">
         <div id="chatName" class="name">Selecione um usuário</div>
         <div class="status">
@@ -733,6 +824,13 @@ window.addEventListener("load", function() {
 <div id="viewer" class="viewer">
   <img id="viewerImg" alt="">
   <button class="viewer-close" id="viewerClose">Fechar</button>
+</div>
+
+<!-- Avatar Viewer -->
+<div id="avatarViewer" class="avatar-viewer">
+  <img id="avatarViewerImg" alt="">
+  <button class="avatar-viewer-close" id="avatarViewerClose">×</button>
+  <div class="avatar-viewer-name" id="avatarViewerName"></div>
 </div>
 
 <div id="auth" class="auth">
@@ -846,6 +944,8 @@ let userPreviewCache = {};
 let usersCache = {};
 let blockedUsers = {};
 let messageStatusCache = {};
+let friendsInChat = {}; // Lista de amigos que estão no chat
+let currentTab = 'my-chats';
 
 // Loading state management
 let loadingState = {
@@ -854,7 +954,8 @@ let loadingState = {
   users: false,
   statuses: false,
   previews: false,
-  blocked: false
+  blocked: false,
+  friends: false
 };
 
 const el = (id)=>document.getElementById(id);
@@ -869,8 +970,10 @@ const pinError = el("pinError");
 const meAvatar = el("meAvatar");
 const meName = el("meName");
 const meEmail = el("meEmail");
-const userList = el("userList");
-const search = el("search");
+const chatList = el("chatList");
+const friendsList = el("friendsList");
+const searchChats = el("searchChats");
+const searchFriends = el("searchFriends");
 const chatBack = el("chatBack");
 const chatAvatar = el("chatAvatar");
 const chatName = el("chatName");
@@ -885,6 +988,10 @@ const imageInput = el("imageInput");
 const viewer = el("viewer");
 const viewerImg = el("viewerImg");
 const viewerClose = el("viewerClose");
+const avatarViewer = el("avatarViewer");
+const avatarViewerImg = el("avatarViewerImg");
+const avatarViewerClose = el("avatarViewerClose");
+const avatarViewerName = el("avatarViewerName");
 const authModal = el("auth");
 const btnGoogle = el("btnGoogle");
 const btnAnon = el("btnAnon");
@@ -906,6 +1013,56 @@ const unblockBtn = el("unblockBtn");
 const pinEnabled = el("pinEnabled");
 const pinSetup = el("pinSetup");
 const newPin = el("newPin");
+const btnNotif = el("btnNotif");
+
+// Tab Navigation
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => switchTab(btn.dataset.tab);
+});
+
+function switchTab(tabName) {
+  currentTab = tabName;
+  
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabName);
+  });
+  
+  // Update tab content
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.toggle('active', content.id === tabName);
+  });
+  
+  // Clear search when switching tabs
+  if (tabName === 'my-chats') {
+    searchChats.value = '';
+    filterChatList();
+  } else {
+    searchFriends.value = '';
+    filterFriendsList();
+  }
+}
+
+// Avatar Viewer Functions
+function openAvatarViewer(src, name) {
+  if (!src || src.includes('data:image/svg')) return;
+  
+  avatarViewerImg.src = src;
+  avatarViewerName.textContent = name || 'Usuário';
+  avatarViewer.style.display = 'flex';
+}
+
+avatarViewerClose.onclick = () => {
+  avatarViewer.style.display = 'none';
+  avatarViewerImg.src = '';
+};
+
+avatarViewer.onclick = (e) => {
+  if (e.target === avatarViewer) {
+    avatarViewer.style.display = 'none';
+    avatarViewerImg.src = '';
+  }
+};
 
 // Update splash status
 function updateSplashStatus(message) {
@@ -1067,6 +1224,18 @@ function hideSplashScreen() {
   }
 }
 
+// Sistema de notificação para Android
+function triggerAndroidNotification() {
+  try {
+    if (btnNotif && typeof btnNotif.click === 'function') {
+      btnNotif.click();
+      console.log('🔔 Notificação Android disparada');
+    }
+  } catch (error) {
+    console.log('Notificação Android não disponível:', error);
+  }
+}
+
 // Sistema de notificação sonora usando Web Audio API
 function createNotificationSound(frequency, duration) {
   try {
@@ -1186,6 +1355,37 @@ async function uploadToImgBB(file) {
   }
 }
 
+// Friends Management System
+async function addFriendToChat(userId) {
+  try {
+    await db.ref(`friendsInChat/${me.uid}/${userId}`).set(true);
+    friendsInChat[userId] = true;
+    showToast('Amigo adicionado ao chat! 👥', 'success');
+    renderChatList();
+    renderFriendsList();
+  } catch (error) {
+    console.error('Erro ao adicionar amigo ao chat:', error);
+    showToast('Erro ao adicionar amigo', 'error');
+  }
+}
+
+async function removeFriendFromChat(userId) {
+  try {
+    await db.ref(`friendsInChat/${me.uid}/${userId}`).remove();
+    delete friendsInChat[userId];
+    showToast('Amigo removido do chat', 'info');
+    renderChatList();
+    renderFriendsList();
+  } catch (error) {
+    console.error('Erro ao remover amigo do chat:', error);
+    showToast('Erro ao remover amigo', 'error');
+  }
+}
+
+function isFriendInChat(userId) {
+  return friendsInChat && friendsInChat[userId] === true;
+}
+
 // Função para verificar se usuário está bloqueado
 function isUserBlocked(userId) {
   return blockedUsers && blockedUsers[userId] === true;
@@ -1197,7 +1397,8 @@ async function blockUser(userId) {
     await db.ref(`blocked/${me.uid}/${userId}`).set(true);
     blockedUsers[userId] = true;
     showToast('Usuário bloqueado com sucesso', 'success');
-    renderUserList(Object.values(usersCache).filter(user => user.uid !== me.uid));
+    renderChatList();
+    renderFriendsList();
     updateBlockButtons();
   } catch (error) {
     console.error('Erro ao bloquear usuário:', error);
@@ -1211,7 +1412,8 @@ async function unblockUser(userId) {
     await db.ref(`blocked/${me.uid}/${userId}`).remove();
     delete blockedUsers[userId];
     showToast('Usuário desbloqueado com sucesso', 'success');
-    renderUserList(Object.values(usersCache).filter(user => user.uid !== me.uid));
+    renderChatList();
+    renderFriendsList();
     updateBlockButtons();
     renderBlockedUsers();
   } catch (error) {
@@ -1428,6 +1630,7 @@ auth.onAuthStateChanged(async user=>{
     bindStatuses();
     bindPreviews();
     bindBlockedUsers();
+    bindFriendsInChat();
     bindMessageStatus();
     checkAllDataLoaded();
   }else{
@@ -1436,6 +1639,19 @@ auth.onAuthStateChanged(async user=>{
   }
 });
 
+// Bind para amigos no chat
+function bindFriendsInChat() {
+  updateSplashStatus('Carregando lista de amigos...');
+  db.ref(`friendsInChat/${me.uid}`).on('value', (snapshot) => {
+    friendsInChat = snapshot.val() || {};
+    loadingState.friends = true;
+    console.log('👥 Amigos no chat carregados:', friendsInChat);
+    renderChatList();
+    renderFriendsList();
+    checkAllDataLoaded();
+  });
+}
+
 // Bind para usuários bloqueados
 function bindBlockedUsers() {
   updateSplashStatus('Carregando usuários bloqueados...');
@@ -1443,7 +1659,8 @@ function bindBlockedUsers() {
     blockedUsers = snapshot.val() || {};
     loadingState.blocked = true;
     console.log('Usuários bloqueados carregados:', blockedUsers);
-    renderUserList(Object.values(usersCache).filter(user => user.uid !== me.uid));
+    renderChatList();
+    renderFriendsList();
     updateBlockButtons();
     checkAllDataLoaded();
   });
@@ -1523,6 +1740,10 @@ unblockBtn.onclick = () => {
     });
   }
 };
+
+// Search functionality
+searchChats.oninput = () => filterChatList();
+searchFriends.oninput = () => filterFriendsList();
 
 pFile.onchange = async (e)=>{
   const file = e.target.files[0]; 
@@ -1714,10 +1935,10 @@ function bindUsers(){
       .filter(uid=>uid!==me.uid)
       .map(uid=>({uid, ...all[uid]}))
       .filter(user => user.name && user.name !== "");
-    renderUserList(arr);
+    renderChatList();
+    renderFriendsList();
     checkAllDataLoaded();
   });
-  search.oninput = ()=> filterUserList();
 }
 
 function bindStatuses(){
@@ -1737,69 +1958,156 @@ function bindPreviews(){
   db.ref("userChats/"+me.uid).on("value", snap=>{
     userPreviewCache = snap.val() || {};
     loadingState.previews = true;
-    filterUserList();
+    renderChatList();
     checkAllDataLoaded();
   });
 }
 
-function renderUserList(users){
-  userList.innerHTML = "";
+// Render Chat List (only friends in chat)
+function renderChatList() {
+  chatList.innerHTML = "";
   
-  const unblocked = users.filter(user => !isUserBlocked(user.uid));
+  const allUsers = Object.keys(usersCache)
+    .filter(uid => uid !== me.uid)
+    .map(uid => ({uid, ...usersCache[uid]}))
+    .filter(user => user.name && user.name !== "");
   
-  unblocked.sort((a,b)=>{
+  // Only show friends that are in chat and not blocked
+  const chatUsers = allUsers.filter(user => 
+    isFriendInChat(user.uid) && !isUserBlocked(user.uid)
+  );
+  
+  chatUsers.sort((a,b)=>{
     const la = userPreviewCache?.[a.uid]?.lastTime || 0;
     const lb = userPreviewCache?.[b.uid]?.lastTime || 0;
     if(lb!==la) return lb-la;
     return (a.name||"").localeCompare(b.name||"");
   });
   
-  unblocked.forEach(u=>{
-    const li = document.createElement("li");
-    li.className = "user-item";
-    li.dataset.uid = u.uid;
+  if (chatUsers.length === 0) {
+    chatList.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px">Nenhum amigo no chat ainda.<br>Adicione amigos na aba "Todos Amigos"</p>';
+    return;
+  }
+  
+  chatUsers.forEach(u => {
+    createUserListItem(u, chatList, 'chat');
+  });
+  
+  filterChatList();
+  updateStatusIndicators();
+}
 
-    const img = document.createElement("img");
-    img.className = "avatar";
-    img.alt = u.name || "Usuário";
-    loadAvatar(img, u.avatar, u.name);
+// Render Friends List (all users with add/remove buttons)
+function renderFriendsList() {
+  friendsList.innerHTML = "";
+  
+  const allUsers = Object.keys(usersCache)
+    .filter(uid => uid !== me.uid)
+    .map(uid => ({uid, ...usersCache[uid]}))
+    .filter(user => user.name && user.name !== "");
+  
+  // Show all users except blocked ones
+  const availableUsers = allUsers.filter(user => !isUserBlocked(user.uid));
+  
+  availableUsers.sort((a,b) => {
+    return (a.name||"").localeCompare(b.name||"");
+  });
+  
+  if (availableUsers.length === 0) {
+    friendsList.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px">Nenhum usuário disponível</p>';
+    return;
+  }
+  
+  availableUsers.forEach(u => {
+    createUserListItem(u, friendsList, 'friends');
+  });
+  
+  filterFriendsList();
+  updateStatusIndicators();
+}
 
-    const main = document.createElement("div");
-    main.className = "u-main";
-    const nm = document.createElement("div"); 
-    nm.className = "u-name"; 
-    nm.textContent = u.name || "Sem nome";
-    
-    const pv = document.createElement("div"); 
-    pv.className = "u-preview";
-    const preview = userPreviewCache?.[u.uid]?.lastText || "";
+function createUserListItem(user, container, listType) {
+  const li = document.createElement("li");
+  li.className = "user-item";
+  li.dataset.uid = user.uid;
+
+  const img = document.createElement("img");
+  img.className = "avatar";
+  img.alt = user.name || "Usuário";
+  img.onclick = (e) => {
+    e.stopPropagation();
+    openAvatarViewer(user.avatar, user.name);
+  };
+  loadAvatar(img, user.avatar, user.name);
+
+  const main = document.createElement("div");
+  main.className = "u-main";
+  const nm = document.createElement("div"); 
+  nm.className = "u-name"; 
+  nm.textContent = user.name || "Sem nome";
+  
+  const pv = document.createElement("div"); 
+  pv.className = "u-preview";
+  
+  if (listType === 'chat') {
+    const preview = userPreviewCache?.[user.uid]?.lastText || "";
     pv.innerHTML = preview ? sanitizePreview(preview) : "Nenhuma mensagem ainda";
+  } else {
+    pv.textContent = user.email || "Usuário disponível";
+  }
 
-    main.appendChild(nm); 
-    main.appendChild(pv);
+  main.appendChild(nm); 
+  main.appendChild(pv);
 
-    const right = document.createElement("div");
-    right.className = "u-right";
+  const right = document.createElement("div");
+  right.className = "u-right";
+  
+  if (listType === 'chat') {
     const time = document.createElement("div");
     time.className = "u-time";
-    time.textContent = userPreviewCache?.[u.uid]?.lastTime ? 
-      formatTime(userPreviewCache?.[u.uid]?.lastTime) : "";
+    time.textContent = userPreviewCache?.[user.uid]?.lastTime ? 
+      formatTime(userPreviewCache?.[user.uid]?.lastTime) : "";
+    
     const dot = document.createElement("div");
-    const userStatus = userStatusCache?.[u.uid];
+    const userStatus = userStatusCache?.[user.uid];
     dot.className = "dot " + (userStatus?.state==="online" ? "online":"offline");
     
     right.appendChild(time); 
     right.appendChild(dot);
+    
+    li.onclick = () => openChat(user.uid, user);
+  } else {
+    // Friends list - show add/remove button
+    const actionBtn = document.createElement("button");
+    actionBtn.className = "friend-action";
+    
+    if (isFriendInChat(user.uid)) {
+      actionBtn.textContent = "Remover";
+      actionBtn.classList.add("remove");
+      actionBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeFriendFromChat(user.uid);
+      };
+    } else {
+      actionBtn.textContent = "Adicionar";
+      actionBtn.onclick = (e) => {
+        e.stopPropagation();
+        addFriendToChat(user.uid);
+      };
+    }
+    
+    const dot = document.createElement("div");
+    const userStatus = userStatusCache?.[user.uid];
+    dot.className = "dot " + (userStatus?.state==="online" ? "online":"offline");
+    
+    right.appendChild(actionBtn);
+    right.appendChild(dot);
+  }
 
-    li.appendChild(img); 
-    li.appendChild(main); 
-    li.appendChild(right);
-    li.onclick = ()=> openChat(u.uid, u);
-    userList.appendChild(li);
-  });
-  
-  filterUserList();
-  updateStatusIndicators();
+  li.appendChild(img); 
+  li.appendChild(main); 
+  li.appendChild(right);
+  container.appendChild(li);
 }
 
 function sanitizePreview(t){
@@ -1810,9 +2118,10 @@ function sanitizePreview(t){
   return s;
 }
 
-function filterUserList(){
-  const q = (search.value||"").toLowerCase().trim();
-  [...userList.children].forEach(li=>{
+function filterChatList(){
+  const q = (searchChats.value||"").toLowerCase().trim();
+  [...chatList.children].forEach(li=>{
+    if (li.tagName !== 'LI') return;
     const uid = li.dataset.uid;
     const name = li.querySelector(".u-name").textContent.toLowerCase();
     const preview = (userPreviewCache?.[uid]?.lastText||"").toLowerCase();
@@ -1821,8 +2130,19 @@ function filterUserList(){
   });
 }
 
+function filterFriendsList(){
+  const q = (searchFriends.value||"").toLowerCase().trim();
+  [...friendsList.children].forEach(li=>{
+    if (li.tagName !== 'LI') return;
+    const name = li.querySelector(".u-name").textContent.toLowerCase();
+    const show = !q || name.includes(q);
+    li.style.display = show ? "" : "none";
+  });
+}
+
 function updateStatusIndicators(){
-  [...userList.children].forEach(li=>{
+  [...chatList.children, ...friendsList.children].forEach(li=>{
+    if (li.tagName !== 'LI') return;
     const uid = li.dataset.uid;
     const dot = li.querySelector(".dot");
     if(!dot) return;
@@ -1865,6 +2185,7 @@ function openChat(uid, user){
     appendMessage(m);
     if(m.from!==me.uid){ 
       createNotificationSound(800, 0.2);
+      triggerAndroidNotification(); // Trigger Android notification
       // Mark as delivered
       updateMessageDeliveryStatus(snap.key);
     }
@@ -1890,9 +2211,11 @@ function appendMessage(m){
   
   if(m.from === me.uid) {
     loadAvatar(messageAvatar, meProfile?.avatar, meProfile?.name);
+    messageAvatar.onclick = () => openAvatarViewer(meProfile?.avatar, meProfile?.name);
   } else {
     const senderData = usersCache[m.from] || currentChatUser;
     loadAvatar(messageAvatar, senderData?.avatar, senderData?.name);
+    messageAvatar.onclick = () => openAvatarViewer(senderData?.avatar, senderData?.name);
   }
   
   const messageWrapper = document.createElement("div");
