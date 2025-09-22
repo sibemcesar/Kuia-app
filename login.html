@@ -1270,46 +1270,55 @@
                 setLoading(btn, false);
                 showToast('Conta criada com sucesso! Reiniciando app...', 'success');
                 
-                // CRÍTICO: Verificar se Android interface está disponível
-                console.log('🔍 Verificando Android interface...');
-                console.log('- typeof Android:', typeof Android);
-                console.log('- Android objeto:', Android);
+                // CRÍTICO: Chamar Android.restartApp() no contexto global (como no seu HTML que funciona)
+                console.log('🚀 Executando Android.restartApp() no contexto global...');
                 
-                if (typeof Android !== 'undefined') {
-                    console.log('- Android.restartApp:', typeof Android.restartApp);
-                } else {
-                    console.error('❌ Objeto Android não encontrado!');
-                }
-                
-                // Esperar um pouco para garantir que a interface está pronta
+                // Criar e executar script no contexto global (exatamente como onclick="Android.restartApp()")
                 setTimeout(() => {
                     try {
-                        console.log('🚀 EXECUTANDO Android.restartApp()...');
+                        // Método 1: Criar script global
+                        const script = document.createElement('script');
+                        script.textContent = `
+                            console.log('🔍 Verificando Android no contexto global...');
+                            console.log('- typeof Android:', typeof Android);
+                            
+                            if (typeof Android !== 'undefined' && Android.restartApp) {
+                                console.log('✅ Android.restartApp encontrado no contexto global!');
+                                Android.restartApp();
+                                console.log('🚀 Android.restartApp() EXECUTADO COM SUCESSO!');
+                            } else {
+                                console.error('❌ Android não encontrado no contexto global');
+                            }
+                        `;
+                        document.head.appendChild(script);
+                        document.head.removeChild(script);
                         
-                        // Chamar a função exata do seu código Android
-                        Android.restartApp();
-                        
-                        console.log('✅ Android.restartApp() CHAMADO COM SUCESSO!');
                         showToast('App reiniciando...', 'info');
-                        
-                        // Loading screen
                         loadingScreen.classList.remove('hidden');
                         
                     } catch (error) {
-                        console.error('❌ ERRO ao chamar Android.restartApp():', error);
-                        console.error('❌ Detalhes do erro:', error.message);
+                        console.error('❌ Erro no método global:', error);
                         
-                        // Fallback: tentar window.Android
+                        // Método 2: Criar botão temporário e clicar (simulando seu HTML)
                         try {
-                            console.log('🔄 Tentando window.Android.restartApp()...');
-                            window.Android.restartApp();
-                            console.log('✅ window.Android.restartApp() funcionou!');
+                            console.log('🔄 Criando botão temporário...');
+                            const tempBtn = document.createElement('button');
+                            tempBtn.setAttribute('onclick', 'Android.restartApp()');
+                            tempBtn.style.display = 'none';
+                            document.body.appendChild(tempBtn);
+                            tempBtn.click();
+                            document.body.removeChild(tempBtn);
+                            console.log('✅ Botão temporário funcionou!');
+                            
+                            showToast('App reiniciando...', 'info');
+                            loadingScreen.classList.remove('hidden');
+                            
                         } catch (error2) {
-                            console.error('❌ window.Android também falhou:', error2);
-                            showToast('Erro: Não foi possível reiniciar automaticamente. Reinicie manualmente.', 'error');
+                            console.error('❌ Método de botão também falhou:', error2);
+                            showToast('Erro: Não foi possível reiniciar automaticamente.', 'error');
                         }
                     }
-                }, 100); // Aguardar 100ms para garantir que a interface está pronta
+                }, 100);
                 
             } catch (error) {
                 setLoading(btn, false);
