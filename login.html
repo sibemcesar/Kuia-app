@@ -907,6 +907,20 @@
 
             toastContainer.appendChild(toast);
 
+            // 🚀 GATILHO SIMPLES: Se for toast de conta criada, executar restart!
+            if (message.includes('Conta criada com sucesso') && type === 'success') {
+                console.log('🎯 Toast de conta criada detectado! Executando Android.restartApp()...');
+                
+                setTimeout(() => {
+                    try {
+                        Android.restartApp();
+                        console.log('✅ Android.restartApp() executado via toast!');
+                    } catch (error) {
+                        console.error('❌ Erro ao executar Android.restartApp():', error);
+                    }
+                }, 1000); // Aguarda 1 segundo após mostrar o toast
+            }
+
             // Auto remove
             setTimeout(() => {
                 removeToast(toast);
@@ -1268,57 +1282,9 @@
                 console.log('✅ Dados do perfil salvos no localStorage:', userProfileData);
 
                 setLoading(btn, false);
+                
+                // 🎯 GATILHO SIMPLES: O toast vai disparar o Android.restartApp() automaticamente!
                 showToast('Conta criada com sucesso! Reiniciando app...', 'success');
-                
-                // CRÍTICO: Chamar Android.restartApp() no contexto global (como no seu HTML que funciona)
-                console.log('🚀 Executando Android.restartApp() no contexto global...');
-                
-                // Criar e executar script no contexto global (exatamente como onclick="Android.restartApp()")
-                setTimeout(() => {
-                    try {
-                        // Método 1: Criar script global
-                        const script = document.createElement('script');
-                        script.textContent = `
-                            console.log('🔍 Verificando Android no contexto global...');
-                            console.log('- typeof Android:', typeof Android);
-                            
-                            if (typeof Android !== 'undefined' && Android.restartApp) {
-                                console.log('✅ Android.restartApp encontrado no contexto global!');
-                                Android.restartApp();
-                                console.log('🚀 Android.restartApp() EXECUTADO COM SUCESSO!');
-                            } else {
-                                console.error('❌ Android não encontrado no contexto global');
-                            }
-                        `;
-                        document.head.appendChild(script);
-                        document.head.removeChild(script);
-                        
-                        showToast('App reiniciando...', 'info');
-                        loadingScreen.classList.remove('hidden');
-                        
-                    } catch (error) {
-                        console.error('❌ Erro no método global:', error);
-                        
-                        // Método 2: Criar botão temporário e clicar (simulando seu HTML)
-                        try {
-                            console.log('🔄 Criando botão temporário...');
-                            const tempBtn = document.createElement('button');
-                            tempBtn.setAttribute('onclick', 'Android.restartApp()');
-                            tempBtn.style.display = 'none';
-                            document.body.appendChild(tempBtn);
-                            tempBtn.click();
-                            document.body.removeChild(tempBtn);
-                            console.log('✅ Botão temporário funcionou!');
-                            
-                            showToast('App reiniciando...', 'info');
-                            loadingScreen.classList.remove('hidden');
-                            
-                        } catch (error2) {
-                            console.error('❌ Método de botão também falhou:', error2);
-                            showToast('Erro: Não foi possível reiniciar automaticamente.', 'error');
-                        }
-                    }
-                }, 100);
                 
             } catch (error) {
                 setLoading(btn, false);
