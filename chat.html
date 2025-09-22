@@ -392,13 +392,24 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 .chat-btn.block:hover{background:#ef4444;color:white}
 .chat-btn.unblock{border-color:#10b981;color:#10b981}
 .chat-btn.unblock:hover{background:#10b981;color:white}
+.chat-btn.clear{border-color:#f59e0b;color:#f59e0b}
+.chat-btn.clear:hover{background:#f59e0b;color:white}
 
 .messages{flex:1;overflow:auto;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
 
 /* Mensagens com Avatares e Status */
-.row{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px}
+.row{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;transition:all 0.3s ease}
 .row.in{justify-content:flex-start}
 .row.out{justify-content:flex-end;flex-direction:row-reverse}
+
+/* Deleted Message Style */
+.row.deleting {
+  opacity: 0;
+  transform: translateX(-20px);
+  margin-bottom: 0;
+  max-height: 0;
+  overflow: hidden;
+}
 
 .message-avatar{
   width:32px;
@@ -426,6 +437,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   display:flex;
   flex-direction:column;
   max-width:70%;
+  position: relative;
 }
 
 .bubble{
@@ -435,6 +447,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   word-wrap:break-word;
   overflow-wrap:anywhere;
   box-shadow:0 1px 2px rgba(0,0,0,0.1);
+  position: relative;
 }
 
 .in .bubble{
@@ -446,6 +459,35 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   background:var(--brand);
   color:var(--out-text);
   border-bottom-right-radius:4px;
+}
+
+/* Message Delete Button */
+.message-delete {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.message-delete:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.message-wrapper:hover .message-delete {
+  display: flex;
 }
 
 .msg-img{border-radius:10px;max-width:100%;cursor:pointer;display:block}
@@ -810,6 +852,7 @@ window.addEventListener("load", function() {
         </div>
       </div>
       <div class="chat-actions">
+        <a href="#"  id="clearChatBtn"  style="display:none"></a>
         <button id="blockBtn" class="chat-btn block" style="display:none">🚫 Bloquear</button>
         <button id="unblockBtn" class="chat-btn unblock" style="display:none">✅ Desbloquear</button>
       </div>
@@ -854,7 +897,7 @@ window.addEventListener("load", function() {
 </svg>
 </span></button>
       <input id="imageInput" type="file" accept="image/*" class="hidden" />
-      <textarea id="textInput" rows="1" placeholder="Digite uma mensagem"></textarea>
+      <textarea id="textInput" rows="1" placeholder="Digite algo"></textarea>
       <button style="
   background-color: white;
   color: black;
@@ -1010,6 +1053,7 @@ let usersCache = {};
 let blockedUsers = {};
 let messageStatusCache = {};
 let friendsInChat = {}; // Lista de amigos que estão no chat
+let hiddenMessages = {}; // Mensagens ocultas para o usuário atual
 let currentTab = 'my-chats';
 
 // Avatar Cache System
@@ -1023,7 +1067,8 @@ let loadingState = {
   statuses: false,
   previews: false,
   blocked: false,
-  friends: false
+  friends: false,
+  hidden: false
 };
 
 const el = (id)=>document.getElementById(id);
@@ -1083,6 +1128,7 @@ const closeBlockedModal = el("closeBlockedModal");
 const blockedList = el("blockedList");
 const blockBtn = el("blockBtn");
 const unblockBtn = el("unblockBtn");
+const clearChatBtn = el("clearChatBtn");
 const pinEnabled = el("pinEnabled");
 const pinSetup = el("pinSetup");
 const newPin = el("newPin");
@@ -1139,6 +1185,105 @@ function clearAvatarCache() {
   avatarCache = {};
   localStorage.removeItem('chatAvatarCache');
   showToast('Cache de avatares limpo', 'info');
+}
+
+// Message Deletion System (Opção 1 - Ultra Segura)
+async function hideMessage(messageId, chatId) {
+  try {
+    const updates = {};
+    updates[`hiddenMessages/${me.uid}/${chatId}/${messageId}`] = {
+      hiddenAt: now(),
+      reason: 'user_deleted'
+    };
+    
+    await db.ref().update(updates);
+    showToast('Mensagem removida para você', 'success');
+    
+    // Recalcular preview se necessário
+    await recalculatePreview(chatId);
+    
+  } catch (error) {
+    console.error('Erro ao ocultar mensagem:', error);
+    showToast('Erro ao remover mensagem', 'error');
+  }
+}
+
+async function clearMyMessagesFromChat(chatId) {
+  try {
+    const chatRef = db.ref(`chats/${chatId}`);
+    const snapshot = await chatRef.get();
+    const messages = snapshot.val() || {};
+    
+    const updates = {};
+    let hiddenCount = 0;
+    
+    // Ocultar apenas mensagens do usuário atual
+    Object.keys(messages).forEach(messageKey => {
+      const message = messages[messageKey];
+      if (message.from === me.uid) {
+        updates[`hiddenMessages/${me.uid}/${chatId}/${messageKey}`] = {
+          hiddenAt: now(),
+          reason: 'chat_cleared'
+        };
+        hiddenCount++;
+      }
+    });
+    
+    if (hiddenCount > 0) {
+      await db.ref().update(updates);
+      showToast(`${hiddenCount} mensagens suas foram removidas`, 'success');
+      
+      // Recalcular preview
+      await recalculatePreview(chatId);
+    } else {
+      showToast('Nenhuma mensagem sua encontrada nesta conversa', 'info');
+    }
+    
+  } catch (error) {
+    console.error('Erro ao limpar mensagens:', error);
+    showToast('Erro ao limpar conversa', 'error');
+  }
+}
+
+async function recalculatePreview(chatId) {
+  try {
+    const chatRef = db.ref(`chats/${chatId}`);
+    const snapshot = await chatRef.get();
+    const messages = snapshot.val() || {};
+    
+    // Encontrar a última mensagem visível
+    const visibleMessages = Object.keys(messages)
+      .map(key => ({...messages[key], messageKey: key}))
+      .filter(msg => !isMessageHidden(msg.messageKey, chatId))
+      .sort((a, b) => b.time - a.time);
+    
+    if (visibleMessages.length > 0) {
+      const lastMessage = visibleMessages[0];
+      let previewText;
+      
+      if (lastMessage.type === "text") previewText = lastMessage.text;
+      else if (lastMessage.type === "image") previewText = "🖼️ Imagem";
+      else if (lastMessage.type === "video") previewText = "🎥 Vídeo";
+      else previewText = "Mensagem";
+      
+      const otherUserId = currentChat;
+      const updates = {};
+      updates[`userChats/${me.uid}/${otherUserId}`] = {
+        other: otherUserId,
+        lastText: previewText,
+        lastTime: lastMessage.time
+      };
+      
+      await db.ref().update(updates);
+    }
+    
+  } catch (error) {
+    console.error('Erro ao recalcular preview:', error);
+  }
+}
+
+function isMessageHidden(messageKey, chatId) {
+  return hiddenMessages[chatId] && hiddenMessages[chatId][messageKey];
 }
 
 // Video URL Processing
@@ -1272,6 +1417,19 @@ videoUrlInput.onkeydown = (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
     videoSendBtn.click();
+  }
+};
+
+// Clear Chat Button
+clearChatBtn.onclick = () => {
+  if (currentChat) {
+    showConfirmDialog(
+      `Tem certeza que deseja remover todas as suas mensagens desta conversa?<br><small>As mensagens só serão removidas para você.</small>`,
+      () => {
+        const chatId = chatId(me.uid, currentChat);
+        clearMyMessagesFromChat(chatId);
+      }
+    );
   }
 };
 
@@ -1474,7 +1632,7 @@ function createNotificationSound(frequency, duration) {
 function showToast(message, type = 'info', duration = 3000) {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.textContent = message;
+  toast.innerHTML = message; // Changed to innerHTML to support HTML content
   toastContainer.appendChild(toast);
   
   setTimeout(() => {
@@ -1751,9 +1909,11 @@ function updateBlockButtons() {
     const isBlocked = isUserBlocked(currentChatUser.uid);
     blockBtn.style.display = isBlocked ? 'none' : 'block';
     unblockBtn.style.display = isBlocked ? 'block' : 'none';
+    clearChatBtn.style.display = 'block';
   } else {
     blockBtn.style.display = 'none';
     unblockBtn.style.display = 'none';
+    clearChatBtn.style.display = 'none';
   }
 }
 
@@ -1874,6 +2034,7 @@ auth.onAuthStateChanged(async user=>{
     bindPreviews();
     bindBlockedUsers();
     bindFriendsInChat();
+    bindHiddenMessages();
     bindMessageStatus();
     checkAllDataLoaded();
   }else{
@@ -1881,6 +2042,22 @@ auth.onAuthStateChanged(async user=>{
     splashScreen.classList.add('hidden');
   }
 });
+
+// Bind para mensagens ocultas
+function bindHiddenMessages() {
+  updateSplashStatus('Carregando mensagens ocultas...');
+  db.ref(`hiddenMessages/${me.uid}`).on('value', (snapshot) => {
+    hiddenMessages = snapshot.val() || {};
+    loadingState.hidden = true;
+    console.log('🙈 Mensagens ocultas carregadas:', Object.keys(hiddenMessages).length);
+    // Re-render messages in current chat if open
+    if (currentChat && msgListenerRef) {
+      messagesEl.innerHTML = '';
+      bindCurrentChat();
+    }
+    checkAllDataLoaded();
+  });
+}
 
 // Bind para amigos no chat
 function bindFriendsInChat() {
@@ -2436,22 +2613,30 @@ function openChat(uid, user){
   document.querySelector('.sidebar').classList.remove('active');
   document.querySelector('.chat').classList.add('active');
   
+  bindCurrentChat();
+  
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function bindCurrentChat() {
   if(msgListenerRef) msgListenerRef.off();
-  const cid = chatId(me.uid, uid);
+  const cid = chatId(me.uid, currentChat);
   msgListenerRef = db.ref("chats/"+cid);
   msgListenerRef.off();
   msgListenerRef.limitToLast(200).on("child_added", snap=>{
     const m = snap.val();
-    appendMessage(m);
-    if(m.from!==me.uid){ 
-      createNotificationSound(800, 0.2);
-      triggerAndroidNotification(); // Trigger Android notification
-      // Mark as delivered
-      updateMessageDeliveryStatus(snap.key);
+    
+    // Check if message is hidden for current user
+    if (!isMessageHidden(snap.key, cid)) {
+      appendMessage(m, snap.key);
+      if(m.from!==me.uid){ 
+        createNotificationSound(800, 0.2);
+        triggerAndroidNotification(); // Trigger Android notification
+        // Mark as delivered
+        updateMessageDeliveryStatus(snap.key);
+      }
     }
   });
-  
-  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 function updateMessageDeliveryStatus(messageId) {
@@ -2460,10 +2645,11 @@ function updateMessageDeliveryStatus(messageId) {
   }
 }
 
-function appendMessage(m){
+function appendMessage(m, messageKey){
   const row = document.createElement("div");
   row.className = "row "+(m.from===me.uid?"out":"in");
-  row.dataset.messageId = m.id || 'msg_' + Date.now();
+  row.dataset.messageId = m.id || messageKey;
+  row.dataset.messageKey = messageKey;
   
   const messageAvatar = document.createElement("img");
   messageAvatar.className = "message-avatar";
@@ -2480,6 +2666,29 @@ function appendMessage(m){
   
   const messageWrapper = document.createElement("div");
   messageWrapper.className = "message-wrapper";
+  
+  // Add delete button for own messages
+  if (m.from === me.uid) {
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "message-delete";
+    deleteBtn.innerHTML = "×";
+    deleteBtn.title = "Remover mensagem";
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation();
+      showConfirmDialog(
+        'Remover esta mensagem para você?<br><small>A mensagem só será removida para você.</small>',
+        () => {
+          // Add animation before hiding
+          row.classList.add('deleting');
+          setTimeout(() => {
+            const cid = chatId(me.uid, currentChat);
+            hideMessage(messageKey, cid);
+          }, 300);
+        }
+      );
+    };
+    messageWrapper.appendChild(deleteBtn);
+  }
   
   const bubble = document.createElement("div");
   bubble.className = "bubble";
