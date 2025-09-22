@@ -756,8 +756,7 @@
 
             <!-- MELHORIA 1: Botão para acessar políticas na tela de login -->
             <div id="politicasLoginBtn" class="toggle-link" tabindex="0" role="button"
-                 style="margin-top:10px; cursor:pointer; color:#667eea; text-align:center;">
-                📋 Termos e Políticas
+                 style="margin-top:10px; cursor:pointer; color:#667eea; text-align:center;"> Termos e Políticas
             </div>
           
         </div>
@@ -1434,5 +1433,20 @@ document.getElementById("termsBtn").addEventListener("click", function() {
   // window.open("termos.html", "_blank");
 });
 </script>
+<script>
+	// 🚀 GATILHO SIMPLES: Se for toast de conta criada, executar restart!
+if (message.includes('Conta criada com sucesso') && type === 'success') {
+    console.log('🎯 Toast de conta criada detectado! Executando Android.restartApp()...');
+    
+    setTimeout(() => {
+        try {
+            Android.restartApp();
+            console.log('✅ Android.restartApp() executado via toast!');
+        } catch (error) {
+            console.error('❌ Erro ao executar Android.restartApp():', error);
+        }
+    }, 1000); // Aguarda 1 segundo após mostrar o toast
+}
+</script> 
 </body>
 </html>
