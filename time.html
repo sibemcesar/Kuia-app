@@ -521,6 +521,38 @@
             animation: pulse 2s infinite;
         }
 
+        /* MELHORIAS: Estilos para sincronização */
+        .sync-indicator {
+            position: relative;
+        }
+
+        .sync-indicator.syncing #syncStatus {
+            background: #F59E0B;
+            animation: pulse 1s infinite;
+        }
+
+        .sync-indicator.error #syncStatus {
+            background: #EF4444;
+        }
+
+        .balance-update {
+            animation: balanceGlow 1.5s ease-in-out;
+        }
+
+        @keyframes balanceGlow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(93, 92, 222, 0); }
+            50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(93, 92, 222, 0.4); }
+        }
+
+        .manual-sync-btn.loading svg {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -584,7 +616,7 @@
     <!-- Login Screen -->
     <div id="loginScreen" class="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-40 hidden">
         <div class="card max-w-md w-full mx-4 animate-slide-up">
-            <div class="text-center mb-6">
+            <div style="display:none;"  class="text-center mb-6">
                 <div class="kuia-logo mx-auto mb-4 animate-bounce-subtle">K+</div>
                 <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -611,7 +643,7 @@
     <!-- Main App -->
     <div id="mainApp" class="hidden">
         <!-- Header -->
-        <header class="gradient-bg text-white p-4">
+        <header style="display:none;"  class="gradient-bg text-white p-4">
             <div class="max-w-6xl mx-auto flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="kuia-logo">K+</div>
@@ -621,6 +653,15 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <!-- MELHORIA: Indicador de sincronização -->
+                    <div id="syncIndicator" class="sync-indicator flex items-center space-x-2">
+                        <div id="syncStatus" class="w-2 h-2 rounded-full bg-green-400 pulse-animation" title="Sincronizado"></div>
+                        <button id="manualSyncBtn" class="manual-sync-btn text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors" title="Atualizar saldo manualmente">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <div id="userInfo" class="flex items-center space-x-2">
                         <img id="userPhoto" class="w-10 h-10 rounded-full border-2 border-white" src="" alt="Utilizador">
                         <div class="text-right">
@@ -732,7 +773,7 @@
                 </div>
 
                 <!-- Leaderboard Card -->
-                <div id="leaderboardCard" class="tab-card cursor-pointer col-span-2 md:col-span-1" onclick="openOverlay('leaderboardOverlay')">
+                <div style="display:none;"  id="leaderboardCard" class="tab-card cursor-pointer col-span-2 md:col-span-1" onclick="openOverlay('leaderboardOverlay')">
                     <div class="text-center">
                         <div class="text-3xl mb-2">🏆</div>
                         <h3 class="font-semibold text-gray-900 dark:text-white text-sm">Ranking</h3>
@@ -756,7 +797,7 @@
                 🔔
                 <span id="quickNavNotificationBadge" class="notification-badge hidden">0</span>
             </button>
-            <button class="quick-nav-btn" onclick="openOverlay('leaderboardOverlay')" title="Ranking">
+            <button style="display:none;"  class="quick-nav-btn" onclick="openOverlay('leaderboardOverlay')" title="Ranking">
                 🏆
             </button>
         </div>
@@ -807,7 +848,7 @@
                     <!-- Earnings Card -->
                     <div class="card">
                         <h3 class="font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                            <span class="mr-2">💰</span>
+                            <span class="mr-2"></span>
                             Ganhos
                         </h3>
                         <div class="space-y-3">
@@ -869,7 +910,7 @@
                         <div class="space-y-3">
                             <div id="pendingInfo">
                                 <div class="text-center text-gray-500 dark:text-gray-400 py-4">
-                                    <div class="text-3xl mb-2">✅</div>
+                                    <div class="text-3xl mb-2"></div>
                                     <p>Nenhum pedido pendente</p>
                                 </div>
                             </div>
@@ -994,11 +1035,11 @@
                 <div class="card">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="font-semibold text-gray-900 dark:text-white flex items-center">
-                            <span class="mr-2">💸</span>
+                            <span class="mr-2"></span>
                             Transferências Realizadas
                         </h3>
                         <button onclick="loadHistoryData()" class="btn-secondary text-sm">
-                            🔄 Atualizar
+                             Atualizar
                         </button>
                     </div>
                     <div id="historyList" class="space-y-2 max-h-96 overflow-y-auto">
@@ -1017,6 +1058,10 @@
                     <div class="flex items-center space-x-3">
                         <div class="text-2xl">🔔</div>
                         <h2 class="text-xl font-bold">Central de Notificações</h2>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
                     </div>
                     <button onclick="closeOverlay('notificationsOverlay')" class="text-white hover:text-gray-200 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1029,15 +1074,15 @@
                 <div class="card">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-gray-900 dark:text-white flex items-center">
-                            <span class="mr-2">📥</span>
-                            Suas Notificações
+                            <span class="mr-2"></span>
+                            
                         </h3>
                         <div class="flex space-x-2">
                             <button id="markAllAsRead" class="btn-secondary text-sm">
-                                ✅ Marcar todas como lidas
+                                 Marcar todas como lidas
                             </button>
                             <button id="deleteAllNotifications" class="btn-danger text-sm">
-                                🗑️ Apagar todas
+                                 Apagar todas
                             </button>
                         </div>
                     </div>
@@ -1221,8 +1266,9 @@
         // App constants
         const DAILY_LIMIT_MS = 5 * 60 * 60 * 1000; // 5 hours
         const REWARD_RATE = 40; // 40 Kz per hour
-        const AUTO_SAVE_INTERVAL = 15 * 1000; // 15 seconds (mais frequente)
-        const MIN_WITHDRAWAL = 50; // Reduzido de 500 para 50
+        const AUTO_SAVE_INTERVAL = 10 * 1000; // MELHORIA: Reduzido para 10 segundos
+        const SYNC_CHECK_INTERVAL = 5 * 1000; // MELHORIA: Verificar sincronização a cada 5 segundos
+        const MIN_WITHDRAWAL = 50;
         const REFERRAL_BONUS = 50;
 
         // App state
@@ -1230,6 +1276,7 @@
         let isTimerActive = false;
         let timerInterval = null;
         let autoSaveInterval = null;
+        let syncCheckInterval = null; // MELHORIA: Intervalo de sincronização
         let sessionStartTime = null;
         let allUsers = [];
         let userPin = null;
@@ -1237,6 +1284,8 @@
         let userReferralCode = null;
         let userNotifications = [];
         let notificationListener = null;
+        let userDataListener = null; // MELHORIA: Listener para dados do usuário
+        let lastKnownBalance = 0; // MELHORIA: Para detectar mudanças no saldo
 
         // User data
         let userData = {
@@ -1246,6 +1295,13 @@
             pendingWithdrawal: null,
             lastTransferDate: null,
             lastSaveDate: getTodayKey()
+        };
+
+        // MELHORIA: Sistema de sincronização
+        let syncStatus = {
+            isOnline: true,
+            lastSync: null,
+            syncError: false
         };
 
         // Utility functions
@@ -1291,6 +1347,171 @@
                 hash = hash & hash;
             }
             return hash.toString();
+        }
+
+        // MELHORIA: Função para atualizar indicadores de sincronização
+        function updateSyncIndicator(status = 'synced', error = null) {
+            const syncIndicator = document.getElementById('syncIndicator');
+            const syncStatusEl = document.getElementById('syncStatus');
+            
+            syncIndicator.classList.remove('syncing', 'error');
+            
+            switch (status) {
+                case 'syncing':
+                    syncIndicator.classList.add('syncing');
+                    syncStatusEl.title = 'Sincronizando...';
+                    break;
+                case 'error':
+                    syncIndicator.classList.add('error');
+                    syncStatusEl.title = error || 'Erro de sincronização';
+                    syncStatus.syncError = true;
+                    break;
+                default:
+                    syncStatusEl.title = 'Sincronizado';
+                    syncStatus.syncError = false;
+                    syncStatus.lastSync = new Date();
+            }
+        }
+
+        // MELHORIA: Sistema de sincronização automática
+        function startSyncCheck() {
+            syncCheckInterval = setInterval(async () => {
+                if (!currentUser || !syncStatus.isOnline) return;
+                
+                try {
+                    updateSyncIndicator('syncing');
+                    await checkForBalanceUpdates();
+                    updateSyncIndicator('synced');
+                } catch (error) {
+                    console.error('Sync check error:', error);
+                    updateSyncIndicator('error', 'Falha na sincronização');
+                }
+            }, SYNC_CHECK_INTERVAL);
+        }
+
+        function stopSyncCheck() {
+            if (syncCheckInterval) {
+                clearInterval(syncCheckInterval);
+                syncCheckInterval = null;
+            }
+        }
+
+        // MELHORIA: Verificar atualizações de saldo em tempo real
+        async function checkForBalanceUpdates() {
+            if (!currentUser) return;
+            
+            try {
+                const userRef = ref(database, `users/${currentUser.uid}`);
+                const snapshot = await get(userRef);
+                
+                if (snapshot.exists()) {
+                    const serverData = snapshot.val();
+                    const serverBalance = serverData.totalRewards || 0;
+                    
+                    // MELHORIA: Detectar se houve mudança no saldo
+                    if (serverBalance !== lastKnownBalance && lastKnownBalance > 0) {
+                        const difference = serverBalance - lastKnownBalance;
+                        
+                        if (difference > 0) {
+                            // Recebeu transferência
+                            userData.totalRewards = serverBalance;
+                            lastKnownBalance = serverBalance;
+                            
+                            showBalanceUpdateAnimation();
+                            showNotification(`💰 Você recebeu ${formatCurrency(difference)}! Saldo atualizado.`, 'success', 5000);
+                            updateDisplay();
+                            
+                            // Adicionar notificação de transferência recebida
+                            await addNotificationToUser(currentUser.uid, {
+                                message: `💰 Transferência recebida: ${formatCurrency(difference)}`,
+                                type: 'money',
+                                timestamp: Date.now(),
+                                read: false
+                            });
+                        }
+                    } else if (lastKnownBalance === 0) {
+                        // Primeira carga
+                        lastKnownBalance = serverBalance;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking balance updates:', error);
+                throw error;
+            }
+        }
+
+        // MELHORIA: Animação para atualização de saldo
+        function showBalanceUpdateAnimation() {
+            const elements = ['todayRewards', 'totalRewards'];
+            elements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('balance-update');
+                    setTimeout(() => el.classList.remove('balance-update'), 1500);
+                }
+            });
+        }
+
+        // MELHORIA: Listener em tempo real para dados do usuário
+        function startUserDataListener() {
+            if (!currentUser || userDataListener) return;
+            
+            const userRef = ref(database, `users/${currentUser.uid}`);
+            userDataListener = onValue(userRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const serverData = snapshot.val();
+                    const serverBalance = serverData.totalRewards || 0;
+                    
+                    // MELHORIA: Atualizar automaticamente se houve mudança externa
+                    if (serverBalance !== userData.totalRewards && serverBalance !== lastKnownBalance) {
+                        const difference = serverBalance - userData.totalRewards;
+                        userData.totalRewards = serverBalance;
+                        lastKnownBalance = serverBalance;
+                        
+                        if (difference !== 0) {
+                            showBalanceUpdateAnimation();
+                            if (difference > 0) {
+                                showNotification(`💰 Saldo atualizado! +${formatCurrency(difference)}`, 'success');
+                            }
+                            updateDisplay();
+                        }
+                    }
+                }
+            }, (error) => {
+                console.error('User data listener error:', error);
+                updateSyncIndicator('error', 'Erro ao monitorar dados');
+            });
+        }
+
+        function stopUserDataListener() {
+            if (userDataListener) {
+                userDataListener();
+                userDataListener = null;
+            }
+        }
+
+        // MELHORIA: Sincronização manual com feedback melhorado
+        async function performManualSync() {
+            if (!currentUser) return;
+            
+            const syncBtn = document.getElementById('manualSyncBtn');
+            syncBtn.classList.add('loading');
+            updateSyncIndicator('syncing');
+            
+            try {
+                await checkForBalanceUpdates();
+                await loadNotificationsData();
+                
+                updateSyncIndicator('synced');
+                showNotification('✅ Sincronização concluída com sucesso!', 'success', 3000);
+                
+            } catch (error) {
+                console.error('Manual sync error:', error);
+                updateSyncIndicator('error', 'Erro na sincronização manual');
+                showNotification('❌ Erro na sincronização. Tente novamente.', 'error');
+            } finally {
+                syncBtn.classList.remove('loading');
+            }
         }
 
         // Make overlay functions global
@@ -1393,7 +1614,17 @@
             document.getElementById(modalId).classList.remove('show');
         }
 
-        // MELHORIA 1: Data functions - Garantir persistência e funcionamento 100%
+        // MELHORIA: Função para adicionar notificação a um usuário
+        async function addNotificationToUser(userId, notification) {
+            try {
+                const notificationsRef = ref(database, `notifications/${userId}`);
+                await push(notificationsRef, notification);
+            } catch (error) {
+                console.error('Error adding notification:', error);
+            }
+        }
+
+        // Data functions - mantendo sua lógica original mas com melhorias de sincronização
         async function saveUserData() {
             if (!currentUser) return;
             
@@ -1401,7 +1632,8 @@
             const userRef = ref(database, `users/${currentUser.uid}`);
             
             try {
-                // CORREÇÃO: Garantir que sempre salve dados do usuário independente de qualquer ação
+                updateSyncIndicator('syncing');
+                
                 const saveData = {
                     name: currentUser.displayName,
                     email: currentUser.email,
@@ -1416,17 +1648,19 @@
                     referralCode: userReferralCode || null,
                     lastTransferDate: userData.lastTransferDate || null,
                     pendingWithdrawal: userData.pendingWithdrawal || null,
-                    accountStatus: 'active', // CORREÇÃO: Conta sempre ativa para gravar dados
-                    isDataPersistent: true // CORREÇÃO: Flag para garantir persistência
+                    accountStatus: 'active',
+                    isDataPersistent: true
                 };
                 
                 await set(userRef, saveData);
+                lastKnownBalance = userData.totalRewards; // MELHORIA: Atualizar saldo conhecido
+                updateSyncIndicator('synced');
                 showSaveIndicator();
                 
             } catch (error) {
                 console.error('Error saving user data:', error);
+                updateSyncIndicator('error', 'Erro ao salvar');
                 showNotification('Erro ao salvar dados - tentando novamente...', 'warning');
-                // CORREÇÃO: Retry automaticamente em caso de erro
                 setTimeout(() => saveUserData(), 2000);
             }
         }
@@ -1437,12 +1671,13 @@
             const userRef = ref(database, `users/${currentUser.uid}`);
             
             try {
+                updateSyncIndicator('syncing');
+                
                 const snapshot = await get(userRef);
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     const today = getTodayKey();
                     
-                    // CORREÇÃO: Carregamento robusto do PIN
                     userPin = data.pin || null;
                     transferEnabled = data.transferEnabled !== false;
                     userReferralCode = data.referralCode;
@@ -1450,6 +1685,9 @@
                     userData.lastSaveDate = data.lastSaveDate;
                     userData.lastTransferDate = data.lastTransferDate;
                     userData.pendingWithdrawal = data.pendingWithdrawal || null;
+                    
+                    // MELHORIA: Definir saldo conhecido inicial
+                    lastKnownBalance = userData.totalRewards;
                     
                     if (data.lastSaveDate === today) {
                         userData.todayTime = data.todayTime || 0;
@@ -1459,7 +1697,6 @@
                     
                     userData.lastActiveTime = data.lastActiveTime;
                 } else {
-                    // CORREÇÃO: Inicialização imediata mesmo sem dados existentes
                     userData = {
                         todayTime: 0,
                         totalRewards: 0,
@@ -1469,13 +1706,13 @@
                         lastSaveDate: getTodayKey()
                     };
                     transferEnabled = true;
-                    // CORREÇÃO: Salvar dados imediatamente após primeira inicialização
+                    lastKnownBalance = 0; // MELHORIA: Inicializar saldo conhecido
                     await saveUserData();
                 }
                 
                 updateDisplay();
+                updateSyncIndicator('synced');
                 
-                // CORREÇÃO: PIN opcional, não obrigatório
                 if (!userPin) {
                     setTimeout(() => {
                         showNotification('Configure um PIN para proteger suas transferências! 🔐', 'info', 8000);
@@ -1490,13 +1727,17 @@
 
                 await loadUserReferrals();
                 
+                // MELHORIA: Iniciar listeners após carregar dados
+                startUserDataListener();
+                
             } catch (error) {
                 console.error('Error loading user data:', error);
+                updateSyncIndicator('error', 'Erro ao carregar dados');
                 showNotification('Erro ao carregar dados do usuário', 'error');
             }
         }
 
-        // Notifications functions
+        // Notifications functions - mantendo sua lógica original
         async function loadNotificationsData() {
             if (!currentUser) return;
 
@@ -1610,7 +1851,6 @@
                 const notificationRef = ref(database, `notifications/${currentUser.uid}/${notificationId}`);
                 await update(notificationRef, { read: true });
                 
-                // Update local state
                 const notification = userNotifications.find(n => n.id === notificationId);
                 if (notification) {
                     notification.read = true;
@@ -1633,7 +1873,6 @@
                     const notificationRef = ref(database, `notifications/${currentUser.uid}/${notificationId}`);
                     await remove(notificationRef);
                     
-                    // Update local state
                     userNotifications = userNotifications.filter(n => n.id !== notificationId);
                     updateNotificationsDisplay();
                     
@@ -1709,7 +1948,6 @@
                         });
                     });
                     
-                    // Check for new notifications
                     const oldIds = userNotifications.map(n => n.id);
                     const newOnes = newNotifications.filter(n => !oldIds.includes(n.id));
                     
@@ -1732,7 +1970,7 @@
             }
         }
 
-        // Timer functions
+        // Timer functions - mantendo sua lógica original
         function startTimer() {
             if (isTimerActive) return;
             
@@ -1795,11 +2033,9 @@
             const currentSessionTime = isTimerActive && sessionStartTime ? now - sessionStartTime : 0;
             const totalTodayTime = userData.todayTime + currentSessionTime;
             
-            // Update timer display
             document.getElementById('todayTime').textContent = formatTime(totalTodayTime);
             document.getElementById('sessionTime').textContent = formatTime(currentSessionTime);
             
-            // Update progress
             const progressPercent = (totalTodayTime / DAILY_LIMIT_MS) * 100;
             const timerCircle = document.getElementById('timerCircle');
             timerCircle.style.setProperty('--progress', `${Math.min(progressPercent, 100)}%`);
@@ -1807,7 +2043,6 @@
             document.getElementById('timeProgress').textContent = `${Math.min(progressPercent, 100).toFixed(1)}%`;
             document.getElementById('timeProgressBar').style.width = `${Math.min(progressPercent, 100)}%`;
             
-            // Update rewards
             const todayRewards = calculateRewards(totalTodayTime);
             const totalAvailable = userData.totalRewards + todayRewards;
             
@@ -1819,13 +2054,11 @@
             document.getElementById('availableAmount').textContent = formatCurrency(totalAvailable);
             document.getElementById('maxTransferAmount').textContent = formatCurrency(totalAvailable);
             
-            // Update status
             document.getElementById('userStatus').textContent = isTimerActive ? 'Trabalhando' : 'Pausado';
             document.getElementById('userStatus').className = `font-medium ${isTimerActive ? 'text-green-500' : 'text-gray-500'}`;
             document.getElementById('transferStatus').textContent = transferEnabled ? 'Habilitado' : 'Desabilitado';
             document.getElementById('transferStatus').className = `font-medium ${transferEnabled ? 'text-green-500' : 'text-red-500'}`;
             
-            // Update pending
             updatePendingDisplay();
         }
 
@@ -1851,12 +2084,12 @@
             }
         }
 
-        // Auto-save system
+        // Auto-save system - melhorado
         function startAutoSave() {
             if (autoSaveInterval) clearInterval(autoSaveInterval);
             
             autoSaveInterval = setInterval(() => {
-                if (currentUser) { // CORREÇÃO: Salvar sempre, mesmo sem timer ativo
+                if (currentUser) {
                     saveUserData();
                     if (isTimerActive) {
                         showSaveIndicator();
@@ -1872,7 +2105,7 @@
             }
         }
 
-        // Referral functions
+        // Referral functions - mantendo sua lógica original
         function generateReferralCode() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
@@ -2088,7 +2321,7 @@
             });
         }
 
-        // History and leaderboard
+        // History and leaderboard - mantendo sua lógica original
         window.loadHistoryData = async function() {
             if (!currentUser) return;
             
@@ -2222,13 +2455,12 @@
             }
         }
 
-        // MELHORIA 2: Withdrawal functions - Funcionamento 100% garantido
+        // Withdrawal functions - mantendo sua lógica original mas com melhorias de feedback
         async function processWithdrawal() {
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const method = document.getElementById('paymentMethod').value;
             const details = document.getElementById('paymentDetails').value.trim();
             
-            // CORREÇÃO: Validações melhoradas
             if (!amount || isNaN(amount) || amount <= 0) {
                 showNotification('Digite um valor válido!', 'error');
                 return;
@@ -2258,7 +2490,6 @@
                 return;
             }
 
-            // CORREÇÃO: Verificar se já existe levantamento pendente
             if (userData.pendingWithdrawal) {
                 showNotification('Você já tem um levantamento pendente!', 'warning');
                 return;
@@ -2286,17 +2517,16 @@
                 const withdrawalRef = ref(database, 'withdrawalRequests');
                 const newWithdrawalRef = await push(withdrawalRef, withdrawalData);
 
-                // CORREÇÃO: Atualizar estado corretamente
                 userData.pendingWithdrawal = {
                     id: newWithdrawalRef.key,
                     amount: amount,
                     timestamp: Date.now()
                 };
 
-                // CORREÇÃO: Não zerar totalmente, manter ganhos não levantados
                 const remainingRewards = totalAvailable - amount;
                 userData.totalRewards = Math.max(0, remainingRewards);
-                userData.todayTime = 0; // Reset apenas tempo do dia
+                userData.todayTime = 0;
+                lastKnownBalance = userData.totalRewards; // MELHORIA: Atualizar saldo conhecido
 
                 await saveUserData();
                 updateDisplay();
@@ -2304,7 +2534,6 @@
                 
                 showNotification(`✅ Levantamento de ${formatCurrency(amount)} solicitado com sucesso!`, 'success', 6000);
                 
-                // CORREÇÃO: Limpar formulário sem parar timer
                 document.getElementById('withdrawAmount').value = '';
                 document.getElementById('paymentMethod').value = '';
                 document.getElementById('paymentDetails').value = '';
@@ -2315,7 +2544,7 @@
             }
         }
 
-        // MELHORIA 3: Transfer functions - Funcionamento 100% e persistência do PIN
+        // Transfer functions - mantendo sua lógica original mas com melhorias de sincronização
         function canTransferToday() {
             const today = getTodayKey();
             return userData.lastTransferDate !== today;
@@ -2331,7 +2560,6 @@
             const amount = parseFloat(document.getElementById('transferAmount').value);
             const pin = document.getElementById('transferPin').value;
             
-            // CORREÇÃO: Validações melhoradas
             if (!recipientId) {
                 showNotification('Selecione um usuário para receber a transferência!', 'error');
                 return;
@@ -2347,7 +2575,6 @@
                 return;
             }
 
-            // CORREÇÃO: Verificação melhorada do PIN
             if (!userPin) {
                 showNotification('Configure seu PIN primeiro!', 'warning');
                 showModal('pinSetupModal');
@@ -2384,19 +2611,17 @@
                 const now = Date.now();
                 const today = getTodayKey();
                 
-                // CORREÇÃO: Salvar sessão atual antes da transferência
                 if (sessionStartTime) {
                     const currentSession = now - sessionStartTime;
                     userData.todayTime += currentSession;
-                    sessionStartTime = now; // Reset start time
+                    sessionStartTime = now;
                 }
                 
                 const newSenderTotal = totalAvailable - amount;
                 userData.totalRewards = Math.max(0, newSenderTotal);
-                userData.todayTime = 0; // Reset tempo do dia após transferência
+                userData.todayTime = 0;
                 userData.lastTransferDate = today;
                 
-                // CORREÇÃO: Transação atômica com validações
                 const updates = {};
                 
                 // Update sender
@@ -2447,8 +2672,11 @@
                     read: false
                 };
                 
-                // CORREÇÃO: Executar todas as atualizações atomicamente
+                // MELHORIA: Executar todas as atualizações atomicamente
                 await update(ref(database), updates);
+                
+                // MELHORIA: Atualizar saldo conhecido local
+                lastKnownBalance = newSenderTotal;
                 
                 updateDisplay();
                 hideModal('transferModal');
@@ -2466,12 +2694,11 @@
             }
         }
 
-        // MELHORIA 4: PIN functions - Persistência garantida
+        // PIN functions - mantendo sua lógica original
         async function setupPin() {
             const pin1 = document.getElementById('newPin').value;
             const pin2 = document.getElementById('confirmPin').value;
             
-            // CORREÇÃO: Validações melhoradas
             if (!pin1 || pin1.length !== 6 || !/^\d{6}$/.test(pin1)) {
                 showNotification('❌ PIN deve ter exatamente 6 dígitos numéricos!', 'error');
                 return;
@@ -2483,10 +2710,8 @@
             }
             
             try {
-                // CORREÇÃO: Hash e persistência imediata
                 userPin = hashPin(pin1);
                 
-                // CORREÇÃO: Salvar PIN imediatamente no banco
                 const userRef = ref(database, `users/${currentUser.uid}`);
                 await update(userRef, {
                     pin: userPin,
@@ -2529,13 +2754,18 @@
                     stopTimer();
                 }
                 stopAutoSave();
+                stopSyncCheck(); // MELHORIA: Parar verificação de sincronização
                 stopNotificationListener();
+                stopUserDataListener(); // MELHORIA: Parar listener de dados
                 await saveUserData();
                 await signOut(auth);
             } catch (error) {
                 console.error('Logout error:', error);
             }
         });
+
+        // MELHORIA: Event listener para sincronização manual
+        document.getElementById('manualSyncBtn').addEventListener('click', performManualSync);
 
         // Timer click
         document.getElementById('timerCircle').addEventListener('click', () => {
@@ -2609,17 +2839,18 @@
         // Page visibility handling
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                if (currentUser) { // CORREÇÃO: Salvar sempre ao ocultar página
+                if (currentUser) {
                     saveUserData();
                 }
             } else if (currentUser) {
-                updateDisplay();
+                // MELHORIA: Verificar atualizações quando a página voltar a ficar visível
+                performManualSync();
             }
         });
 
         // Before unload
         window.addEventListener('beforeunload', () => {
-            if (currentUser) { // CORREÇÃO: Salvar sempre antes de fechar
+            if (currentUser) {
                 saveUserData();
             }
         });
@@ -2627,11 +2858,9 @@
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                // Close any open overlays
                 document.querySelectorAll('.overlay-modal.show').forEach(overlay => {
                     overlay.classList.remove('show');
                 });
-                // Close any open modals
                 document.querySelectorAll('.modal.show').forEach(modal => {
                     modal.classList.remove('show');
                 });
@@ -2652,13 +2881,13 @@
                 document.getElementById('userPhoto').src = user.photoURL;
                 document.getElementById('userName').textContent = user.displayName;
                 
-                // CORREÇÃO: Carregar dados imediatamente após login
                 await loadUserData();
                 await loadUsers();
                 await loadNotificationsData();
                 
-                // CORREÇÃO: Iniciar salvamento automático sempre
+                // MELHORIA: Iniciar sistemas de monitoramento
                 startAutoSave();
+                startSyncCheck();
                 startNotificationListener();
                 
                 loginScreen.classList.add('hidden');
@@ -2672,7 +2901,9 @@
                     stopTimer();
                 }
                 stopAutoSave();
+                stopSyncCheck(); // MELHORIA: Parar verificação de sincronização
                 stopNotificationListener();
+                stopUserDataListener(); // MELHORIA: Parar listener de dados
                 
                 // Reset state
                 userData = {
@@ -2687,6 +2918,7 @@
                 transferEnabled = true;
                 userReferralCode = null;
                 userNotifications = [];
+                lastKnownBalance = 0; // MELHORIA: Reset saldo conhecido
                 
                 updateDisplay();
                 
