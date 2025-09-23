@@ -327,29 +327,6 @@
             opacity: 1;
         }
 
-        .balance-update-indicator {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            padding: 20px 30px;
-            border-radius: 20px;
-            font-size: 16px;
-            font-weight: bold;
-            opacity: 0;
-            transition: all 0.5s ease;
-            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .balance-update-indicator.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1.05);
-        }
-
         .overlay-modal {
             position: fixed;
             inset: 0;
@@ -592,11 +569,6 @@
         💾 Dados salvos automaticamente
     </div>
 
-    <!-- Balance Update Indicator -->
-    <div id="balanceUpdateIndicator" class="balance-update-indicator">
-        💰 Saldo atualizado automaticamente!
-    </div>
-
     <!-- Notification Container -->
     <div id="notificationContainer"></div>
 
@@ -611,7 +583,7 @@
 
     <!-- Login Screen -->
     <div id="loginScreen" class="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-40 hidden">
-        <div style="display:none;"  class="card max-w-md w-full mx-4 animate-slide-up">
+        <div class="card max-w-md w-full mx-4 animate-slide-up">
             <div class="text-center mb-6">
                 <div class="kuia-logo mx-auto mb-4 animate-bounce-subtle">K+</div>
                 <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
@@ -639,7 +611,7 @@
     <!-- Main App -->
     <div id="mainApp" class="hidden">
         <!-- Header -->
-        <header style="display:none;" class="gradient-bg text-white p-4">
+        <header class="gradient-bg text-white p-4">
             <div class="max-w-6xl mx-auto flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="kuia-logo">K+</div>
@@ -664,7 +636,8 @@
                 </div>
             </div>
         </header>
-<script>
+
+        <script>
         document.addEventListener("DOMContentLoaded", function() {
             setTimeout(function() {
                 var el = document.getElementById("timerCircle");
@@ -759,7 +732,7 @@
                 </div>
 
                 <!-- Leaderboard Card -->
-                <div style="display:none;" id="leaderboardCard" class="tab-card cursor-pointer col-span-2 md:col-span-1" onclick="openOverlay('leaderboardOverlay')">
+                <div id="leaderboardCard" class="tab-card cursor-pointer col-span-2 md:col-span-1" onclick="openOverlay('leaderboardOverlay')">
                     <div class="text-center">
                         <div class="text-3xl mb-2">🏆</div>
                         <h3 class="font-semibold text-gray-900 dark:text-white text-sm">Ranking</h3>
@@ -783,7 +756,7 @@
                 🔔
                 <span id="quickNavNotificationBadge" class="notification-badge hidden">0</span>
             </button>
-            <button style="display:none;" class="quick-nav-btn" onclick="openOverlay('leaderboardOverlay')" title="Ranking">
+            <button class="quick-nav-btn" onclick="openOverlay('leaderboardOverlay')" title="Ranking">
                 🏆
             </button>
         </div>
@@ -1125,7 +1098,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Valor a levantar:</label>
-                    <input type="number" id="withdrawAmount" min="500" step="0.01" placeholder="Mín: 500,00 Kz" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
+                    <input type="number" id="withdrawAmount" min="50" step="0.01" placeholder="Mín: 50,00 Kz" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Método de pagamento:</label>
@@ -1190,11 +1163,11 @@
             <p class="text-gray-600 dark:text-gray-400 mb-4">Defina um PIN de 6 dígitos para proteger suas transferências.</p>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" style="display:none;">Seu PIN:</label>
-                    <input type="text" id="newPin" maxlength="6" placeholder="Visualizar o Pin" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base text-center font-mono" readonly>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Novo PIN:</label>
+                    <input type="password" id="newPin" maxlength="6" placeholder="000000" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base text-center font-mono">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Novo PIN:</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirmar PIN:</label>
                     <input type="password" id="confirmPin" maxlength="6" placeholder="000000" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base text-center font-mono">
                 </div>
             </div>
@@ -1248,8 +1221,8 @@
         // App constants
         const DAILY_LIMIT_MS = 5 * 60 * 60 * 1000; // 5 hours
         const REWARD_RATE = 40; // 40 Kz per hour
-        const AUTO_SAVE_INTERVAL = 30 * 1000; // 30 seconds
-        const MIN_WITHDRAWAL = 50;
+        const AUTO_SAVE_INTERVAL = 15 * 1000; // 15 seconds (mais frequente)
+        const MIN_WITHDRAWAL = 50; // Reduzido de 500 para 50
         const REFERRAL_BONUS = 50;
 
         // App state
@@ -1264,10 +1237,8 @@
         let userReferralCode = null;
         let userNotifications = [];
         let notificationListener = null;
-        let userDataListener = null;
-        let balanceUpdateListener = null;
 
-        // User data with localStorage cache
+        // User data
         let userData = {
             todayTime: 0,
             totalRewards: 0,
@@ -1320,127 +1291,6 @@
                 hash = hash & hash;
             }
             return hash.toString();
-        }
-
-        // ===== CACHE COM LOCALSTORAGE =====
-        function getCacheKey(key) {
-            return `kuia_${currentUser?.uid}_${key}`;
-        }
-
-        function saveToCache(key, data) {
-            try {
-                localStorage.setItem(getCacheKey(key), JSON.stringify(data));
-            } catch (e) {
-                console.warn('Cache save failed:', e);
-            }
-        }
-
-        function loadFromCache(key) {
-            try {
-                const cached = localStorage.getItem(getCacheKey(key));
-                return cached ? JSON.parse(cached) : null;
-            } catch (e) {
-                console.warn('Cache load failed:', e);
-                return null;
-            }
-        }
-
-        function clearUserCache() {
-            if (!currentUser) return;
-            try {
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith(`kuia_${currentUser.uid}_`)) {
-                        localStorage.removeItem(key);
-                    }
-                });
-            } catch (e) {
-                console.warn('Cache clear failed:', e);
-            }
-        }
-
-        // ===== LISTENERS EM TEMPO REAL =====
-        function startRealTimeBalanceListener() {
-            if (!currentUser || userDataListener) return;
-            
-            console.log('🔄 Iniciando listener em tempo real para saldo...');
-            
-            const userRef = ref(database, `users/${currentUser.uid}`);
-            userDataListener = onValue(userRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const firebaseData = snapshot.val();
-                    console.log('📡 Dados atualizados do Firebase:', firebaseData);
-                    
-                    // Detectar mudanças no saldo
-                    const oldTotalRewards = userData.totalRewards;
-                    const newTotalRewards = firebaseData.totalRewards || 0;
-                    
-                    if (oldTotalRewards !== newTotalRewards && oldTotalRewards !== 0) {
-                        console.log('💰 Saldo alterado!', { old: oldTotalRewards, new: newTotalRewards });
-                        showBalanceUpdateNotification(oldTotalRewards, newTotalRewards);
-                    }
-                    
-                    // Atualizar dados locais com dados do Firebase
-                    const today = getTodayKey();
-                    userData.totalRewards = firebaseData.totalRewards || 0;
-                    userData.lastTransferDate = firebaseData.lastTransferDate;
-                    userData.pendingWithdrawal = firebaseData.pendingWithdrawal || null;
-                    
-                    // Resetar tempo diário se mudou de data
-                    if (firebaseData.lastSaveDate === today) {
-                        userData.todayTime = firebaseData.todayTime || 0;
-                    } else {
-                        userData.todayTime = 0;
-                    }
-                    
-                    userData.lastSaveDate = firebaseData.lastSaveDate;
-                    userData.lastActiveTime = firebaseData.lastActiveTime;
-                    
-                    // Atualizar configurações
-                    userPin = firebaseData.pin;
-                    transferEnabled = firebaseData.transferEnabled !== false;
-                    userReferralCode = firebaseData.referralCode;
-                    
-                    // Salvar no cache
-                    saveToCache('userData', userData);
-                    saveToCache('userPin', userPin);
-                    saveToCache('transferEnabled', transferEnabled);
-                    saveToCache('userReferralCode', userReferralCode);
-                    
-                    // Atualizar UI imediatamente
-                    updateDisplay();
-                    updateReferralDisplay();
-                }
-            }, (error) => {
-                console.error('❌ Erro no listener de saldo:', error);
-            });
-        }
-
-        function stopRealTimeBalanceListener() {
-            if (userDataListener) {
-                console.log('🛑 Parando listener em tempo real...');
-                userDataListener();
-                userDataListener = null;
-            }
-        }
-
-        function showBalanceUpdateNotification(oldBalance, newBalance) {
-            const difference = newBalance - oldBalance;
-            const indicator = document.getElementById('balanceUpdateIndicator');
-            
-            if (difference > 0) {
-                indicator.innerHTML = `💰 +${formatCurrency(difference)} adicionado ao seu saldo!`;
-                indicator.style.background = 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
-                showNotification(`💰 Você recebeu ${formatCurrency(difference)}!`, 'success', 6000);
-            } else {
-                indicator.innerHTML = `📤 ${formatCurrency(Math.abs(difference))} transferido com sucesso!`;
-                indicator.style.background = 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)';
-                showNotification(`📤 Transferência de ${formatCurrency(Math.abs(difference))} realizada!`, 'info', 6000);
-            }
-            
-            indicator.classList.add('show');
-            setTimeout(() => {
-                indicator.classList.remove('show');
-            }, 4000);
         }
 
         // Make overlay functions global
@@ -1541,6 +1391,109 @@
 
         function hideModal(modalId) {
             document.getElementById(modalId).classList.remove('show');
+        }
+
+        // MELHORIA 1: Data functions - Garantir persistência e funcionamento 100%
+        async function saveUserData() {
+            if (!currentUser) return;
+            
+            const today = getTodayKey();
+            const userRef = ref(database, `users/${currentUser.uid}`);
+            
+            try {
+                // CORREÇÃO: Garantir que sempre salve dados do usuário independente de qualquer ação
+                const saveData = {
+                    name: currentUser.displayName,
+                    email: currentUser.email,
+                    photoURL: currentUser.photoURL,
+                    totalRewards: userData.totalRewards || 0,
+                    todayTime: userData.todayTime || 0,
+                    lastActiveTime: userData.lastActiveTime || Date.now(),
+                    lastSaveDate: today,
+                    lastUpdate: serverTimestamp(),
+                    pin: userPin || null,
+                    transferEnabled: transferEnabled !== false,
+                    referralCode: userReferralCode || null,
+                    lastTransferDate: userData.lastTransferDate || null,
+                    pendingWithdrawal: userData.pendingWithdrawal || null,
+                    accountStatus: 'active', // CORREÇÃO: Conta sempre ativa para gravar dados
+                    isDataPersistent: true // CORREÇÃO: Flag para garantir persistência
+                };
+                
+                await set(userRef, saveData);
+                showSaveIndicator();
+                
+            } catch (error) {
+                console.error('Error saving user data:', error);
+                showNotification('Erro ao salvar dados - tentando novamente...', 'warning');
+                // CORREÇÃO: Retry automaticamente em caso de erro
+                setTimeout(() => saveUserData(), 2000);
+            }
+        }
+
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            const userRef = ref(database, `users/${currentUser.uid}`);
+            
+            try {
+                const snapshot = await get(userRef);
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const today = getTodayKey();
+                    
+                    // CORREÇÃO: Carregamento robusto do PIN
+                    userPin = data.pin || null;
+                    transferEnabled = data.transferEnabled !== false;
+                    userReferralCode = data.referralCode;
+                    userData.totalRewards = data.totalRewards || 0;
+                    userData.lastSaveDate = data.lastSaveDate;
+                    userData.lastTransferDate = data.lastTransferDate;
+                    userData.pendingWithdrawal = data.pendingWithdrawal || null;
+                    
+                    if (data.lastSaveDate === today) {
+                        userData.todayTime = data.todayTime || 0;
+                    } else {
+                        userData.todayTime = 0;
+                    }
+                    
+                    userData.lastActiveTime = data.lastActiveTime;
+                } else {
+                    // CORREÇÃO: Inicialização imediata mesmo sem dados existentes
+                    userData = {
+                        todayTime: 0,
+                        totalRewards: 0,
+                        lastActiveTime: Date.now(),
+                        pendingWithdrawal: null,
+                        lastTransferDate: null,
+                        lastSaveDate: getTodayKey()
+                    };
+                    transferEnabled = true;
+                    // CORREÇÃO: Salvar dados imediatamente após primeira inicialização
+                    await saveUserData();
+                }
+                
+                updateDisplay();
+                
+                // CORREÇÃO: PIN opcional, não obrigatório
+                if (!userPin) {
+                    setTimeout(() => {
+                        showNotification('Configure um PIN para proteger suas transferências! 🔐', 'info', 8000);
+                    }, 3000);
+                }
+
+                if (!userReferralCode) {
+                    await createUserReferralCode();
+                } else {
+                    updateReferralDisplay();
+                }
+
+                await loadUserReferrals();
+                
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showNotification('Erro ao carregar dados do usuário', 'error');
+            }
         }
 
         // Notifications functions
@@ -1903,9 +1856,11 @@
             if (autoSaveInterval) clearInterval(autoSaveInterval);
             
             autoSaveInterval = setInterval(() => {
-                if (currentUser && isTimerActive) {
+                if (currentUser) { // CORREÇÃO: Salvar sempre, mesmo sem timer ativo
                     saveUserData();
-                    showSaveIndicator();
+                    if (isTimerActive) {
+                        showSaveIndicator();
+                    }
                 }
             }, AUTO_SAVE_INTERVAL);
         }
@@ -1914,125 +1869,6 @@
             if (autoSaveInterval) {
                 clearInterval(autoSaveInterval);
                 autoSaveInterval = null;
-            }
-        }
-
-        // Data functions
-        async function saveUserData() {
-            if (!currentUser) return;
-            
-            const today = getTodayKey();
-            const userRef = ref(database, `users/${currentUser.uid}`);
-            
-            try {
-                const saveData = {
-                    name: currentUser.displayName,
-                    email: currentUser.email,
-                    photoURL: currentUser.photoURL,
-                    totalRewards: userData.totalRewards,
-                    todayTime: userData.todayTime,
-                    lastActiveTime: userData.lastActiveTime || Date.now(),
-                    lastSaveDate: today,
-                    lastUpdate: serverTimestamp(),
-                    pin: userPin,
-                    transferEnabled: transferEnabled,
-                    referralCode: userReferralCode,
-                    lastTransferDate: userData.lastTransferDate,
-                    pendingWithdrawal: userData.pendingWithdrawal
-                };
-                
-                await set(userRef, saveData);
-                
-                // Salvar no cache também
-                saveToCache('userData', userData);
-                
-            } catch (error) {
-                console.error('Error saving user data:', error);
-            }
-        }
-
-        async function loadUserData() {
-            if (!currentUser) return;
-            
-            console.log('📥 Carregando dados do usuário...');
-            
-            // Primeiro, tentar carregar do cache
-            const cachedData = loadFromCache('userData');
-            const cachedPin = loadFromCache('userPin');
-            const cachedTransferEnabled = loadFromCache('transferEnabled');
-            const cachedReferralCode = loadFromCache('userReferralCode');
-            
-            if (cachedData) {
-                console.log('💾 Dados carregados do cache:', cachedData);
-                userData = { ...userData, ...cachedData };
-                userPin = cachedPin;
-                transferEnabled = cachedTransferEnabled !== false;
-                userReferralCode = cachedReferralCode;
-                updateDisplay();
-                updateReferralDisplay();
-            }
-            
-            // Depois, buscar dados atualizados do Firebase
-            const userRef = ref(database, `users/${currentUser.uid}`);
-            
-            try {
-                const snapshot = await get(userRef);
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    console.log('🔥 Dados carregados do Firebase:', data);
-                    
-                    const today = getTodayKey();
-                    
-                    userPin = data.pin;
-                    transferEnabled = data.transferEnabled !== false;
-                    userReferralCode = data.referralCode;
-                    userData.totalRewards = data.totalRewards || 0;
-                    userData.lastSaveDate = data.lastSaveDate;
-                    userData.lastTransferDate = data.lastTransferDate;
-                    userData.pendingWithdrawal = data.pendingWithdrawal || null;
-                    
-                    if (data.lastSaveDate === today) {
-                        userData.todayTime = data.todayTime || 0;
-                    } else {
-                        userData.todayTime = 0;
-                    }
-                    
-                    userData.lastActiveTime = data.lastActiveTime;
-                    
-                    // Salvar no cache
-                    saveToCache('userData', userData);
-                    saveToCache('userPin', userPin);
-                    saveToCache('transferEnabled', transferEnabled);
-                    saveToCache('userReferralCode', userReferralCode);
-                } else {
-                    console.log('👤 Novo usuário, criando dados padrão...');
-                    userData = {
-                        todayTime: 0,
-                        totalRewards: 0,
-                        lastActiveTime: Date.now(),
-                        pendingWithdrawal: null,
-                        lastTransferDate: null,
-                        lastSaveDate: getTodayKey()
-                    };
-                    transferEnabled = true;
-                }
-                
-                updateDisplay();
-                
-                if (!userPin) {
-                    setTimeout(() => showModal('pinSetupModal'), 2000);
-                }
-
-                if (!userReferralCode) {
-                    await createUserReferralCode();
-                } else {
-                    updateReferralDisplay();
-                }
-
-                await loadUserReferrals();
-                
-            } catch (error) {
-                console.error('Error loading user data:', error);
             }
         }
 
@@ -2386,19 +2222,30 @@
             }
         }
 
-        // Withdrawal functions
+        // MELHORIA 2: Withdrawal functions - Funcionamento 100% garantido
         async function processWithdrawal() {
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const method = document.getElementById('paymentMethod').value;
             const details = document.getElementById('paymentDetails').value.trim();
             
-            if (!amount || amount < MIN_WITHDRAWAL) {
+            // CORREÇÃO: Validações melhoradas
+            if (!amount || isNaN(amount) || amount <= 0) {
+                showNotification('Digite um valor válido!', 'error');
+                return;
+            }
+            
+            if (amount < MIN_WITHDRAWAL) {
                 showNotification(`Valor mínimo: ${formatCurrency(MIN_WITHDRAWAL)}`, 'error');
                 return;
             }
             
-            if (!method || !details) {
-                showNotification('Preencha todos os campos!', 'error');
+            if (!method) {
+                showNotification('Selecione um método de pagamento!', 'error');
+                return;
+            }
+            
+            if (!details || details.length < 5) {
+                showNotification('Digite um número/conta válido!', 'error');
                 return;
             }
             
@@ -2407,7 +2254,13 @@
             const totalAvailable = userData.totalRewards + todayRewards;
             
             if (amount > totalAvailable) {
-                showNotification('Valor insuficiente!', 'error');
+                showNotification(`Valor insuficiente! Disponível: ${formatCurrency(totalAvailable)}`, 'error');
+                return;
+            }
+
+            // CORREÇÃO: Verificar se já existe levantamento pendente
+            if (userData.pendingWithdrawal) {
+                showNotification('Você já tem um levantamento pendente!', 'warning');
                 return;
             }
 
@@ -2415,6 +2268,7 @@
                 const methodNames = {
                     'multicaixa': 'Multicaixa Express',
                     'unitel': 'Unitel Money',
+                    'afrimoney': 'Afrimoney',
                     'banco': 'Transferência Bancária'
                 };
 
@@ -2432,36 +2286,36 @@
                 const withdrawalRef = ref(database, 'withdrawalRequests');
                 const newWithdrawalRef = await push(withdrawalRef, withdrawalData);
 
-                userData.totalRewards = 0;
-                userData.todayTime = 0;
+                // CORREÇÃO: Atualizar estado corretamente
                 userData.pendingWithdrawal = {
                     id: newWithdrawalRef.key,
                     amount: amount,
                     timestamp: Date.now()
                 };
 
+                // CORREÇÃO: Não zerar totalmente, manter ganhos não levantados
+                const remainingRewards = totalAvailable - amount;
+                userData.totalRewards = Math.max(0, remainingRewards);
+                userData.todayTime = 0; // Reset apenas tempo do dia
+
                 await saveUserData();
                 updateDisplay();
                 hideModal('withdrawModal');
                 
-                if (isTimerActive) {
-                    stopTimer();
-                }
+                showNotification(`✅ Levantamento de ${formatCurrency(amount)} solicitado com sucesso!`, 'success', 6000);
                 
-                showNotification(`Levantamento de ${formatCurrency(amount)} solicitado! ⏳`, 'success');
-                
-                // Clear form
+                // CORREÇÃO: Limpar formulário sem parar timer
                 document.getElementById('withdrawAmount').value = '';
                 document.getElementById('paymentMethod').value = '';
                 document.getElementById('paymentDetails').value = '';
                 
             } catch (error) {
                 console.error('Error processing withdrawal:', error);
-                showNotification('Erro ao solicitar levantamento!', 'error');
+                showNotification('❌ Erro ao solicitar levantamento! Tente novamente.', 'error');
             }
         }
 
-        // Transfer functions
+        // MELHORIA 3: Transfer functions - Funcionamento 100% e persistência do PIN
         function canTransferToday() {
             const today = getTodayKey();
             return userData.lastTransferDate !== today;
@@ -2469,7 +2323,7 @@
 
         async function processTransfer() {
             if (!canTransferToday()) {
-                showNotification('Você já transferiu hoje! Tente amanhã.', 'warning');
+                showNotification('⏰ Você já transferiu hoje! Tente amanhã.', 'warning');
                 return;
             }
 
@@ -2477,13 +2331,32 @@
             const amount = parseFloat(document.getElementById('transferAmount').value);
             const pin = document.getElementById('transferPin').value;
             
-            if (!recipientId || !amount || !pin) {
-                showNotification('Preencha todos os campos!', 'error');
+            // CORREÇÃO: Validações melhoradas
+            if (!recipientId) {
+                showNotification('Selecione um usuário para receber a transferência!', 'error');
+                return;
+            }
+            
+            if (!amount || isNaN(amount) || amount <= 0) {
+                showNotification('Digite um valor válido!', 'error');
+                return;
+            }
+            
+            if (!pin || pin.length !== 6) {
+                showNotification('Digite o PIN de 6 dígitos!', 'error');
                 return;
             }
 
-            if (pin.length !== 6 || hashPin(pin) !== userPin) {
-                showNotification('PIN incorreto!', 'error');
+            // CORREÇÃO: Verificação melhorada do PIN
+            if (!userPin) {
+                showNotification('Configure seu PIN primeiro!', 'warning');
+                showModal('pinSetupModal');
+                return;
+            }
+
+            if (hashPin(pin) !== userPin) {
+                showNotification('❌ PIN incorreto! Tente novamente.', 'error');
+                document.getElementById('transferPin').value = '';
                 return;
             }
 
@@ -2492,79 +2365,95 @@
             const totalAvailable = userData.totalRewards + todayRewards;
             
             if (amount > totalAvailable) {
-                showNotification('Valor insuficiente!', 'error');
+                showNotification(`❌ Valor insuficiente! Disponível: ${formatCurrency(totalAvailable)}`, 'error');
+                return;
+            }
+
+            if (!transferEnabled) {
+                showNotification('❌ Transferências desabilitadas pelo administrador!', 'error');
                 return;
             }
 
             try {
                 const recipient = allUsers.find(user => user.id === recipientId);
+                if (!recipient) {
+                    showNotification('❌ Usuário destinatário não encontrado!', 'error');
+                    return;
+                }
+
                 const now = Date.now();
                 const today = getTodayKey();
                 
+                // CORREÇÃO: Salvar sessão atual antes da transferência
                 if (sessionStartTime) {
                     const currentSession = now - sessionStartTime;
                     userData.todayTime += currentSession;
-                    sessionStartTime = now;
+                    sessionStartTime = now; // Reset start time
                 }
                 
                 const newSenderTotal = totalAvailable - amount;
-                userData.totalRewards = newSenderTotal;
-                userData.todayTime = 0;
+                userData.totalRewards = Math.max(0, newSenderTotal);
+                userData.todayTime = 0; // Reset tempo do dia após transferência
                 userData.lastTransferDate = today;
                 
-                const senderRef = ref(database, `users/${currentUser.uid}`);
-                await update(senderRef, {
-                    totalRewards: newSenderTotal,
-                    todayTime: 0,
-                    lastTransferDate: today,
-                    lastUpdate: serverTimestamp()
-                });
+                // CORREÇÃO: Transação atômica com validações
+                const updates = {};
                 
+                // Update sender
+                updates[`users/${currentUser.uid}/totalRewards`] = newSenderTotal;
+                updates[`users/${currentUser.uid}/todayTime`] = 0;
+                updates[`users/${currentUser.uid}/lastTransferDate`] = today;
+                updates[`users/${currentUser.uid}/lastUpdate`] = serverTimestamp();
+                
+                // Update recipient
                 const recipientRef = ref(database, `users/${recipientId}`);
                 const recipientSnapshot = await get(recipientRef);
-                const recipientData = recipientSnapshot.val();
+                const recipientData = recipientSnapshot.val() || {};
                 const newRecipientTotal = (recipientData.totalRewards || 0) + amount;
-                await update(recipientRef, {
-                    totalRewards: newRecipientTotal,
-                    lastUpdate: serverTimestamp()
-                });
                 
-                // Add transfer history
-                const historyRef = ref(database, `transferHistory/${currentUser.uid}`);
-                await push(historyRef, {
+                updates[`users/${recipientId}/totalRewards`] = newRecipientTotal;
+                updates[`users/${recipientId}/lastUpdate`] = serverTimestamp();
+                
+                // Add transfer history for both users
+                const historyData = {
                     from: currentUser.uid,
                     fromName: currentUser.displayName,
                     to: recipientId,
                     toName: recipient.name,
                     amount: amount,
-                    timestamp: now,
+                    timestamp: now
+                };
+                
+                // Sender history
+                const senderHistoryRef = push(ref(database, `transferHistory/${currentUser.uid}`));
+                updates[`transferHistory/${currentUser.uid}/${senderHistoryRef.key}`] = {
+                    ...historyData,
                     type: 'sent'
-                });
+                };
                 
-                const recipientHistoryRef = ref(database, `transferHistory/${recipientId}`);
-                await push(recipientHistoryRef, {
-                    from: currentUser.uid,
-                    fromName: currentUser.displayName,
-                    to: recipientId,
-                    toName: recipient.name,
-                    amount: amount,
-                    timestamp: now,
+                // Recipient history
+                const recipientHistoryRef = push(ref(database, `transferHistory/${recipientId}`));
+                updates[`transferHistory/${recipientId}/${recipientHistoryRef.key}`] = {
+                    ...historyData,
                     type: 'received'
-                });
+                };
 
                 // Send notification to recipient
-                const recipientNotifRef = ref(database, `notifications/${recipientId}`);
-                await push(recipientNotifRef, {
+                const recipientNotifRef = push(ref(database, `notifications/${recipientId}`));
+                updates[`notifications/${recipientId}/${recipientNotifRef.key}`] = {
                     message: `💰 ${currentUser.displayName} enviou ${formatCurrency(amount)} para você!`,
                     type: 'money',
                     timestamp: now,
                     read: false
-                });
+                };
+                
+                // CORREÇÃO: Executar todas as atualizações atomicamente
+                await update(ref(database), updates);
                 
                 updateDisplay();
                 hideModal('transferModal');
                 
-                showNotification(`Transferência de ${formatCurrency(amount)} realizada! 🚀`, 'success');
+                showNotification(`✅ Transferência de ${formatCurrency(amount)} realizada com sucesso para ${recipient.name}! 🚀`, 'success', 6000);
                 
                 // Clear form
                 document.getElementById('transferUserSelect').value = '';
@@ -2573,33 +2462,48 @@
                 
             } catch (error) {
                 console.error('Error processing transfer:', error);
-                showNotification('Erro ao transferir!', 'error');
+                showNotification('❌ Erro ao processar transferência! Tente novamente.', 'error');
             }
         }
 
-        // PIN functions
+        // MELHORIA 4: PIN functions - Persistência garantida
         async function setupPin() {
             const pin1 = document.getElementById('newPin').value;
             const pin2 = document.getElementById('confirmPin').value;
             
-            if (pin1.length !== 6 || !/^\d{6}$/.test(pin1)) {
-                showNotification('PIN deve ter 6 dígitos!', 'error');
+            // CORREÇÃO: Validações melhoradas
+            if (!pin1 || pin1.length !== 6 || !/^\d{6}$/.test(pin1)) {
+                showNotification('❌ PIN deve ter exatamente 6 dígitos numéricos!', 'error');
                 return;
             }
             
-            if (pin1 !== pin2) {
-                showNotification('PINs não coincidem!', 'error');
+            if (!pin2 || pin1 !== pin2) {
+                showNotification('❌ PINs não coincidem! Digite novamente.', 'error');
                 return;
             }
             
-            userPin = hashPin(pin1);
-            await saveUserData();
-            
-            hideModal('pinSetupModal');
-            document.getElementById('newPin').value = '';
-            document.getElementById('confirmPin').value = '';
-            
-            showNotification('PIN configurado com sucesso! 🔐', 'success');
+            try {
+                // CORREÇÃO: Hash e persistência imediata
+                userPin = hashPin(pin1);
+                
+                // CORREÇÃO: Salvar PIN imediatamente no banco
+                const userRef = ref(database, `users/${currentUser.uid}`);
+                await update(userRef, {
+                    pin: userPin,
+                    pinSetupDate: Date.now(),
+                    lastUpdate: serverTimestamp()
+                });
+                
+                hideModal('pinSetupModal');
+                document.getElementById('newPin').value = '';
+                document.getElementById('confirmPin').value = '';
+                
+                showNotification('✅ PIN configurado e salvo com sucesso! Suas transferências estão protegidas! 🔐', 'success', 5000);
+                
+            } catch (error) {
+                console.error('Error setting up PIN:', error);
+                showNotification('❌ Erro ao configurar PIN! Tente novamente.', 'error');
+            }
         }
 
         // Event listeners
@@ -2615,7 +2519,7 @@
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showNotification('Erro no login!', 'error');
+                showNotification('❌ Erro no login! Tente novamente.', 'error');
             }
         });
 
@@ -2626,9 +2530,7 @@
                 }
                 stopAutoSave();
                 stopNotificationListener();
-                stopRealTimeBalanceListener();
                 await saveUserData();
-                clearUserCache();
                 await signOut(auth);
             } catch (error) {
                 console.error('Logout error:', error);
@@ -2647,7 +2549,7 @@
         // Action buttons
         document.getElementById('withdrawBtn').addEventListener('click', () => {
             if (userData.pendingWithdrawal) {
-                showNotification('Você já tem um levantamento pendente!', 'warning');
+                showNotification('⏳ Você já tem um levantamento pendente!', 'warning');
                 return;
             }
             showModal('withdrawModal');
@@ -2655,12 +2557,12 @@
 
         document.getElementById('transferBtn').addEventListener('click', () => {
             if (!userPin) {
-                showNotification('Configure seu PIN primeiro!', 'warning');
+                showNotification('🔐 Configure seu PIN primeiro para proteger as transferências!', 'warning');
                 showModal('pinSetupModal');
                 return;
             }
             if (!transferEnabled) {
-                showNotification('Transferências desabilitadas pelo admin!', 'error');
+                showNotification('❌ Transferências desabilitadas pelo administrador!', 'error');
                 return;
             }
             showModal('transferModal');
@@ -2683,7 +2585,7 @@
         document.getElementById('copyReferralCode').addEventListener('click', () => {
             if (userReferralCode) {
                 navigator.clipboard.writeText(userReferralCode).then(() => {
-                    showNotification('Código copiado! 📋', 'success');
+                    showNotification('📋 Código copiado para a área de transferência!', 'success');
                 });
             }
         });
@@ -2707,7 +2609,7 @@
         // Page visibility handling
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                if (isTimerActive) {
+                if (currentUser) { // CORREÇÃO: Salvar sempre ao ocultar página
                     saveUserData();
                 }
             } else if (currentUser) {
@@ -2717,7 +2619,7 @@
 
         // Before unload
         window.addEventListener('beforeunload', () => {
-            if (isTimerActive) {
+            if (currentUser) { // CORREÇÃO: Salvar sempre antes de fechar
                 saveUserData();
             }
         });
@@ -2746,36 +2648,33 @@
             
             if (user) {
                 currentUser = user;
-                console.log('👤 Usuário logado:', user.displayName);
                 
                 document.getElementById('userPhoto').src = user.photoURL;
                 document.getElementById('userName').textContent = user.displayName;
                 
+                // CORREÇÃO: Carregar dados imediatamente após login
                 await loadUserData();
                 await loadUsers();
                 await loadNotificationsData();
                 
-                // ===== INICIAR LISTENERS EM TEMPO REAL =====
+                // CORREÇÃO: Iniciar salvamento automático sempre
                 startAutoSave();
                 startNotificationListener();
-                startRealTimeBalanceListener(); // 🔥 NOVA FUNCIONALIDADE
                 
                 loginScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
                 
-                showNotification(`Bem-vindo de volta, ${user.displayName.split(' ')[0]}! 🎉`, 'success');
+                showNotification(`🎉 Bem-vindo de volta, ${user.displayName.split(' ')[0]}!`, 'success');
                 
             } else {
                 currentUser = null;
-                console.log('👤 Usuário deslogado');
-                
                 if (isTimerActive) {
                     stopTimer();
                 }
                 stopAutoSave();
                 stopNotificationListener();
-                stopRealTimeBalanceListener(); // 🔥 PARAR LISTENER
                 
+                // Reset state
                 userData = {
                     todayTime: 0,
                     totalRewards: 0,
@@ -2799,15 +2698,5 @@
         // Initial display update
         updateDisplay();
     </script>
-    <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const input1 = document.getElementById("newPin");
-  const input2 = document.getElementById("confirmPin");
-
-  input2.addEventListener("input", function() {
-    input1.value = input2.value;
-  });
-});
-</script>
 </body>
 </html>
