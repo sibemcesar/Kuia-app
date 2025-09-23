@@ -928,6 +928,131 @@
             cursor: pointer;
         }
 
+        /* ===== NOVOS ESTILOS PARA VERIFICAÇÃO DE VÍDEO ===== */
+        .video-error-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(185, 28, 28, 0.9));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: errorPulse 2s infinite;
+        }
+
+        @keyframes errorPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .error-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .error-message {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .retry-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .retry-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .video-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(93, 92, 222, 0.3));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            z-index: 5;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: loadingSpin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes loadingSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        /* Platform badges */
+        .platform-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            backdrop-filter: blur(5px);
+        }
+
+        .platform-youtube { background: linear-gradient(45deg, #ff0000, #cc0000); }
+        .platform-vimeo { background: linear-gradient(45deg, #1ab7ea, #0d8db8); }
+        .platform-tiktok { background: linear-gradient(45deg, #ff0050, #000000); }
+        .platform-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .platform-facebook { background: linear-gradient(45deg, #1877f2, #42a5f5); }
+        .platform-twitter { background: linear-gradient(45deg, #1da1f2, #0d8bd9); }
+        .platform-direct { background: linear-gradient(45deg, #4caf50, #388e3c); }
+
         /* Responsive */
         @media (max-width: 768px) {
             .search-container {
@@ -1793,8 +1918,11 @@
                 </div>
 
                 <div id="videoUpload" class="form-group" style="display: none;">
-                    <label class="form-label">Link do Vídeo</label>
-                    <input type="url" id="videoInput" class="form-input" placeholder="Cole o link do YouTube, Vimeo, etc.">
+                    <label class="form-label">Link do Vídeo Universal</label>
+                    <input type="url" id="videoInput" class="form-input" placeholder="Cole qualquer link de vídeo (YouTube, TikTok, Instagram, Vimeo, Facebook, Twitter, URLs diretas...)">
+                    <small style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
+                        ✅ Suporte a: YouTube, TikTok, Instagram, Vimeo, Facebook, Twitter, Dailymotion, Twitch e URLs diretas
+                    </small>
                 </div>
 
                 <button type="submit" class="submit-btn" id="submitBtn">
@@ -1913,6 +2041,7 @@
 
 let videoCache = new Map(); // Cache de vídeos carregados
 let preloadContainer = null; // Container para vídeos escondidos
+let videoVerificationMap = new Map(); // Cache de verificação de vídeos
 
 // ADICIONE esta função para criar o sistema de cache:
 
@@ -2079,6 +2208,184 @@ function ensureOnlyCurrentVideoPlays() {
     });
 }
 }
+
+// ===== SISTEMA DE VERIFICAÇÃO DE VÍDEO =====
+
+// Função para verificar se o vídeo está disponível
+async function verifyVideoAvailability(story) {
+    const cacheKey = story.id;
+    
+    // Verifica cache de verificação (válido por 1 hora)
+    if (videoVerificationMap.has(cacheKey)) {
+        const cached = videoVerificationMap.get(cacheKey);
+        if (Date.now() - cached.timestamp < 3600000) { // 1 hora
+            return cached.available;
+        }
+    }
+    
+    return new Promise((resolve) => {
+        const testIframe = document.createElement('iframe');
+        testIframe.style.cssText = `
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        `;
+        
+        let resolved = false;
+        const timeout = setTimeout(() => {
+            if (!resolved) {
+                resolved = true;
+                document.body.removeChild(testIframe);
+                // Cache resultado negativo
+                videoVerificationMap.set(cacheKey, {
+                    available: false,
+                    timestamp: Date.now()
+                });
+                resolve(false);
+            }
+        }, 8000); // 8 segundos timeout
+        
+        testIframe.onload = () => {
+            if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                document.body.removeChild(testIframe);
+                // Cache resultado positivo
+                videoVerificationMap.set(cacheKey, {
+                    available: true,
+                    timestamp: Date.now()
+                });
+                resolve(true);
+            }
+        };
+        
+        testIframe.onerror = () => {
+            if (!resolved) {
+                resolved = true;
+                clearTimeout(timeout);
+                document.body.removeChild(testIframe);
+                // Cache resultado negativo
+                videoVerificationMap.set(cacheKey, {
+                    available: false,
+                    timestamp: Date.now()
+                });
+                resolve(false);
+            }
+        };
+        
+        document.body.appendChild(testIframe);
+        testIframe.src = getEmbedUrl(story.url);
+    });
+}
+
+// Função para mostrar loading de verificação
+function showVideoLoading(container) {
+    container.innerHTML = `
+        <div class="video-loading-overlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Verificando disponibilidade...</div>
+        </div>
+    `;
+}
+
+// Função para mostrar erro de vídeo
+function showVideoError(container, story) {
+    const platform = detectVideoPlatform(story.url);
+    
+    container.innerHTML = `
+        <div class="video-error-overlay">
+            <div class="error-icon">🚫</div>
+            <div class="error-title">Vídeo Indisponível</div>
+            <div class="error-message">
+                Este vídeo de ${platform} não está disponível no momento.<br>
+                Tente novamente mais tarde ou verifique se o link está correto.
+            </div>
+            <button class="retry-btn" onclick="retryVideo('${story.id}')">
+                🔄 Tentar Novamente
+            </button>
+        </div>
+    `;
+}
+
+// Função para detectar plataforma do vídeo
+function detectVideoPlatform(url) {
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YouTube';
+    if (url.includes('vimeo.com')) return 'Vimeo';
+    if (url.includes('tiktok.com')) return 'TikTok';
+    if (url.includes('instagram.com')) return 'Instagram';
+    if (url.includes('facebook.com') || url.includes('fb.watch')) return 'Facebook';
+    if (url.includes('twitter.com') || url.includes('x.com')) return 'Twitter';
+    if (url.includes('dailymotion.com')) return 'Dailymotion';
+    if (url.includes('twitch.tv')) return 'Twitch';
+    if (url.includes('streamable.com')) return 'Streamable';
+    return 'esta plataforma';
+}
+
+// Função global para retry
+window.retryVideo = async function(storyId) {
+    const story = allStories.find(s => s.id === storyId);
+    if (!story) return;
+    
+    // Remove do cache de verificação
+    videoVerificationMap.delete(storyId);
+    
+    // Recarrega o vídeo
+    const overlayMedia = document.getElementById('overlayMedia');
+    await loadVideoWithVerification(story, overlayMedia);
+};
+
+// Função principal para carregar vídeo com verificação
+async function loadVideoWithVerification(story, container) {
+    // Mostra loading
+    showVideoLoading(container);
+    
+    // Verifica disponibilidade
+    const isAvailable = await verifyVideoAvailability(story);
+    
+    if (!isAvailable) {
+        // Mostra erro
+        showVideoError(container, story);
+        return;
+    }
+    
+    // Se disponível, carrega o vídeo normalmente
+    container.innerHTML = '';
+    
+    const cachedVideo = getVideoFromCache(story.id);
+    
+    if (cachedVideo) {
+        cachedVideo.src = 'about:blank';
+        cachedVideo.src = getEmbedUrl(story.url);
+        cachedVideo.id = 'currentVideo';
+        container.appendChild(cachedVideo);
+        console.log(`⚡ Vídeo carregado do cache: ${story.title}`);
+    } else {
+        const iframe = document.createElement('iframe');
+        iframe.src = getEmbedUrl(story.url);
+        iframe.className = 'overlay-media video-player';
+        iframe.width = '100%';
+        iframe.height = '100%';
+        iframe.frameBorder = '0';
+        iframe.allowFullscreen = true;
+        iframe.id = 'currentVideo';
+        
+        iframe.onload = function() {
+            console.log(`🎵 Vídeo carregado: ${story.title}`);
+        };
+        
+        container.appendChild(iframe);
+    }
+    
+    // Garante que apenas este vídeo toca
+    setTimeout(() => {
+        ensureOnlyCurrentVideoPlays();
+    }, 500);
+}
+
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
@@ -2290,12 +2597,36 @@ onAuthStateChanged(auth, (user) => {
             const stats = story.stats || { likes: 0, comments: 0, views: 0 };
             
             let thumbnailContent = '';
+            let platformBadge = '';
+            
             if (story.type === 'image') {
                 thumbnailContent = `<img src="${story.url}" alt="${story.title}">`;
             } else {
+                // Detecta plataforma e cria badge
+                const platform = detectVideoPlatform(story.url);
+                const platformClass = platform.toLowerCase().replace(/[^a-z]/g, '');
+                platformBadge = `<div class="platform-badge platform-${platformClass}">${platform}</div>`;
+                
+                // Tenta pegar thumbnail específica da plataforma
+                let thumbnailUrl = 'https://via.placeholder.com/400x300/333/fff?text=Vídeo';
+                
+                if (platform === 'YouTube') {
+                    const videoId = getYouTubeVideoId(story.url);
+                    if (videoId) {
+                        thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                    }
+                } else if (platform === 'Vimeo') {
+                    thumbnailUrl = 'https://via.placeholder.com/400x300/1ab7ea/fff?text=Vimeo';
+                } else if (platform === 'TikTok') {
+                    thumbnailUrl = 'https://via.placeholder.com/400x300/ff0050/fff?text=TikTok';
+                } else if (platform === 'Instagram') {
+                    thumbnailUrl = 'https://via.placeholder.com/400x300/E4405F/fff?text=Instagram';
+                }
+                
                 thumbnailContent = `
-                    <img src="https://img.youtube.com/vi/${getYouTubeVideoId(story.url)}/maxresdefault.jpg" alt="${story.title}">
+                    <img src="${thumbnailUrl}" alt="${story.title}" onerror="this.src='https://via.placeholder.com/400x300/333/fff?text=${platform}'">
                     <div class="play-icon">▶</div>
+                    ${platformBadge}
                 `;
             }
 
@@ -2354,69 +2685,30 @@ onAuthStateChanged(auth, (user) => {
                 deleteBtn.style.display = 'none';
             }
 
-        // SUBSTITUA a parte de carregamento de mídia na função openFullscreen():
-
-// Load media
-const overlayMedia = document.getElementById('overlayMedia');
-
-// PARA TODOS OS VÍDEOS PRIMEIRO
-stopAllVideos();
-
-// IMPORTANTE: Limpa conteúdo anterior
-overlayMedia.innerHTML = '';
-
-if (story.type === 'image') {
-    const img = document.createElement('img');
-    img.src = story.url;
-    img.className = 'overlay-media';
-    img.alt = story.title;
-    overlayMedia.appendChild(img);
-} else {
-    // VERIFICA SE JÁ ESTÁ NO CACHE
-    const cachedVideo = getVideoFromCache(story.id);
-    
-    if (cachedVideo) {
-        // PARA o vídeo do cache antes de mover
-        cachedVideo.src = 'about:blank';
+        // Load media with verification
+        const overlayMedia = document.getElementById('overlayMedia');
         
-        // USA VÍDEO DO CACHE com nova URL (autoplay)
-        cachedVideo.src = getEmbedUrl(story.url);
-        cachedVideo.id = 'currentVideo';
-        overlayMedia.appendChild(cachedVideo);
+        // Para todos os vídeos primeiro
+        stopAllVideos();
         
-        console.log(`⚡ Vídeo carregado do cache: ${story.title}`);
-    } else {
-        // CRIA NOVO VÍDEO
-        const iframe = document.createElement('iframe');
-        iframe.src = getEmbedUrl(story.url);
-        iframe.className = 'overlay-media video-player';
-        iframe.width = '100%';
-        iframe.height = '100%';
-        iframe.frameBorder = '0';
-        iframe.allowFullscreen = true;
-        iframe.id = 'currentVideo';
+        // Limpa conteúdo anterior
+        overlayMedia.innerHTML = '';
         
-        // FORÇA AUTOPLAY quando carregar
-        iframe.onload = function() {
-            console.log(`🎵 Autoplay ativado: ${story.title}`);
-        };
-        
-        overlayMedia.appendChild(iframe);
-        console.log(`🔄 Vídeo carregando: ${story.title}`);
-    }
-    
-    // GARANTE que apenas este vídeo toca
-    setTimeout(() => {
-        ensureOnlyCurrentVideoPlays();
-    }, 500);
-}
-
-// PRECARREGA vídeos adjacentes (SEM autoplay)
-if (story.type === 'video') {
-    setTimeout(() => {
-        preloadAdjacentVideos(story.id);
-    }, 1000);
-}
+        if (story.type === 'image') {
+            const img = document.createElement('img');
+            img.src = story.url;
+            img.className = 'overlay-media';
+            img.alt = story.title;
+            overlayMedia.appendChild(img);
+        } else {
+            // Carrega vídeo com verificação
+            loadVideoWithVerification(story, overlayMedia);
+            
+            // Precarrega vídeos adjacentes (sem autoplay)
+            setTimeout(() => {
+                preloadAdjacentVideos(story.id);
+            }, 1000);
+        }
 
             // Record view
             recordView(storyId);
@@ -3013,7 +3305,7 @@ console.log('✅ Exclusão direta ativada!');
                         throw new Error('Digite o link do vídeo');
                     }
                     if (!isValidVideoUrl(url)) {
-                        throw new Error('Link de vídeo inválido');
+                        throw new Error('Link de vídeo inválido. Use YouTube, TikTok, Instagram, Vimeo, Facebook, Twitter ou URLs diretas.');
                     }
                 }
 
@@ -3076,14 +3368,51 @@ console.log('✅ Exclusão direta ativada!');
             return data.data.url;
         }
 
-        // Validate video URL
+        // FUNÇÃO UNIVERSAL DE VALIDAÇÃO DE VÍDEO
         function isValidVideoUrl(url) {
             const videoPatterns = [
+                // YouTube
                 /youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
                 /youtu\.be\/([a-zA-Z0-9_-]+)/,
+                /m\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+                
+                // Vimeo
                 /vimeo\.com\/(\d+)/,
+                /player\.vimeo\.com\/video\/(\d+)/,
+                
+                // TikTok
+                /tiktok\.com\/@[^\/]+\/video\/(\d+)/,
+                /vm\.tiktok\.com\/([a-zA-Z0-9]+)/,
+                
+                // Instagram
+                /instagram\.com\/p\/([a-zA-Z0-9_-]+)/,
+                /instagram\.com\/reel\/([a-zA-Z0-9_-]+)/,
+                /instagram\.com\/tv\/([a-zA-Z0-9_-]+)/,
+                
+                // Facebook
+                /facebook\.com\/watch\?v=(\d+)/,
+                /fb\.watch\/([a-zA-Z0-9]+)/,
+                
+                // Twitter/X
+                /twitter\.com\/[^\/]+\/status\/(\d+)/,
+                /x\.com\/[^\/]+\/status\/(\d+)/,
+                
+                // Dailymotion
                 /dailymotion\.com\/video\/([a-zA-Z0-9]+)/,
-              
+                /dai\.ly\/([a-zA-Z0-9]+)/,
+                
+                // Twitch
+                /twitch\.tv\/videos\/(\d+)/,
+                /clips\.twitch\.tv\/([a-zA-Z0-9]+)/,
+                
+                // Streamable
+                /streamable\.com\/([a-zA-Z0-9]+)/,
+                
+                // URLs diretas de vídeo
+                /\.(mp4|webm|ogg|mov|avi|wmv|flv|m4v)(\?.*)?$/i,
+                
+                // URLs genéricas que podem ser vídeos
+                /^https?:\/\/[^\s]+$/
             ];
             
             return videoPatterns.some(pattern => pattern.test(url));
@@ -3095,20 +3424,80 @@ console.log('✅ Exclusão direta ativada!');
             return match ? match[1] : '';
         }
 
-        // Get embed URL
-        // SUBSTITUA a função getEmbedUrl por esta versão melhorada:
+        // FUNÇÃO UNIVERSAL PARA EMBED
+        function getEmbedUrl(url) {
+            // YouTube
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+                if (videoId) {
+                    return `https://www.youtube.com/embed/${videoId[1]}?autoplay=1&controls=1&rel=0`;
+                }
+            }
+            
+            // Vimeo
+            if (url.includes('vimeo.com')) {
+                const videoId = url.match(/vimeo\.com\/(\d+)/);
+                if (videoId) {
+                    return `https://player.vimeo.com/video/${videoId[1]}?autoplay=1&controls=1`;
+                }
+            }
+            
+            // TikTok (iframe embed)
+            if (url.includes('tiktok.com')) {
+                return `https://www.tiktok.com/embed/v2?url=${encodeURIComponent(url)}`;
+            }
+            
+            // Instagram (básico - pode não funcionar sempre devido a restrições)
+            if (url.includes('instagram.com')) {
+                const postId = url.match(/\/p\/([a-zA-Z0-9_-]+)/);
+                if (postId) {
+                    return `https://www.instagram.com/p/${postId[1]}/embed/`;
+                }
+            }
+            
+            // Facebook (limitado)
+            if (url.includes('facebook.com') || url.includes('fb.watch')) {
+                return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`;
+            }
+            
+            // Dailymotion
+            if (url.includes('dailymotion.com')) {
+                const videoId = url.match(/dailymotion\.com\/video\/([a-zA-Z0-9]+)/);
+                if (videoId) {
+                    return `https://www.dailymotion.com/embed/video/${videoId[1]}?autoplay=1`;
+                }
+            }
+            
+            // Twitch
+            if (url.includes('twitch.tv')) {
+                const videoId = url.match(/videos\/(\d+)/);
+                if (videoId) {
+                    return `https://player.twitch.tv/?video=v${videoId[1]}&parent=${window.location.hostname}&autoplay=true`;
+                }
+                const clipId = url.match(/clips\.twitch\.tv\/([a-zA-Z0-9]+)/);
+                if (clipId) {
+                    return `https://clips.twitch.tv/embed?clip=${clipId[1]}&parent=${window.location.hostname}&autoplay=true`;
+                }
+            }
+            
+            // Streamable
+            if (url.includes('streamable.com')) {
+                const videoId = url.match(/streamable\.com\/([a-zA-Z0-9]+)/);
+                if (videoId) {
+                    return `https://streamable.com/e/${videoId[1]}?autoplay=1`;
+                }
+            }
+            
+            // URLs diretas de vídeo - criar elemento video
+            if (/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url)) {
+                // Para URLs diretas, retornamos a URL original para usar em um elemento <video>
+                return url;
+            }
+            
+            // Fallback - retorna URL original (pode não funcionar)
+            return url;
+        }
 
-// FORÇA todos os vídeos a NÃO reproduzir automaticamente
-window.getEmbedUrl = function(url) {
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)[1];
-        return `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1`;
-    } else if (url.includes('vimeo.com')) {
-        const videoId = url.match(/vimeo\.com\/(\d+)/)[1];
-        return `https://player.vimeo.com/video/${videoId}?autoplay=0&controls=1`;
-    }
-    return url;
-};
         // Modal close functionality
         document.querySelectorAll('.close-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -3367,6 +3756,8 @@ window.filterAndRenderStories = applyCategoryFilter;
 updateCategoryCounts();
 
 console.log('✅ Filtro de categorias ativado!');
+console.log('🎥 Sistema de verificação de vídeo ativado!');
+console.log('🌐 Suporte universal a URLs de vídeo ativado!');
     </script>
     <script>
   const botao = document.querySelector('button.tab[data-tab="video"]');
