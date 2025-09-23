@@ -753,6 +753,12 @@
      onclick="window.location.href='senha.html'">
     Esqueci minha senha
 </div>
+
+            <!-- MELHORIA 1: Botão para acessar políticas na tela de login -->
+            <div id="politicasLoginBtn" class="toggle-link" tabindex="0" role="button"
+                 style="margin-top:10px; cursor:pointer; color:#667eea; text-align:center;">
+                📋 Termos e Políticas
+            </div>
           
         </div>
     </div>
@@ -858,6 +864,9 @@
         const photoInput = document.getElementById("photoInput");
         const photoPreview = document.getElementById("photoPreview");
         const toastContainer = document.getElementById("toastContainer");
+        
+        // MELHORIA 1: DOM Element para botão de políticas na tela de login
+        const politicasLoginBtn = document.getElementById("politicasLoginBtn");
 
         let currentForm = "login";
         let selectedPhoto = null;
@@ -956,6 +965,11 @@
         acceptTermsBtn.addEventListener('click', () => {
             termsModal.classList.add('hidden');
             showToast('Termos aceitos! Bem-vindo ao Kuia+', 'success');
+        });
+
+        // MELHORIA 1: Event listener para botão de políticas na tela de login
+        politicasLoginBtn.addEventListener('click', () => {
+            document.getElementById('overlay-termos-kuia').style.display = 'flex';
         });
 
         // Form switching
@@ -1100,6 +1114,15 @@
 
             // Comunicar com Android baseado na conta ativa
             try {
+                if (typeof Android !== 'undefined' && Android.restartApp) {
+                    Android.restartApp();
+                    console.log('✅ Android.restartApp() chamado - redirecionando para rede social');
+                }
+            } catch (error) {
+                console.warn('⚠️ Android.restartApp() não disponível:', error);
+            }
+
+            try {
                 if (typeof AndroidBridge7 !== 'undefined' && AndroidBridge7.acaoBotao) {
                     AndroidBridge7.acaoBotao();
                     console.log('✅ AndroidBridge7.acaoBotao() ativado - conta ativa detectada!');
@@ -1224,21 +1247,78 @@
                 
                 await saveUserToDatabase(userCredential.user, userData);
                 
-                // Save to localStorage
-                localStorage.setItem('vizin_userData', JSON.stringify({
-                    ...userData,
+                // MELHORIA 2: Salvar nome e avatar especificamente no localStorage
+                const userProfileData = {
+                    name: name,
+                    displayName: name,
+                    avatar: photoUrl,
+                    photoURL: photoUrl,
                     email: email,
                     uid: userCredential.user.uid,
-                    createdAt: new Date().toISOString()
-                }));
+                    type: 'register',
+                    createdAt: new Date().toISOString(),
+                    platform: 'kuia-plus',
+                    profileComplete: true
+                };
+                
+                // Salvar dados do perfil para carregamento rápido
+                localStorage.setItem('kuia_userProfile', JSON.stringify(userProfileData));
+                localStorage.setItem('vizin_userData', JSON.stringify(userProfileData));
+                
+                console.log('✅ Dados do perfil salvos no localStorage:', userProfileData);
 
                 setLoading(btn, false);
-                showToast('Conta criada com sucesso! Bem-vindo ao Kuia+ ', 'success');
+                showToast('Conta criada com sucesso! Reiniciando app...', 'success');
                 
-                // Redirect to Vizin+
+                // CRÍTICO: Chamar Android.restartApp() no contexto global (como no seu HTML que funciona)
+                console.log('🚀 Executando Android.restartApp() no contexto global...');
+                
+                // Criar e executar script no contexto global (exatamente como onclick="Android.restartApp()")
                 setTimeout(() => {
-                    redirectToVizin();
-                }, 1000);
+                    try {
+                        // Método 1: Criar script global
+                        const script = document.createElement('script');
+                        script.textContent = `
+                            console.log('🔍 Verificando Android no contexto global...');
+                            console.log('- typeof Android:', typeof Android);
+                            
+                            if (typeof Android !== 'undefined' && Android.restartApp) {
+                                console.log('✅ Android.restartApp encontrado no contexto global!');
+                                Android.restartApp();
+                                console.log('🚀 Android.restartApp() EXECUTADO COM SUCESSO!');
+                            } else {
+                                console.error('❌ Android não encontrado no contexto global');
+                            }
+                        `;
+                        document.head.appendChild(script);
+                        document.head.removeChild(script);
+                        
+                        showToast('App reiniciando...', 'info');
+                        loadingScreen.classList.remove('hidden');
+                        
+                    } catch (error) {
+                        console.error('❌ Erro no método global:', error);
+                        
+                        // Método 2: Criar botão temporário e clicar (simulando seu HTML)
+                        try {
+                            console.log('🔄 Criando botão temporário...');
+                            const tempBtn = document.createElement('button');
+                            tempBtn.setAttribute('onclick', 'Android.restartApp()');
+                            tempBtn.style.display = 'none';
+                            document.body.appendChild(tempBtn);
+                            tempBtn.click();
+                            document.body.removeChild(tempBtn);
+                            console.log('✅ Botão temporário funcionou!');
+                            
+                            showToast('App reiniciando...', 'info');
+                            loadingScreen.classList.remove('hidden');
+                            
+                        } catch (error2) {
+                            console.error('❌ Método de botão também falhou:', error2);
+                            showToast('Erro: Não foi possível reiniciar automaticamente.', 'error');
+                        }
+                    }
+                }, 100);
                 
             } catch (error) {
                 setLoading(btn, false);
@@ -1253,6 +1333,24 @@
             if (user) {
                 console.log('👤 Usuário autenticado no Kuia+:', user.email);
                 console.log('📸 Foto do perfil:', user.photoURL);
+                console.log('👤 Nome do usuário:', user.displayName);
+                
+                // MELHORIA 2: Salvar dados do usuário logado no localStorage para acesso rápido
+                if (user.displayName || user.photoURL) {
+                    const currentUserData = {
+                        name: user.displayName,
+                        displayName: user.displayName,
+                        avatar: user.photoURL,
+                        photoURL: user.photoURL,
+                        email: user.email,
+                        uid: user.uid,
+                        lastLogin: new Date().toISOString(),
+                        platform: 'kuia-plus'
+                    };
+                    
+                    localStorage.setItem('kuia_userProfile', JSON.stringify(currentUserData));
+                    console.log('✅ Perfil do usuário atualizado no localStorage:', currentUserData);
+                }
                 
                 // Comunicar com Android que há conta ativa (UMA VEZ)
                 if (!acaoBotaoCalled) {
@@ -1309,9 +1407,11 @@
   const overlay = document.getElementById('overlay-termos-kuia');
   const btnFechar = document.getElementById('fechar-termos-kuia');
 
-  btnAbrir.addEventListener('click', () => {
-    overlay.style.display = 'flex';
-  });
+  if (btnAbrir) {
+    btnAbrir.addEventListener('click', () => {
+      overlay.style.display = 'flex';
+    });
+  }
 
   btnFechar.addEventListener('click', () => {
     overlay.style.display = 'none';
@@ -1367,31 +1467,6 @@ document.getElementById("termsBtn").addEventListener("click", function() {
   // ou, para abrir em nova aba:
   // window.open("termos.html", "_blank");
 });
-</script>
-<script>
-(function() {
-  const gatilhoTexto = 'Conta criada com sucesso';
-  const seletorToast = '[kuia-toast][type="success"]'; // ajuste conforme seu sistema
-
-  const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      for (const node of mutation.addedNodes) {
-        if (node.nodeType === 1 && node.matches(seletorToast)) {
-          const texto = node.textContent || '';
-          if (texto.includes(gatilhoTexto)) {
-            if (typeof Android !== 'undefined' && typeof Android.restartApp === 'function') {
-              setTimeout(() => {
-                Android.restartApp();
-              }, 1200); // delay para deixar o toast aparecer antes de reiniciar
-            }
-          }
-        }
-      }
-    }
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-})();
 </script>
 </body>
 </html>
