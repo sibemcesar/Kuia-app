@@ -327,6 +327,29 @@
             opacity: 1;
         }
 
+        .balance-update-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-update-indicator.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
         .overlay-modal {
             position: fixed;
             inset: 0;
@@ -567,6 +590,11 @@
     <!-- Save Indicator -->
     <div id="saveIndicator" class="save-indicator">
         💾 Dados salvos automaticamente
+    </div>
+
+    <!-- Balance Update Indicator -->
+    <div id="balanceUpdateIndicator" class="balance-update-indicator">
+        💰 Saldo atualizado automaticamente!
     </div>
 
     <!-- Notification Container -->
@@ -1162,11 +1190,11 @@
             <p class="text-gray-600 dark:text-gray-400 mb-4">Defina um PIN de 6 dígitos para proteger suas transferências.</p>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Novo PIN:</label>
-                    <input type="password" id="newPin" maxlength="6" placeholder="000000" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base text-center font-mono">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" style="display:none;">Seu PIN:</label>
+                    <input type="text" id="newPin" maxlength="6" placeholder="Visualizar o Pin" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base text-center font-mono" readonly>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirmar PIN:</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Novo PIN:</label>
                     <input type="password" id="confirmPin" maxlength="6" placeholder="000000" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base text-center font-mono">
                 </div>
             </div>
@@ -1236,8 +1264,10 @@
         let userReferralCode = null;
         let userNotifications = [];
         let notificationListener = null;
+        let userDataListener = null;
+        let balanceUpdateListener = null;
 
-        // User data
+        // User data with localStorage cache
         let userData = {
             todayTime: 0,
             totalRewards: 0,
@@ -1290,6 +1320,127 @@
                 hash = hash & hash;
             }
             return hash.toString();
+        }
+
+        // ===== CACHE COM LOCALSTORAGE =====
+        function getCacheKey(key) {
+            return `kuia_${currentUser?.uid}_${key}`;
+        }
+
+        function saveToCache(key, data) {
+            try {
+                localStorage.setItem(getCacheKey(key), JSON.stringify(data));
+            } catch (e) {
+                console.warn('Cache save failed:', e);
+            }
+        }
+
+        function loadFromCache(key) {
+            try {
+                const cached = localStorage.getItem(getCacheKey(key));
+                return cached ? JSON.parse(cached) : null;
+            } catch (e) {
+                console.warn('Cache load failed:', e);
+                return null;
+            }
+        }
+
+        function clearUserCache() {
+            if (!currentUser) return;
+            try {
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith(`kuia_${currentUser.uid}_`)) {
+                        localStorage.removeItem(key);
+                    }
+                });
+            } catch (e) {
+                console.warn('Cache clear failed:', e);
+            }
+        }
+
+        // ===== LISTENERS EM TEMPO REAL =====
+        function startRealTimeBalanceListener() {
+            if (!currentUser || userDataListener) return;
+            
+            console.log('🔄 Iniciando listener em tempo real para saldo...');
+            
+            const userRef = ref(database, `users/${currentUser.uid}`);
+            userDataListener = onValue(userRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const firebaseData = snapshot.val();
+                    console.log('📡 Dados atualizados do Firebase:', firebaseData);
+                    
+                    // Detectar mudanças no saldo
+                    const oldTotalRewards = userData.totalRewards;
+                    const newTotalRewards = firebaseData.totalRewards || 0;
+                    
+                    if (oldTotalRewards !== newTotalRewards && oldTotalRewards !== 0) {
+                        console.log('💰 Saldo alterado!', { old: oldTotalRewards, new: newTotalRewards });
+                        showBalanceUpdateNotification(oldTotalRewards, newTotalRewards);
+                    }
+                    
+                    // Atualizar dados locais com dados do Firebase
+                    const today = getTodayKey();
+                    userData.totalRewards = firebaseData.totalRewards || 0;
+                    userData.lastTransferDate = firebaseData.lastTransferDate;
+                    userData.pendingWithdrawal = firebaseData.pendingWithdrawal || null;
+                    
+                    // Resetar tempo diário se mudou de data
+                    if (firebaseData.lastSaveDate === today) {
+                        userData.todayTime = firebaseData.todayTime || 0;
+                    } else {
+                        userData.todayTime = 0;
+                    }
+                    
+                    userData.lastSaveDate = firebaseData.lastSaveDate;
+                    userData.lastActiveTime = firebaseData.lastActiveTime;
+                    
+                    // Atualizar configurações
+                    userPin = firebaseData.pin;
+                    transferEnabled = firebaseData.transferEnabled !== false;
+                    userReferralCode = firebaseData.referralCode;
+                    
+                    // Salvar no cache
+                    saveToCache('userData', userData);
+                    saveToCache('userPin', userPin);
+                    saveToCache('transferEnabled', transferEnabled);
+                    saveToCache('userReferralCode', userReferralCode);
+                    
+                    // Atualizar UI imediatamente
+                    updateDisplay();
+                    updateReferralDisplay();
+                }
+            }, (error) => {
+                console.error('❌ Erro no listener de saldo:', error);
+            });
+        }
+
+        function stopRealTimeBalanceListener() {
+            if (userDataListener) {
+                console.log('🛑 Parando listener em tempo real...');
+                userDataListener();
+                userDataListener = null;
+            }
+        }
+
+        function showBalanceUpdateNotification(oldBalance, newBalance) {
+            const difference = newBalance - oldBalance;
+            const indicator = document.getElementById('balanceUpdateIndicator');
+            
+            if (difference > 0) {
+                indicator.innerHTML = `💰 +${formatCurrency(difference)} adicionado ao seu saldo!`;
+                indicator.style.background = 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
+                showNotification(`💰 Você recebeu ${formatCurrency(difference)}!`, 'success', 6000);
+            } else {
+                indicator.innerHTML = `📤 ${formatCurrency(Math.abs(difference))} transferido com sucesso!`;
+                indicator.style.background = 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)';
+                showNotification(`📤 Transferência de ${formatCurrency(Math.abs(difference))} realizada!`, 'info', 6000);
+            }
+            
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 4000);
         }
 
         // Make overlay functions global
@@ -1792,6 +1943,9 @@
                 
                 await set(userRef, saveData);
                 
+                // Salvar no cache também
+                saveToCache('userData', userData);
+                
             } catch (error) {
                 console.error('Error saving user data:', error);
             }
@@ -1800,12 +1954,33 @@
         async function loadUserData() {
             if (!currentUser) return;
             
+            console.log('📥 Carregando dados do usuário...');
+            
+            // Primeiro, tentar carregar do cache
+            const cachedData = loadFromCache('userData');
+            const cachedPin = loadFromCache('userPin');
+            const cachedTransferEnabled = loadFromCache('transferEnabled');
+            const cachedReferralCode = loadFromCache('userReferralCode');
+            
+            if (cachedData) {
+                console.log('💾 Dados carregados do cache:', cachedData);
+                userData = { ...userData, ...cachedData };
+                userPin = cachedPin;
+                transferEnabled = cachedTransferEnabled !== false;
+                userReferralCode = cachedReferralCode;
+                updateDisplay();
+                updateReferralDisplay();
+            }
+            
+            // Depois, buscar dados atualizados do Firebase
             const userRef = ref(database, `users/${currentUser.uid}`);
             
             try {
                 const snapshot = await get(userRef);
                 if (snapshot.exists()) {
                     const data = snapshot.val();
+                    console.log('🔥 Dados carregados do Firebase:', data);
+                    
                     const today = getTodayKey();
                     
                     userPin = data.pin;
@@ -1823,7 +1998,14 @@
                     }
                     
                     userData.lastActiveTime = data.lastActiveTime;
+                    
+                    // Salvar no cache
+                    saveToCache('userData', userData);
+                    saveToCache('userPin', userPin);
+                    saveToCache('transferEnabled', transferEnabled);
+                    saveToCache('userReferralCode', userReferralCode);
                 } else {
+                    console.log('👤 Novo usuário, criando dados padrão...');
                     userData = {
                         todayTime: 0,
                         totalRewards: 0,
@@ -2444,7 +2626,9 @@
                 }
                 stopAutoSave();
                 stopNotificationListener();
+                stopRealTimeBalanceListener();
                 await saveUserData();
+                clearUserCache();
                 await signOut(auth);
             } catch (error) {
                 console.error('Logout error:', error);
@@ -2562,6 +2746,7 @@
             
             if (user) {
                 currentUser = user;
+                console.log('👤 Usuário logado:', user.displayName);
                 
                 document.getElementById('userPhoto').src = user.photoURL;
                 document.getElementById('userName').textContent = user.displayName;
@@ -2570,8 +2755,10 @@
                 await loadUsers();
                 await loadNotificationsData();
                 
+                // ===== INICIAR LISTENERS EM TEMPO REAL =====
                 startAutoSave();
                 startNotificationListener();
+                startRealTimeBalanceListener(); // 🔥 NOVA FUNCIONALIDADE
                 
                 loginScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
@@ -2580,11 +2767,14 @@
                 
             } else {
                 currentUser = null;
+                console.log('👤 Usuário deslogado');
+                
                 if (isTimerActive) {
                     stopTimer();
                 }
                 stopAutoSave();
                 stopNotificationListener();
+                stopRealTimeBalanceListener(); // 🔥 PARAR LISTENER
                 
                 userData = {
                     todayTime: 0,
@@ -2609,5 +2799,15 @@
         // Initial display update
         updateDisplay();
     </script>
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+  const input1 = document.getElementById("newPin");
+  const input2 = document.getElementById("confirmPin");
+
+  input2.addEventListener("input", function() {
+    input1.value = input2.value;
+  });
+});
+</script>
 </body>
 </html>
