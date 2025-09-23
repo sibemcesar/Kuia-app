@@ -753,11 +753,6 @@
      onclick="window.location.href='senha.html'">
     Esqueci minha senha
 </div>
-
-            <!-- MELHORIA 1: Botão para acessar políticas na tela de login -->
-            <div id="politicasLoginBtn" class="toggle-link" tabindex="0" role="button"
-                 style="margin-top:10px; cursor:pointer; color:#667eea; text-align:center;"> Termos e Políticas
-            </div>
           
         </div>
     </div>
@@ -863,9 +858,6 @@
         const photoInput = document.getElementById("photoInput");
         const photoPreview = document.getElementById("photoPreview");
         const toastContainer = document.getElementById("toastContainer");
-        
-        // MELHORIA 1: DOM Element para botão de políticas na tela de login
-        const politicasLoginBtn = document.getElementById("politicasLoginBtn");
 
         let currentForm = "login";
         let selectedPhoto = null;
@@ -905,20 +897,6 @@
             `;
 
             toastContainer.appendChild(toast);
-
-            // 🚀 GATILHO SIMPLES: Se for toast de conta criada, executar restart!
-            if (message.includes('Conta criada com sucesso') && type === 'success') {
-                console.log('🎯 Toast de conta criada detectado! Executando Android.restartApp()...');
-                
-                setTimeout(() => {
-                    try {
-                        Android.restartApp();
-                        console.log('✅ Android.restartApp() executado via toast!');
-                    } catch (error) {
-                        console.error('❌ Erro ao executar Android.restartApp():', error);
-                    }
-                }, 1000); // Aguarda 1 segundo após mostrar o toast
-            }
 
             // Auto remove
             setTimeout(() => {
@@ -978,11 +956,6 @@
         acceptTermsBtn.addEventListener('click', () => {
             termsModal.classList.add('hidden');
             showToast('Termos aceitos! Bem-vindo ao Kuia+', 'success');
-        });
-
-        // MELHORIA 1: Event listener para botão de políticas na tela de login
-        politicasLoginBtn.addEventListener('click', () => {
-            document.getElementById('overlay-termos-kuia').style.display = 'flex';
         });
 
         // Form switching
@@ -1127,15 +1100,6 @@
 
             // Comunicar com Android baseado na conta ativa
             try {
-                if (typeof Android !== 'undefined' && Android.restartApp) {
-                    Android.restartApp();
-                    console.log('✅ Android.restartApp() chamado - redirecionando para rede social');
-                }
-            } catch (error) {
-                console.warn('⚠️ Android.restartApp() não disponível:', error);
-            }
-
-            try {
                 if (typeof AndroidBridge7 !== 'undefined' && AndroidBridge7.acaoBotao) {
                     AndroidBridge7.acaoBotao();
                     console.log('✅ AndroidBridge7.acaoBotao() ativado - conta ativa detectada!');
@@ -1260,30 +1224,21 @@
                 
                 await saveUserToDatabase(userCredential.user, userData);
                 
-                // MELHORIA 2: Salvar nome e avatar especificamente no localStorage
-                const userProfileData = {
-                    name: name,
-                    displayName: name,
-                    avatar: photoUrl,
-                    photoURL: photoUrl,
+                // Save to localStorage
+                localStorage.setItem('vizin_userData', JSON.stringify({
+                    ...userData,
                     email: email,
                     uid: userCredential.user.uid,
-                    type: 'register',
-                    createdAt: new Date().toISOString(),
-                    platform: 'kuia-plus',
-                    profileComplete: true
-                };
-                
-                // Salvar dados do perfil para carregamento rápido
-                localStorage.setItem('kuia_userProfile', JSON.stringify(userProfileData));
-                localStorage.setItem('vizin_userData', JSON.stringify(userProfileData));
-                
-                console.log('✅ Dados do perfil salvos no localStorage:', userProfileData);
+                    createdAt: new Date().toISOString()
+                }));
 
                 setLoading(btn, false);
+                showToast('Conta criada com sucesso! Bem-vindo ao Kuia+ ', 'success');
                 
-                // 🎯 GATILHO SIMPLES: O toast vai disparar o Android.restartApp() automaticamente!
-                showToast('Conta criada com sucesso! Reiniciando app...', 'success');
+                // Redirect to Vizin+
+                setTimeout(() => {
+                    redirectToVizin();
+                }, 1000);
                 
             } catch (error) {
                 setLoading(btn, false);
@@ -1298,24 +1253,6 @@
             if (user) {
                 console.log('👤 Usuário autenticado no Kuia+:', user.email);
                 console.log('📸 Foto do perfil:', user.photoURL);
-                console.log('👤 Nome do usuário:', user.displayName);
-                
-                // MELHORIA 2: Salvar dados do usuário logado no localStorage para acesso rápido
-                if (user.displayName || user.photoURL) {
-                    const currentUserData = {
-                        name: user.displayName,
-                        displayName: user.displayName,
-                        avatar: user.photoURL,
-                        photoURL: user.photoURL,
-                        email: user.email,
-                        uid: user.uid,
-                        lastLogin: new Date().toISOString(),
-                        platform: 'kuia-plus'
-                    };
-                    
-                    localStorage.setItem('kuia_userProfile', JSON.stringify(currentUserData));
-                    console.log('✅ Perfil do usuário atualizado no localStorage:', currentUserData);
-                }
                 
                 // Comunicar com Android que há conta ativa (UMA VEZ)
                 if (!acaoBotaoCalled) {
@@ -1372,11 +1309,9 @@
   const overlay = document.getElementById('overlay-termos-kuia');
   const btnFechar = document.getElementById('fechar-termos-kuia');
 
-  if (btnAbrir) {
-    btnAbrir.addEventListener('click', () => {
-      overlay.style.display = 'flex';
-    });
-  }
+  btnAbrir.addEventListener('click', () => {
+    overlay.style.display = 'flex';
+  });
 
   btnFechar.addEventListener('click', () => {
     overlay.style.display = 'none';
@@ -1434,19 +1369,28 @@ document.getElementById("termsBtn").addEventListener("click", function() {
 });
 </script>
 <script>
-	// 🚀 GATILHO SIMPLES: Se for toast de conta criada, executar restart!
-if (message.includes('Conta criada com sucesso') && type === 'success') {
-    console.log('🎯 Toast de conta criada detectado! Executando Android.restartApp()...');
-    
-    setTimeout(() => {
-        try {
-            Android.restartApp();
-            console.log('✅ Android.restartApp() executado via toast!');
-        } catch (error) {
-            console.error('❌ Erro ao executar Android.restartApp():', error);
+(function() {
+  const targetText = 'Conta criada com sucesso';
+  const toastSelector = '[kuia-toast]'; // ou o seletor real do seu toast
+
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType === 1 && node.matches(toastSelector)) {
+          const text = node.textContent || '';
+          const type = node.getAttribute('type') || '';
+          if (text.includes(targetText) && type === 'success') {
+            if (typeof Android !== 'undefined' && Android.restartApp) {
+              Android.restartApp();
+            }
+          }
         }
-    }, 1000); // Aguarda 1 segundo após mostrar o toast
-}
-</script> 
+      }
+    }
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 </body>
 </html>
