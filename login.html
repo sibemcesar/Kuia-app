@@ -1370,18 +1370,19 @@ document.getElementById("termsBtn").addEventListener("click", function() {
 </script>
 <script>
 (function() {
-  const targetText = 'Conta criada com sucesso';
-  const toastSelector = '[kuia-toast]'; // ou o seletor real do seu toast
+  const gatilhoTexto = 'Conta criada com sucesso';
+  const seletorToast = '[kuia-toast][type="success"]'; // ajuste conforme seu sistema
 
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
-        if (node.nodeType === 1 && node.matches(toastSelector)) {
-          const text = node.textContent || '';
-          const type = node.getAttribute('type') || '';
-          if (text.includes(targetText) && type === 'success') {
-            if (typeof Android !== 'undefined' && Android.restartApp) {
-              Android.restartApp();
+        if (node.nodeType === 1 && node.matches(seletorToast)) {
+          const texto = node.textContent || '';
+          if (texto.includes(gatilhoTexto)) {
+            if (typeof Android !== 'undefined' && typeof Android.restartApp === 'function') {
+              setTimeout(() => {
+                Android.restartApp();
+              }, 1200); // delay para deixar o toast aparecer antes de reiniciar
             }
           }
         }
