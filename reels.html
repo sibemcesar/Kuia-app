@@ -125,27 +125,55 @@ a{color:inherit;text-decoration:none}
 .svp-mylist{margin-top:1rem}
 .svp-empty{color:var(--svp-sub);text-align:center;padding:1rem}
 
-/* Player Overlay - Tema Claro Tela Cheia */
+/* Player Overlay - Tela Cheia Consistente */
 .svp-overlay {
-  position: absolute;
+  position: fixed;
   top: 0; left: 0;
-  width: 100%;
-  min-height: 100%;
-  background: rgba(0,0,0,0.6);
+  width: 100vw;
+  height: 100vh;
+  background: var(--svp-bg);
   z-index: 1000;
   display: none;
+  flex-direction: column;
 }
 .svp-overlay.is-open {
   display: flex;
 }
+
+/* Fullscreen nativo do Android */
+.svp-overlay:fullscreen {
+  background: #000;
+}
+.svp-overlay:-webkit-full-screen {
+  background: #000;
+}
+.svp-overlay:-moz-full-screen {
+  background: #000;
+}
+
 .svp-player-header{
   background:var(--svp-bg);border-bottom:1px solid var(--svp-border);
   display:flex;justify-content:space-between;align-items:center;padding:1rem;
   flex-shrink:0;
 }
+.svp-overlay:fullscreen .svp-player-header {
+  background: rgba(0,0,0,0.8);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.svp-overlay:-webkit-full-screen .svp-player-header {
+  background: rgba(0,0,0,0.8);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
 .svp-player-title-wrap{flex:1;padding-right:1rem}
 .svp-player-title-main{font-size:1.1rem;font-weight:600;margin-bottom:.25rem;color:var(--svp-text)}
 .svp-player-meta{font-size:.85rem;color:var(--svp-sub)}
+.svp-overlay:fullscreen .svp-player-title-main {
+  color: #fff;
+}
+.svp-overlay:fullscreen .svp-player-meta {
+  color: rgba(255,255,255,0.8);
+}
 
 .svp-player-controls{display:flex;gap:.5rem}
 .svp-player-btn{
@@ -155,24 +183,62 @@ a{color:inherit;text-decoration:none}
 }
 .svp-player-btn:hover{background:var(--svp-chip)}
 .svp-player-btn svg{width:20px;height:20px;fill:currentColor}
-
-.svp-player-video{
-  background:#000;position:relative;display:flex;align-items:center;justify-content:center;
-  flex:1;min-height:0;height:35%;
+.svp-overlay:fullscreen .svp-player-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
 }
-.svp-player-video iframe,.svp-player-video video{
-  width:100%;height:100%;border:0;
+
+/* Vídeo com tamanho consistente */
+.svp-player-video {
+  background:#000;
+  position:relative;
+  width:100%;
+  height:250px;        /* altura fixa para todos os vídeos */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.svp-player-video iframe,
+.svp-player-video video {
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+  object-fit:contain;  /* mantém proporção sem cortar */
+}
+
+/* Vídeo maior em fullscreen */
+.svp-overlay:fullscreen .svp-player-video {
+  height:60vh;
+}
+.svp-overlay:-webkit-full-screen .svp-player-video {
+  height:60vh;
+}
+.svp-overlay:-moz-full-screen .svp-player-video {
+  height:60vh;
 }
 
 .svp-player-footer {
   background: var(--svp-bg);
   border-top: 1px solid var(--svp-border);
-  max-height: calc(100vh - 200px); /* ocupa quase toda tela, mas deixa espaço pro player */
+  max-height: calc(100vh - 250px);
   overflow-y: auto;
   flex-shrink: 0;
 }
+.svp-overlay:fullscreen .svp-player-footer {
+  background: rgba(0,0,0,0.9);
+  border-top: 1px solid rgba(255,255,255,0.2);
+  max-height: calc(40vh - 100px);
+}
 
 .svp-player-info{padding:1rem;border-bottom:1px solid var(--svp-border)}
+.svp-overlay:fullscreen .svp-player-info {
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
 .svp-player-actions{display:flex;align-items:center;gap:1rem;margin-top:.75rem}
 .svp-player-action{
   display:flex;align-items:center;gap:.5rem;background:var(--svp-hover);
@@ -182,14 +248,35 @@ a{color:inherit;text-decoration:none}
 .svp-player-action:hover{background:var(--svp-chip)}
 .svp-player-action.is-liked{background:var(--svp-accent-2);color:#fff;border-color:var(--svp-accent-2)}
 .svp-player-action svg{width:18px;height:18px;fill:currentColor}
+.svp-overlay:fullscreen .svp-player-action {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+}
 
 .svp-comments{padding:1rem;border-bottom:1px solid var(--svp-border)}
+.svp-overlay:fullscreen .svp-comments {
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
 .svp-comments-header{font-size:1rem;font-weight:600;margin-bottom:.75rem;color:var(--svp-text)}
+.svp-overlay:fullscreen .svp-comments-header {
+  color: #fff;
+}
+
 .svp-comment-form{display:flex;gap:.5rem;margin-bottom:1rem;}
 .svp-comment-input{
   flex:1;border:1px solid var(--svp-border);border-radius:20px;
   padding:.5rem 1rem;background:var(--svp-bg);color:var(--svp-text);font-size:16px;
 }
+.svp-overlay:fullscreen .svp-comment-input {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+}
+.svp-overlay:fullscreen .svp-comment-input::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
 .svp-comment-btn {
   background: var(--svp-accent-2);
   color: #fff;
@@ -197,16 +284,19 @@ a{color:inherit;text-decoration:none}
   border-radius: 20px;
   padding: .5rem 1rem;
   font-weight: 600;
-  display: flex;              /* ativa flexbox */
-  align-items: center;        /* centraliza verticalmente */
-  justify-content: flex-start;/* força conteúdo à esquerda */
-  gap: 8px;                   /* espaço entre ícone e texto */
-  width: auto;                /* deixa o botão se ajustar ao conteúdo */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: auto;
   cursor: pointer;
 } 
 .svp-comment{
   display:flex;gap:.75rem;margin-bottom:1rem;padding-bottom:1rem;
   border-bottom:1px solid var(--svp-border);
+}
+.svp-overlay:fullscreen .svp-comment {
+  border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 .svp-comment:last-child{border-bottom:0}
 .svp-comment-avatar{
@@ -218,15 +308,30 @@ a{color:inherit;text-decoration:none}
 .svp-comment-author{font-weight:600;font-size:.9rem;margin-bottom:.25rem;color:var(--svp-text)}
 .svp-comment-text{color:var(--svp-text);line-height:1.4;margin-bottom:.25rem}
 .svp-comment-time{color:var(--svp-sub);font-size:.8rem}
+.svp-overlay:fullscreen .svp-comment-author {
+  color: #fff;
+}
+.svp-overlay:fullscreen .svp-comment-text {
+  color: rgba(255,255,255,0.9);
+}
+.svp-overlay:fullscreen .svp-comment-time {
+  color: rgba(255,255,255,0.6);
+}
 
 .svp-related{padding:1rem; }
 .svp-related-header{font-size:1rem;font-weight:600;margin-bottom:.75rem;color:var(--svp-text)}
+.svp-overlay:fullscreen .svp-related-header {
+  color: #fff;
+}
 .svp-related-grid{display:grid;gap:.75rem}
 .svp-related-item{
   display:flex;gap:.75rem;cursor:pointer;padding:.5rem;border-radius:8px;
   transition:background .2s;
 }
 .svp-related-item:hover{background:var(--svp-hover)}
+.svp-overlay:fullscreen .svp-related-item:hover {
+  background: rgba(255,255,255,0.1);
+}
 .svp-related-thumb{
   width:120px;aspect-ratio:16/9;border-radius:8px;object-fit:cover;
   background:var(--svp-chip);flex:0 0 120px;
@@ -237,6 +342,12 @@ a{color:inherit;text-decoration:none}
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
 }
 .svp-related-meta{color:var(--svp-sub);font-size:.8rem}
+.svp-overlay:fullscreen .svp-related-title {
+  color: #fff;
+}
+.svp-overlay:fullscreen .svp-related-meta {
+  color: rgba(255,255,255,0.7);
+}
 
 /* Responsivo Desktop */
 @media(min-width:768px){
@@ -245,10 +356,20 @@ a{color:inherit;text-decoration:none}
   .svp-player-sidebar{width:350px;background:var(--svp-elev);border-left:1px solid var(--svp-border)}
   .svp-player-footer{max-height:none;overflow:visible}
   .svp-related{border-top:0}
+  .svp-player-video {
+    height:400px;
+  }
+  .svp-overlay:fullscreen .svp-player-video {
+    height:70vh;
+  }
 }
-  .svp-tabs {
+
+.svp-tabs {
   display: flex;
   border-bottom: 1px solid #ddd;
+}
+.svp-overlay:fullscreen .svp-tabs {
+  border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
 .svp-tab-btn {
@@ -259,10 +380,18 @@ a{color:inherit;text-decoration:none}
   cursor: pointer;
   font-weight: 600;
 }
+.svp-overlay:fullscreen .svp-tab-btn {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+}
 
 .svp-tab-btn.active {
   background: var(--svp-bg);
   border-bottom: 2px solid var(--svp-accent-2);
+}
+.svp-overlay:fullscreen .svp-tab-btn.active {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
 }
 
 .tab-pane {
@@ -272,11 +401,6 @@ a{color:inherit;text-decoration:none}
 
 .tab-pane.active {
   display: block;
-}
-  .svp-iframe {
-  width: 100%;      /* ocupa toda a largura do container */
-  height: 100%;     /* opcional: ocupa toda a altura do container */
-  display: block;   /* remove espaçamento inline */
 }
 </style>
 </head>
@@ -350,7 +474,7 @@ a{color:inherit;text-decoration:none}
   </main>
 </div>
 
-<!-- Player Overlay Tema Claro Tela Cheia -->
+<!-- Player Overlay com Tela Cheia Nativa -->
 <div class="svp-overlay" id="svp-overlay">
   <div class="svp-player-main">
     <!-- Header do player -->
@@ -360,7 +484,7 @@ a{color:inherit;text-decoration:none}
         <div class="svp-player-meta" id="svp-player-meta">0 visualizações</div>
       </div>
       <div class="svp-player-controls">
-        <button style="display:none;"  class="svp-player-btn" id="svp-fullscreen" title="Tela cheia" aria-label="Tela cheia">
+        <button class="svp-player-btn" id="svp-fullscreen" title="Tela cheia" aria-label="Tela cheia">
           <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm12 5h-5v-2h3v-3h2v5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
         </button>
         <button class="svp-player-btn" id="svp-close" aria-label="Fechar">
@@ -369,7 +493,7 @@ a{color:inherit;text-decoration:none}
       </div>
     </div>
 
-    <!-- Área do vídeo -->
+    <!-- Área do vídeo com tamanho consistente -->
     <div class="svp-player-video" id="svp-player-body"></div>
 
     <!-- Informações e comentários -->
@@ -415,6 +539,9 @@ a{color:inherit;text-decoration:none}
     <div id="svp-comments-list"></div>
   </div>
 
+</div>
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -517,7 +644,6 @@ function getUserAvatar(user){
   if(user && user.photoURL){
     return user.photoURL;
   }
-  // Fallback para avatar gerado se não tiver foto
   return generateAvatar(user?.uid || 'default');
 }
 
@@ -627,6 +753,12 @@ function closePlayer(){
   $("#svp-comments-list").innerHTML = "";
   $("#svp-related-videos").innerHTML = "";
   document.body.style.overflow = '';
+  
+  // Sair de fullscreen se estiver ativo
+  if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
+    exitFullscreen();
+  }
+  
   currentVideo = null;
 }
 
@@ -634,7 +766,7 @@ function buildPlayerHTML(v){
   const youId = parseYouTubeId(v.url);
   if(youId){
     const src = `https://www.youtube.com/embed/${youId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`;
-    return `<iframe class="svp-iframe"
+    return `<iframe 
   src="${src}"
   frameborder="0"
   allow="autoplay; encrypted-media; picture-in-picture"
@@ -642,7 +774,7 @@ function buildPlayerHTML(v){
   if(isFacebookUrl(v.url)){
     const enc = encodeURIComponent(v.url);
     const src = `https://www.facebook.com/plugins/video.php?href=${enc}&show_text=false&autoplay=true`;
-    return `<iframe class="svp-iframe"
+    return `<iframe
   src="${src}"
   frameborder="0"
   allow="autoplay; encrypted-media; picture-in-picture"
@@ -717,11 +849,31 @@ function timeAgo(timestamp){
   return 'Agora';
 }
 
+// Fullscreen nativo do Android
 function requestFullscreen(){
-  const player = $("#svp-overlay");
-  if(player.requestFullscreen){ player.requestFullscreen(); }
-  else if(player.webkitRequestFullscreen){ player.webkitRequestFullscreen(); }
-  else if(player.msRequestFullscreen){ player.msRequestFullscreen(); }
+  const overlay = $("#svp-overlay");
+  
+  if (overlay.requestFullscreen) {
+    overlay.requestFullscreen();
+  } else if (overlay.webkitRequestFullscreen) {
+    overlay.webkitRequestFullscreen();
+  } else if (overlay.mozRequestFullScreen) {
+    overlay.mozRequestFullScreen();
+  } else if (overlay.msRequestFullscreen) {
+    overlay.msRequestFullscreen();
+  }
+}
+
+function exitFullscreen(){
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  }
 }
 
 /* ===== Eventos ===== */
@@ -869,29 +1021,72 @@ async function toggleLike(id){
   });
 }
 
-/* Apagar vídeo */
 function showConfirmDialog(message, onConfirm) {
   const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+  modal.style.cssText = `
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.5);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999
+  `;
+
   modal.innerHTML = `
-    <div style="background:white;padding:1.5rem;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:400px;width:90%;margin:1rem">
+    <div style="background:white;padding:1.5rem;border-radius:12px;
+                box-shadow:0 4px 20px rgba(0,0,0,0.3);
+                max-width:400px;width:90%;margin:1rem">
       <p style="color:#333;margin-bottom:1rem;font-size:1rem">${message}</p>
       <div style="display:flex;justify-content:flex-end;gap:0.75rem">
-        <button style="padding:0.5rem 1rem;color:#666;background:transparent;border:1px solid #ddd;border-radius:6px;cursor:pointer" onclick="this.closest('div[style*=fixed]').remove()">Cancelar</button>
-        <button style="padding:0.5rem 1rem;background:#ef4444;color:white;border:0;border-radius:6px;cursor:pointer;font-weight:600" onclick="this.closest('div[style*=fixed]').remove(); (${onConfirm})()">Confirmar</button>
+        <button class="confirm-cancel"
+          style="padding:0.5rem 1rem;color:#666;background:transparent;
+                 border:1px solid #ddd;border-radius:6px;cursor:pointer">
+          Cancelar
+        </button>
+        <button class="confirm-yes"
+          style="padding:0.5rem 1rem;background:#ef4444;color:white;
+                 border:0;border-radius:6px;cursor:pointer;font-weight:600">
+          Confirmar
+        </button>
       </div>
     </div>
   `;
+
   document.body.appendChild(modal);
+
+  const cancelBtn = modal.querySelector('.confirm-cancel');
+  const yesBtn = modal.querySelector('.confirm-yes');
+
+  cancelBtn.addEventListener('click', () => modal.remove());
+
+  yesBtn.addEventListener('click', () => {
+    modal.remove();
+    if (typeof onConfirm === 'function') {
+      try {
+        const result = onConfirm();
+        if (result instanceof Promise) {
+          result.catch(err => {
+            console.error("Erro ao confirmar:", err);
+            alert("Ocorreu um erro ao apagar o vídeo.");
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao confirmar:", err);
+        alert("Ocorreu um erro ao apagar o vídeo.");
+      }
+    }
+  });
 }
 
-async function deleteVideo(id){
-  const v = state.videos.find(x=>x.id===id);
-  if(!v || state.user?.uid!==v.authorId) return;
-  
+async function deleteVideo(id) {
+  const v = state.videos.find(x => x.id === id);
+  if (!v || state.user?.uid !== v.authorId) return;
+
   showConfirmDialog("Tem certeza que deseja apagar este vídeo?", async () => {
-    await remove(ref(db, `videos/${id}`));
-    await remove(ref(db, `comments/${id}`));
+    try {
+      await remove(ref(db, `videos/${id}`));
+      await remove(ref(db, `comments/${id}`));
+    } catch (err) {
+      console.error("Erro ao deletar:", err);
+    }
   });
 }
 
