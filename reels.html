@@ -1,3829 +1,944 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reels App</title>
-    <style>
-       :root {
-    --primary-color: #4a90e2; /* tom azul claro */
-    --bg-color: #ffffff; /* fundo branco */
-    --surface-color: #f5f5f5; /* cor de superfície clara */
-    --text-color: #1a1a1a; /* texto escuro */
-    --text-secondary: #555555; /* texto secundário mais claro */
-    --border-color: #cccccc; /* bordas claras */
-    --success-color: #10b981; /* verde */
-    --error-color: #ef4444; /* vermelho */
-    --heart-color: #ff3040; /* vermelho vivo para ícone coração */
-}
-
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            overflow-x: hidden;
-        }
-
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background-color: var(--surface-color);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            z-index: 100;
-        }
-
-        .header-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-right: auto;
-        }
-
-        .search-container {
-            flex: 1;
-            max-width: 300px;
-            margin: 0 16px;
-            position: relative;
-        }
-
-        /* Input melhorado */
-.search-input-advanced {
-    flex: 1;
-    padding: 12px 8px;
-    border: none;
-    background: transparent;
-    color: var(--text-color);
-    font-size: 16px;
-    outline: none;
-}
-
-.search-input-advanced::placeholder {
-    color: var(--text-secondary);
-}
-
-/* Botão limpar */
-.clear-search {
-    padding: 8px 12px;
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 16px;
-    transition: color 0.3s;
-}
-
-.clear-search:hover {
-    color: var(--error-color);
-}
-
-        .add-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 16px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            margin-left: 16px;
-            gap: 8px;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        /* Tabs */
-        .tabs-container {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            right: 0;
-            height: 50px;
-            background-color: var(--surface-color);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            z-index: 99;
-        }
-
-        .tab {
-            flex: 1;
-            height: 100%;
-            border: none;
-            background: none;
-            color: var(--text-secondary);
-            font-size: 16px;
-            cursor: pointer;
-            position: relative;
-            transition: color 0.3s;
-        }
-
-        .tab.active {
-            color: var(--primary-color);
-        }
-
-        .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: var(--primary-color);
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-top: 110px;
-            padding: 16px;
-            min-height: calc(100vh - 110px);
-        }
-
-        /* Feed Grid */
-        .feed-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-        }
-
-        /* Reel Card */
-        .reel-card {
-            background-color: var(--surface-color);
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid var(--border-color);
-        }
-
-        .reel-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .reel-thumbnail {
-            width: 100%;
-            height: 200px;
-            background-color: var(--bg-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .reel-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .reel-thumbnail video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .play-icon {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-        }
-
-        .type-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .type-badge.video {
-            background-color: #ff4757;
-        }
-
-        .type-badge.image {
-            background-color: #2ed573;
-        }
-
-        .reel-info {
-            padding: 12px;
-        }
-
-        .reel-title {
-            font-weight: bold;
-            font-size: 14px;
-            margin-bottom: 8px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .reel-author {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .reel-author img {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .reel-author-name {
-            font-size: 13px;
-            color: #f5f5f5;
-        }
-
-        .reel-genre {
-            display: inline-block;
-            padding: 2px 8px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 10px;
-            font-size: 11px;
-            margin-bottom: 8px;
-        }
-
-        .reel-stats {
-            display: flex;
-            gap: 16px;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-state h3 {
-            font-size: 24px;
-            margin-bottom: 8px;
-            color: var(--text-color);
-        }
-
-        /* Loading */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Modal Base */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-        }
-
-        .modal.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background-color: var(--surface-color);
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 90vw;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            transform: scale(0.9);
-            transition: transform 0.3s;
-        }
-
-        .modal.active .modal-content {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        /* Create Modal */
-        .create-form {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            min-width: 400px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        .form-input {
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .form-input:focus {
-            border-color: var(--primary-color);
-        }
-
-        .form-select {
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 16px;
-            outline: none;
-        }
-
-        .upload-type-tabs {
-            display: flex;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .upload-tab {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background-color: var(--bg-color);
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .upload-tab.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .file-upload {
-            border: 2px dashed var(--border-color);
-            border-radius: 8px;
-            padding: 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-
-        .file-upload:hover {
-            border-color: var(--primary-color);
-        }
-
-        .file-upload.dragover {
-            border-color: var(--primary-color);
-            background-color: rgba(93, 92, 222, 0.1);
-        }
-
-        .upload-icon {
-            font-size: 48px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .submit-btn {
-            padding: 12px 24px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .submit-btn:hover {
-            background-color: #4c4bcd;
-        }
-
-        .submit-btn:disabled {
-            background-color: var(--border-color);
-            cursor: not-allowed;
-        }
-
-/* Adicione apenas isto ao seu CSS existente */
-/* SUBSTITUA todo o CSS de transição por este simples: */
-.fullscreen-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #000;
-    z-index: 2000;
-    display: none;
-    flex-direction: column;
-    /* SEM transições complexas */
-}
-
-/* Efeito suave apenas no conteúdo */
-.overlay-content {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 60px 20px 150px 20px;
-    transition: opacity 0.3s ease; /* Apenas fade suave */
-}
-
-/* Estado durante carregamento */
-.overlay-content.loading {
-    opacity: 0.7;
-}
-        .overlay-header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            z-index: 10;
-        }
-
-        .overlay-type {
-            background-color: rgba(255, 255, 255, 0.2);
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-right: auto;
-        }
-
-        .overlay-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-        }
-
-        /* Player de vídeo fullscreen maior */
-.overlay-content {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 60px 20px 150px 20px; /* Espaço para header e info */
-}
-
-.overlay-media {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
-/* Classe especial para vídeos - MUITO MAIOR */
-.overlay-media.video-player {
-    width: 95vw;           /* 95% da largura da tela */
-    height: 80vh;          /* 80% da altura da tela */
-    max-width: 1200px;     /* Máximo 1200px no desktop */
-    max-height: 675px;     /* Proporção 16:9 para 1200px */
-    border-radius: 12px;   /* Bordas arredondadas */
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); /* Sombra bonita */
-}
-
-/* Responsivo para mobile - AINDA MAIOR */
-@media (max-width: 768px) {
-    .overlay-content {
-        padding: 60px 10px 120px 10px; /* Menos padding lateral */
-    }
-/* ADICIONE estes estilos para os botões de navegação: */
-
-
-/* Botões de navegação */
-.nav-btn {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: none;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    pointer-events: auto; /* Reativa cliques nos botões */
-    opacity: 0.7;
-    margin: 0 20px;
-}
-
-.nav-btn:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-    opacity: 1;
-    transform: scale(1.1);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.nav-btn:active {
-    transform: scale(0.95);
-}
-
-/* Setas dos botões */
-.nav-arrow {
-    font-size: 28px;
-    font-weight: bold;
-    line-height: 1;
-}
-
-/* Botão anterior */
-.nav-prev {
-    background: linear-gradient(45deg, rgba(0, 0, 0, 0.6), rgba(93, 92, 222, 0.3));
-}
-
-.nav-prev:hover {
-    background: linear-gradient(45deg, rgba(0, 0, 0, 0.8), rgba(93, 92, 222, 0.5));
-}
-
-/* Botão próximo */
-.nav-next {
-    background: linear-gradient(-45deg, rgba(0, 0, 0, 0.6), rgba(93, 92, 222, 0.3));
-}
-
-.nav-next:hover {
-    background: linear-gradient(-45deg, rgba(0, 0, 0, 0.8), rgba(93, 92, 222, 0.5));
-}
-
-/* Estados desabilitados */
-.nav-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    pointer-events: auto;
-}
-
-.nav-btn:disabled:hover {
-    transform: none;
-    background-color: rgba(0, 0, 0, 0.6);
-    box-shadow: none;
-}
-
-/* Animação de pulse quando disponível */
-.nav-btn.available {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(93, 92, 222, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(93, 92, 222, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(93, 92, 222, 0); }
-}
-
-/* Responsivo para mobile */
-@media (max-width: 768px) {
-    .nav-btn {
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
-        margin: 0 15px;
-    }
-    
-    .nav-arrow {
-        font-size: 24px;
-    }
-}
-
-@media (max-width: 480px) {
-    .nav-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 18px;
-        margin: 0 10px;
-    }
-    
-    .nav-arrow {
-        font-size: 20px;
-    }
-    
-    .navigation-controls {
-        left: 10px;
-        right: 10px;
-    }
-}
-
-/* Efeito fade quando aparecem */
-.navigation-controls {
-    animation: fadeInNav 0.5s ease-out;
-}
-
-@keyframes fadeInNav {
-    from {
-        opacity: 0;
-        transform: translateY(-50%) scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(-50%) scale(1);
-    }
-}
-    .overlay-media.video-player {
-        width: 98vw;        /* 98% da largura no mobile */
-        height: 75vh;       /* 75% da altura no mobile */
-        max-width: none;    /* Remove limite de largura */
-        max-height: none;   /* Remove limite de altura */
-    }
-}
-
-
-        .overlay-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 80px;
-            padding: 20px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-        }
-
-        .overlay-title {
-            color:#f5f5f5         
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .overlay-author {
-            color:#f5f5f5;          
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .overlay-author img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .overlay-genre {
-            display: inline-block;
-            padding: 4px 8px;
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 10px;
-            font-size: 12px;
-        }
-
-        .overlay-actions {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .action-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: none;
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-
-        .action-btn:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-
-        .action-btn.liked {
-            background-color: var(--heart-color);
-        }
-
-        .action-count {
-            color:white;
-            font-size: 12px;
-            margin-top: 4px;
-            text-align: center;
-        }
-
-        .delete-btn {
-            background-color: rgba(239, 68, 68, 0.8);
-        }
-
-        /* Comments Panel */
-        .comments-panel {
-            position: fixed;
-            bottom: -100%;
-            left: 0;
-            right: 0;
-            height: 70vh;
-            background-color: var(--surface-color);
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            z-index: 3000;
-            transition: bottom 0.3s ease-out;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .comments-panel.active {
-            bottom: 0;
-        }
-
-        .comments-header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .comments-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-        }
-
-        .comment {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .comment-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .comment-content {
-            flex: 1;
-        }
-
-        .comment-author {
-            font-weight: 500;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .comment-text {
-            font-size: 14px;
-            line-height: 1.4;
-            margin-bottom: 4px;
-        }
-
-        .comment-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .comment-input-container {
-            padding: 16px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .comment-input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 16px;
-            outline: none;
-            resize: none;
-        }
-
-        .send-comment-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            border: none;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        /* ===== NOVOS ESTILOS PARA VERIFICAÇÃO DE VÍDEO ===== */
-        .video-error-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(185, 28, 28, 0.9));
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            z-index: 10;
-        }
-
-        .error-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-            animation: errorPulse 2s infinite;
-        }
-
-        @keyframes errorPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-
-        .error-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .error-message {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        .retry-btn {
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 25px;
-            color: white;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            backdrop-filter: blur(5px);
-        }
-
-        .retry-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
-
-        .video-loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(93, 92, 222, 0.3));
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            border-radius: 12px;
-            z-index: 5;
-        }
-
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: loadingSpin 1s linear infinite;
-            margin-bottom: 16px;
-        }
-
-        @keyframes loadingSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 16px;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-
-        /* Platform badges */
-        .platform-badge {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            padding: 4px 8px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            backdrop-filter: blur(5px);
-        }
-
-        .platform-youtube { background: linear-gradient(45deg, #ff0000, #cc0000); }
-        .platform-vimeo { background: linear-gradient(45deg, #1ab7ea, #0d8db8); }
-        .platform-tiktok { background: linear-gradient(45deg, #ff0050, #000000); }
-        .platform-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
-        .platform-facebook { background: linear-gradient(45deg, #1877f2, #42a5f5); }
-        .platform-twitter { background: linear-gradient(45deg, #1da1f2, #0d8bd9); }
-        .platform-direct { background: linear-gradient(45deg, #4caf50, #388e3c); }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .search-container {
-                display: none;
-            }
-
-            .create-form {
-                min-width: auto;
-                width: 90vw;
-            }
-
-            .feed-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 12px;
-            }
-
-            .overlay-info {
-                right: 70px;
-            }
-
-            .overlay-actions {
-                right: 10px;
-                gap: 16px;
-            }
-
-            .action-btn {
-                width: 44px;
-                height: 44px;
-                font-size: 18px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header {
-                padding: 0 12px;
-            }
-
-            .main-content {
-                padding: 12px;
-            }
-
-            .feed-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .modal-content {
-                padding: 16px;
-                margin: 16px;
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-color);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
-        }
-
-        /* Animations */
-        @keyframes heartBeat {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-        }
-
-        .heart-animation {
-            animation: heartBeat 0.6s ease-in-out;
-        }
-
-        /* Login Screen */
-        .login-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 5000;
-        }
-
-        .login-content {
-            text-align: center;
-            max-width: 400px;
-            padding: 40px;
-        }
-
-        .login-title {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 16px;
-            background: linear-gradient(45deg, var(--primary-color), #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .login-subtitle {
-            font-size: 16px;
-            color: var(--text-secondary);
-            margin-bottom: 32px;
-        }
-
-        .login-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 24px;
-            background-color: white;
-            color: #333;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-
-        .login-btn:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .google-icon {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Alert Custom */
-        .custom-alert {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 4000;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-out;
-        }
-
-        .custom-alert.show {
-            transform: translateX(0);
-        }
-
-        .custom-alert.success {
-            background-color: var(--success-color);
-        }
-
-        .custom-alert.error {
-            background-color: var(--error-color);
-        }
-
-        /* Views Modal */
-        .views-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .view-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .view-item:last-child {
-            border-bottom: none;
-        }
-
-        .view-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .view-info {
-            flex: 1;
-        }
-
-        .view-name {
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        .view-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-    
-    #heartIcon {
-    transition: fill 0.4s ease, stroke 0.4s ease;
-    fill: none;
-    stroke: white;
-  }
-  
-  #heartIcon.animating {
-    fill: red;
-    stroke: red;
-  }
-  
-  /* ADICIONE este CSS para mobile: */
-@media (max-width: 480px) {
-    .delete-toast {
-        top: 10px !important;
-        right: 10px !important;
-        left: 10px !important;
-        min-width: auto !important;
-    }
-}
-
-   
-/* ADICIONE estes estilos para o filtro de categorias: */
-
-/* Container do filtro */
-.category-filter {
-    position: relative;
-    margin-right: 16px;
-}
-
-/* Botão principal */
-.category-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border: 2px solid var(--border-color);
-    border-radius: 25px;
-    background: linear-gradient(135deg, var(--surface-color), var(--bg-color));
-    color: var(--text-color);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    font-weight: 500;
-    min-width: 140px;
-    justify-content: space-between;
-}
-
-.category-button:hover {
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(93, 92, 222, 0.3);
-}
-
-.category-button.active {
-    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
-    border-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 4px 15px rgba(93, 92, 222, 0.4);
-}
-
-.category-icon {
-    font-size: 16px;
-}
-
-.category-text {
-    flex: 1;
-    text-align: left;
-}
-
-.category-arrow {
-    font-size: 12px;
-    transition: transform 0.3s ease;
-}
-
-.category-button.active .category-arrow {
-    transform: rotate(180deg);
-}
-
-/* Dropdown */
-.category-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: var(--surface-color);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    margin-top: 8px;
-    padding: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    min-width: 220px;
-    backdrop-filter: blur(10px);
-}
-
-.category-dropdown.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-/* Opções do dropdown */
-.category-option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-bottom: 4px;
-}
-
-.category-option:last-child {
-    margin-bottom: 0;
-}
-
-.category-option:hover {
-    background-color: var(--bg-color);
-    transform: translateX(4px);
-}
-
-.category-option.active {
-    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
-    color: white;
-    transform: translateX(4px);
-}
-
-.category-emoji {
-    font-size: 18px;
-    width: 24px;
-    text-align: center;
-}
-
-.category-option span:nth-child(2) {
-    flex: 1;
-    font-weight: 500;
-}
-
-.category-count {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: var(--text-secondary);
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: bold;
-    min-width: 20px;
-    text-align: center;
-}
-
-.category-option.active .category-count {
-    background-color: rgba(255, 255, 255, 0.3);
-    color: white;
-}
-
-/* Responsivo */
-@media (max-width: 768px) {
-    .category-filter {
-        margin-right: 8px;
-    }
-    
-    .category-button {
-        min-width: 120px;
-        padding: 8px 12px;
-        font-size: 13px;
-    }
-    
-    .category-text {
-        display: none;
-    }
-    
-    .category-dropdown {
-        left: -50px;
-        right: -50px;
-    }
-}
-
-@media (max-width: 480px) {
-    .category-dropdown {
-        left: -100px;
-        right: -100px;
-    }
-}
-
-/* Animações */
-@keyframes categoryPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-.category-button.pulse {
-    animation: categoryPulse 0.6s ease-in-out;
-}
-  /* ADICIONE estes estilos ao seu CSS: */
-
-/* Barra de categorias */
-.category-bar {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-    padding: 0 4px;
-    flex-wrap: wrap;
-}
-
-.category-label {
-    font-size: 16px;
-    color: var(--text-color);
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-/* Container do filtro principal */
-.category-filter-main {
-    position: relative;
-    flex: 1;
-    max-width: 350px;
-}
-
-/* Botão de seleção */
-.category-select {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    border: 2px solid var(--border-color);
-    border-radius: 16px;
-    background: linear-gradient(135deg, var(--surface-color), var(--bg-color));
-    color: var(--text-color);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 15px;
-    font-weight: 500;
-    justify-content: space-between;
-}
-
-.category-select:hover {
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(93, 92, 222, 0.2);
-}
-
-.category-select.active {
-    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
-    border-color: var(--primary-color);
-    color: white;
-    box-shadow: 0 4px 15px rgba(93, 92, 222, 0.3);
-}
-
-.category-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-}
-
-.category-text {
-    flex: 1;
-    text-align: left;
-}
-
-.category-arrow {
-    font-size: 14px;
-    transition: transform 0.3s ease;
-    flex-shrink: 0;
-}
-
-.category-select.active .category-arrow {
-    transform: rotate(180deg);
-}
-
-/* Dropdown principal */
-.category-dropdown-main {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: var(--surface-color);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    margin-top: 8px;
-    padding: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.category-dropdown-main.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-/* Opções do dropdown */
-.category-option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-bottom: 4px;
-}
-
-.category-option:last-child {
-    margin-bottom: 0;
-}
-
-.category-option:hover {
-    background-color: var(--bg-color);
-    transform: translateX(4px);
-}
-
-.category-option.active {
-    background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
-    color: white;
-    transform: translateX(4px);
-}
-
-.category-emoji {
-    font-size: 20px;
-    width: 28px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.category-option span:nth-child(2) {
-    flex: 1;
-    font-weight: 500;
-    font-size: 14px;
-}
-
-.category-count {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-secondary);
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: bold;
-    min-width: 24px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.category-option.active .category-count {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-/* Responsivo */
-@media (max-width: 768px) {
-    .category-bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        margin-bottom: 20px;
-    }
-    
-    .category-label {
-        font-size: 15px;
-        text-align: center;
-    }
-    
-    .category-filter-main {
-        max-width: none;
-    }
-    
-    .category-select {
-        padding: 12px 16px;
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 480px) {
-    .category-bar {
-        margin-bottom: 16px;
-        padding: 0 2px;
-    }
-    
-    .category-label {
-        font-size: 14px;
-    }
-    
-    .category-select {
-        padding: 10px 14px;
-    }
-    
-    .category-dropdown-main {
-        margin-top: 6px;
-        max-height: 300px;
-    }
-    
-    .category-option {
-        padding: 10px 14px;
-    }
-}
-
-/* Animações */
-@keyframes categoryPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
-}
-
-.category-select.pulse {
-    animation: categoryPulse 0.6s ease-in-out;
-}
-
-/* Scrollbar customizada para dropdown */
-.category-dropdown-main::-webkit-scrollbar {
-    width: 6px;
-}
-
-.category-dropdown-main::-webkit-scrollbar-track {
-    background: var(--bg-color);
-    border-radius: 3px;
-}
-
-.category-dropdown-main::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 3px;
-}
-
-.category-dropdown-main::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
-}
-
-/* Saída para cima */
-.slide-up {
-    animation: slideUpOut 0.25s ease forwards;
-}
-
-/* Saída para baixo */
-.slide-down {
-    animation: slideDownOut 0.25s ease forwards;
-}
-
-/* Entrada de cima */
-.slide-up-in {
-    animation: slideUpIn 0.25s ease forwards;
-}
-
-/* Entrada de baixo */
-.slide-down-in {
-    animation: slideDownIn 0.25s ease forwards;
-}
-
-@keyframes slideUpOut {
-    to { transform: translateY(-100%); opacity: 0; }
-}
-
-@keyframes slideDownOut {
-    to { transform: translateY(100%); opacity: 0; }
-}
-
-@keyframes slideUpIn {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slideDownIn {
-    from { transform: translateY(-100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title> Vídeos</title>
+<meta name="theme-color" content="#fff" />
+<style>
+/* ===== SIBEM Video Player - Tema Claro Completo ===== */
+:root{
+  --svp-bg:#ffffff; --svp-card:#ffffff; --svp-elev:#f8f9fa; --svp-text:#0f0f0f; --svp-sub:#606060;
+  --svp-accent:#ff2d55; --svp-accent-2:#3ea6ff; --svp-ok:#22c55e; --svp-warn:#f59e0b; --svp-danger:#ef4444;
+  --svp-chip:#e5e5e5; --svp-border:#e5e5e5; --svp-hover:#f5f5f5;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;padding:0;background:var(--svp-bg);color:var(--svp-text);
+  font-family:Inter,system-ui,Roboto,Helvetica,Arial,sans-serif;
+  overflow-x:hidden;width:100vw;height:100vh;position:fixed;
+}
+button,input,select{font:inherit}
+a{color:inherit;text-decoration:none}
+
+.svp-app{
+  display:flex;flex-direction:column;height:100vh;width:100vw;position:fixed;top:0;left:0;overflow:hidden;
+}
+
+.svp-topbar{
+  position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--svp-border);flex-shrink:0;
+}
+
+.svp-header-main{display:flex;align-items:center;gap:.5rem;padding:.75rem}
+
+.svp-logo{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.9rem}
+.svp-logo svg{width:20px;height:20px;fill:var(--svp-accent)}
+
+.svp-search{
+  display:flex;align-items:center;gap:.5rem;background:var(--svp-elev);border:1px solid var(--svp-border);
+  border-radius:20px;padding:.4rem .6rem;flex:1;margin:0 .5rem;width:58px;
+}
+.svp-search input{flex:1;background:transparent;border:0;outline:none;color:var(--svp-text);font-size:16px; width:48px}
+.svp-search button{background:transparent;border:0;color:var(--svp-sub);display:flex;padding:.25rem}
+.svp-search svg{width:18px;height:18px}
+
+.svp-nav-btns{display:flex;gap:.25rem}
+.svp-nav-btn{
+  background:transparent;border:0;color:var(--svp-sub);padding:.5rem .75rem;border-radius:20px;
+  font-size:.85rem;font-weight:600;transition:all .2s;
+}
+.svp-nav-btn.is-active{background:var(--svp-text);color:#fff}
+.svp-nav-btn:not(.is-active):hover{background:var(--svp-hover)}
+
+.svp-cats{
+  display:flex;gap:.5rem;padding:.5rem .75rem;border-bottom:1px solid var(--svp-border);overflow:auto;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.svp-cats::-webkit-scrollbar{display:none}
+.svp-chip{
+  background:var(--svp-chip);color:var(--svp-sub);border:0;border-radius:999px;
+  padding:.35rem .8rem;white-space:nowrap;font-size:.85rem;
+}
+.svp-chip.is-active{background:var(--svp-text);color:#fff;font-weight:600}
+
+.svp-content{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
+.svp-page{display:none;height:100%}
+.svp-page.is-active{display:block}
+
+.svp-grid{
+  padding:.75rem;display:grid;grid-template-columns:1fr;gap:.8rem;
+}
+@media(min-width:480px){.svp-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:768px){.svp-grid{grid-template-columns:1fr 1fr 1fr}}
+
+.svp-card{
+  background:var(--svp-card);border-radius:12px;overflow:hidden;cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,.1);
+}
+.svp-thumb-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000}
+.svp-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.svp-dur{
+  position:absolute;right:.5rem;bottom:.5rem;background:rgba(0,0,0,.7);color:#fff;
+  padding:.15rem .35rem;border-radius:6px;font-size:.75rem;
+}
+.svp-meta{display:flex;gap:.6rem;margin-top:.5rem;padding:0 .5rem .5rem}
+.svp-avatar{
+  width:36px;height:36px;border-radius:50%;background:#ddd;flex:0 0 36px;
+  background-size:cover;background-position:center;border:2px solid var(--svp-border);
+}
+.svp-title{
+  font-weight:600;line-height:1.25;margin:0 0 .15rem;font-size:.95rem;color:var(--svp-text);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.svp-sub{color:var(--svp-sub);font-size:.85rem;display:flex;align-items:center;gap:.25rem}
+
+.svp-actions{display:flex;align-items:center;gap:.75rem;margin-top:.4rem}
+.svp-action{
+  display:inline-flex;align-items:center;gap:.35rem;background:transparent;border:0;
+  color:var(--svp-sub);padding:.25rem .5rem;border-radius:20px;transition:background .2s;font-size:.85rem;
+}
+.svp-action:hover{background:var(--svp-hover)}
+.svp-action svg{width:16px;height:16px;fill:currentColor}
+.svp-action.is-like{color:var(--svp-accent-2)}
+.svp-action.is-danger{color:var(--svp-danger)}
+
+.svp-studio{padding:1rem;height:100%;overflow-y:auto}
+.svp-form{
+  background:var(--svp-card);border:1px solid var(--svp-border);border-radius:12px;
+  padding:1rem;display:grid;gap:.6rem;box-shadow:0 1px 3px rgba(0,0,0,.1);
+}
+.svp-row{display:grid;gap:.35rem}
+.svp-input,.svp-select,.svp-file,.svp-btn{
+  width:100%;border-radius:10px;border:1px solid var(--svp-border);background:var(--svp-bg);
+  color:var(--svp-text);padding:.75rem;font-size:16px;
+}
+.svp-file{padding:.55rem}
+.svp-btn{background:var(--svp-accent);border:0;font-weight:700;color:#fff}
+.svp-btn.alt{background:var(--svp-chip);color:var(--svp-text)}
+.svp-hint{color:var(--svp-sub);font-size:.85rem}
+.svp-cover-preview{
+  width:100%;aspect-ratio:16/9;border-radius:10px;background:var(--svp-elev);
+  object-fit:cover;border:1px dashed var(--svp-border);
+}
+
+.svp-mylist{margin-top:1rem}
+.svp-empty{color:var(--svp-sub);text-align:center;padding:1rem}
+
+/* Player Overlay - Tema Claro Tela Cheia */
+.svp-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  min-height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: none;
+}
+.svp-overlay.is-open {
+  display: flex;
+}
+.svp-player-header{
+  background:var(--svp-bg);border-bottom:1px solid var(--svp-border);
+  display:flex;justify-content:space-between;align-items:center;padding:1rem;
+  flex-shrink:0;
+}
+.svp-player-title-wrap{flex:1;padding-right:1rem}
+.svp-player-title-main{font-size:1.1rem;font-weight:600;margin-bottom:.25rem;color:var(--svp-text)}
+.svp-player-meta{font-size:.85rem;color:var(--svp-sub)}
+
+.svp-player-controls{display:flex;gap:.5rem}
+.svp-player-btn{
+  background:var(--svp-hover);border:1px solid var(--svp-border);color:var(--svp-text);
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.svp-player-btn:hover{background:var(--svp-chip)}
+.svp-player-btn svg{width:20px;height:20px;fill:currentColor}
+
+.svp-player-video{
+  background:#000;position:relative;display:flex;align-items:center;justify-content:center;
+  flex:1;min-height:0;
+}
+.svp-player-video iframe,.svp-player-video video{
+  width:100%;height:100%;border:0;
+}
+
+.svp-player-footer {
+  background: var(--svp-bg);
+  border-top: 1px solid var(--svp-border);
+  max-height: calc(100vh - 200px); /* ocupa quase toda tela, mas deixa espaço pro player */
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.svp-player-info{padding:1rem;border-bottom:1px solid var(--svp-border)}
+.svp-player-actions{display:flex;align-items:center;gap:1rem;margin-top:.75rem}
+.svp-player-action{
+  display:flex;align-items:center;gap:.5rem;background:var(--svp-hover);
+  border:1px solid var(--svp-border);color:var(--svp-text);padding:.5rem 1rem;
+  border-radius:20px;font-weight:600;transition:background .2s;
+}
+.svp-player-action:hover{background:var(--svp-chip)}
+.svp-player-action.is-liked{background:var(--svp-accent-2);color:#fff;border-color:var(--svp-accent-2)}
+.svp-player-action svg{width:18px;height:18px;fill:currentColor}
+
+.svp-comments{padding:1rem;border-bottom:1px solid var(--svp-border)}
+.svp-comments-header{font-size:1rem;font-weight:600;margin-bottom:.75rem;color:var(--svp-text)}
+.svp-comment-form{display:flex;gap:.5rem;margin-bottom:1rem;}
+.svp-comment-input{
+  flex:1;border:1px solid var(--svp-border);border-radius:20px;
+  padding:.5rem 1rem;background:var(--svp-bg);color:var(--svp-text);font-size:16px;
+}
+.svp-comment-btn {
+  background: var(--svp-accent-2);
+  color: #fff;
+  border: 0;
+  border-radius: 20px;
+  padding: .5rem 1rem;
+  font-weight: 600;
+  display: flex;              /* ativa flexbox */
+  align-items: center;        /* centraliza verticalmente */
+  justify-content: flex-start;/* força conteúdo à esquerda */
+  gap: 8px;                   /* espaço entre ícone e texto */
+  width: auto;                /* deixa o botão se ajustar ao conteúdo */
+  cursor: pointer;
+} 
+.svp-comment{
+  display:flex;gap:.75rem;margin-bottom:1rem;padding-bottom:1rem;
+  border-bottom:1px solid var(--svp-border);
+}
+.svp-comment:last-child{border-bottom:0}
+.svp-comment-avatar{
+  width:32px;height:32px;border-radius:50%;background:var(--svp-chip);
+  flex:0 0 32px;background-size:cover;background-position:center;
+  border:2px solid var(--svp-border);
+}
+.svp-comment-content{flex:1}
+.svp-comment-author{font-weight:600;font-size:.9rem;margin-bottom:.25rem;color:var(--svp-text)}
+.svp-comment-text{color:var(--svp-text);line-height:1.4;margin-bottom:.25rem}
+.svp-comment-time{color:var(--svp-sub);font-size:.8rem}
+
+.svp-related{padding:1rem; }
+.svp-related-header{font-size:1rem;font-weight:600;margin-bottom:.75rem;color:var(--svp-text)}
+.svp-related-grid{display:grid;gap:.75rem}
+.svp-related-item{
+  display:flex;gap:.75rem;cursor:pointer;padding:.5rem;border-radius:8px;
+  transition:background .2s;
+}
+.svp-related-item:hover{background:var(--svp-hover)}
+.svp-related-thumb{
+  width:120px;aspect-ratio:16/9;border-radius:8px;object-fit:cover;
+  background:var(--svp-chip);flex:0 0 120px;
+}
+.svp-related-info{flex:1;min-width:0}
+.svp-related-title{
+  font-weight:600;font-size:.9rem;line-height:1.3;margin-bottom:.25rem;color:var(--svp-text);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.svp-related-meta{color:var(--svp-sub);font-size:.8rem}
+
+/* Responsivo Desktop */
+@media(min-width:768px){
+  .svp-overlay{flex-direction:row}
+  .svp-player-main{flex:1;display:flex;flex-direction:column}
+  .svp-player-sidebar{width:350px;background:var(--svp-elev);border-left:1px solid var(--svp-border)}
+  .svp-player-footer{max-height:none;overflow:visible}
+  .svp-related{border-top:0}
+}
+  .svp-tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+}
+
+.svp-tab-btn {
+  flex: 1;
+  padding: .75rem;
+  background: #f5f5f5;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.svp-tab-btn.active {
+  background: var(--svp-bg);
+  border-bottom: 2px solid var(--svp-accent-2);
+}
+
+.tab-pane {
+  display: none;
+  padding: 1rem 0;
+}
+
+.tab-pane.active {
+  display: block;
+}
+</style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-screen">
-        <div class="login-content">
-            <h1 class="login-title">Reels </h1>
-            <p class="login-subtitle">Compartilhe seus momentos favoritos</p>
-            <button id="loginBtn" class="login-btn" style="display:none;>
-                <svg class="google-icon" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Entrar com Google
-            </button>
-        </div>
+<div class="svp-app" id="svp-app">
+  <!-- Header com navegação -->
+  <div class="svp-topbar">
+    <div class="svp-header-main">
+      <div class="svp-logo">
+       
+      </div>
+      
+      <div class="svp-search" id="svp-search">
+        <button id="svp-search-btn" aria-label="Pesquisar">
+          <svg viewBox="0 0 24 24"><path d="M9.5 3a6.5 6.5 0 015.164 10.45l4.443 4.443-1.414 1.414-4.443-4.443A6.5 6.5 0 119.5 3zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/></svg>
+        </button>
+        <input id="svp-search-input" type="search" placeholder="Pesquisar" autocomplete="off" />
+        <button style="display:none;" id="svp-clear-btn" aria-label="Limpar">
+          <svg viewBox="0 0 24 24"><path d="M18.3 5.71L12 12.01l-6.29-6.3-1.42 1.42 6.3 6.29-6.3 6.29 1.42 1.42L12 14.85l6.29 6.28 1.42-1.41-6.3-6.29 6.3-6.29z"/></svg>
+        </button>
+      </div>
+       
+<div class="svp-nav-btns">
+        <button class="svp-nav-btn is-active" data-tab="explore">Explorar</button>
+        <button class="svp-nav-btn" data-tab="studio">Estúdio</button>
+      </div>
     </div>
-    <!-- Main App -->
-    <div id="mainApp" style="display: none;">
-    	
-        <!-- ADICIONE este botão no header, após o título: -->
-
-<div class="header">
-	
-    <h1 class="header-title">Reels</h1>
-    
-
-    <!-- BARRA DE PESQUISA MELHORADA -->
-    <div class="search-container-advanced">
-        <div class="search-wrapper">
-               <input type="text" id="searchInput" class="search-input-advanced" 
-                   placeholder="Buscar por título, usuário ou gênero...">
-            <button id="clearSearch" class="clear-search" style="display: none;">✕</button>
-        </div>
-        
-        <!-- FILTROS RÁPIDOS -->
-        <div class="search-filters" id="searchFilters" style="display: none;">
-            <div class="filter-section">
-                <span class="filter-label">Buscar por:</span>
-                <button class="filter-btn active" data-filter="all">Tudo</button>
-                <button class="filter-btn" data-filter="title">Título</button>
-                <button class="filter-btn" data-filter="author">Usuário</button>
-                <button class="filter-btn" data-filter="genre">Gênero</button>
-            </div>
-        </div>
-        
-        <!-- RESULTADOS DA BUSCA -->
-        <div class="search-results" id="searchResults" style="display: none;">
-            <div class="search-stats">
-                <span id="searchStats"></span>
-            </div>
-        </div>
-    </div>
-            <button id="addBtn" class="add-btn">+</button>
-            <div class="user-info" style="display:none;">
-                <img id="userAvatar" class="user-avatar" src="" alt="Avatar" style="display:none;">
-                <span id="userName"></span>
-                <button id="logoutBtn" class="logout-btn" style="display:none;">Sair</button>
-            </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs-container">
-            <button class="tab" data-tab="all" style="display:none;">Todos</button>
-            <button class="tab active" data-tab="video">Vídeos</button>
-            <button class="tab" data-tab="image">Imagens</button>
-        </div>
-
-        
-     <!-- ENCONTRE a div "main-content" e ADICIONE esta barra ANTES do feedContainer: -->
-
-<div class="main-content">
-    
-    <!-- BARRA DE CATEGORIAS -->
-    <div class="category-bar">
-        <span class="category-label">Filtrar por categoria:</span>
-        
-        <div class="category-filter-main">
-            <button id="categoryBtn" class="category-select">
-                <span class="category-icon">🎯</span>
-                <span class="category-text">Todas as Categorias</span>
-                <span class="category-arrow">▼</span>
-            </button>
-            
-            <!-- DROPDOWN DE CATEGORIAS -->
-            <div id="categoryDropdown" class="category-dropdown-main">
-                <div class="category-option active" data-category="all">
-                    <span class="category-emoji">🎯</span>
-                    <span>Todas as Categorias</span>
-                    <span class="category-count" id="count-all">0</span>
-                </div>
-                <div class="category-option" data-category="musica">
-                    <span class="category-emoji">🎵</span>
-                    <span>Música</span>
-                    <span class="category-count" id="count-musica">0</span>
-                </div>
-                <div class="category-option" data-category="comedia">
-                    <span class="category-emoji">😂</span>
-                    <span>Comédia</span>
-                    <span class="category-count" id="count-comedia">0</span>
-                </div>
-                <div class="category-option" data-category="danca">
-                    <span class="category-emoji">💃</span>
-                    <span>Dança</span>
-                    <span class="category-count" id="count-danca">0</span>
-                </div>
-                <div class="category-option" data-category="educativo">
-                    <span class="category-emoji">📚</span>
-                    <span>Educativo</span>
-                    <span class="category-count" id="count-educativo">0</span>
-                </div>
-                <div class="category-option" data-category="lifestyle">
-                    <span class="category-emoji">✨</span>
-                    <span>Lifestyle</span>
-                    <span class="category-count" id="count-lifestyle">0</span>
-                </div>
-                <div class="category-option" data-category="outros">
-                    <span class="category-emoji">🎲</span>
-                    <span>Outros</span>
-                    <span class="category-count" id="count-outros">0</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div id="feedContainer">
-        <!-- Feed de reels aqui -->
-  <div class="loading">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="svp-cats" id="svp-cats"></div>
   </div>
-</div>   
-    <!-- Create Modal -->
-    <div id="createModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Criar Novo Reel</h2>
-                <button class="close-btn">&times;</button>
-            </div>
-            <form id="createForm" class="create-form">
-                <div class="form-group">
-                    <label class="form-label">Título</label>
-                    <input type="text" id="titleInput" class="form-input" placeholder="Digite o título do seu reel" required maxlength="100">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Gênero</label>
-                    <select id="genreSelect" class="form-select" required>
-                        <option value="">Selecione um gênero</option>
-                        <option value="musica">Música</option>
-                        <option value="comedia">Comédia</option>
-                        <option value="danca">Dança</option>
-                        <option value="educativo">Educativo</option>
-                        <option value="lifestyle">Lifestyle</option>
-                        <option value="outros">Outros</option>
-                    </select>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">Tipo de Conteúdo</label>
-                    <div class="upload-type-tabs">
-                        <button type="button" class="upload-tab active" data-type="image">Imagem</button>
-                        <button type="button" class="upload-tab" data-type="video">Vídeo</button>
-                    </div>
-                </div>
+  <!-- Conteúdo principal -->
+  <main class="svp-content">
+    <!-- Página Explorar -->
+    <section class="svp-page is-active" id="svp-page-explore">
+      <div class="svp-grid" id="svp-feed"></div>
+    </section>
 
-                <div id="imageUpload" class="form-group">
-                    <label class="form-label">Upload de Imagem</label>
-                    <div class="file-upload" id="fileUploadArea">
-                        <div class="upload-icon">📷</div>
-                        <p>Clique ou arraste uma imagem aqui</p>
-                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                    </div>
-                </div>
-
-                <div id="videoUpload" class="form-group" style="display: none;">
-                    <label class="form-label">Link do Vídeo Universal</label>
-                    <input type="url" id="videoInput" class="form-input" placeholder="Cole qualquer link de vídeo (YouTube, TikTok, Instagram, Vimeo, Facebook, Twitter, URLs diretas...)">
-                    <small style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">
-                        ✅ Suporte a: YouTube, TikTok, Instagram, Vimeo, Facebook, Twitter, Dailymotion, Twitch e URLs diretas
-                    </small>
-                </div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    Publicar Reel
-                </button>
-            </form>
+    <!-- Página Meu Estúdio -->
+    <section class="svp-page" id="svp-page-studio">
+      <div class="svp-studio">
+        <div class="svp-form" id="svp-form">
+          <div class="svp-row">
+            <label for="svp-title">Título</label>
+            <input class="svp-input" id="svp-title" type="text" placeholder="Ex.: Highlights Angola vs ..." />
+          </div>
+          <div class="svp-row">
+            <label for="svp-category">Categoria</label>
+            <select class="svp-select" id="svp-category"></select>
+          </div>
+          <div class="svp-row">
+            <label for="svp-url">URL do vídeo (YouTube, Facebook público ou MP4)</label>
+            <input class="svp-input" id="svp-url" type="url" placeholder="https://..." />
+            <div class="svp-hint">Dica: YouTube e Facebook público usam embed; links diretos usam player nativo.</div>
+          </div>
+          <div class="svp-row">
+            <label for="svp-cover">Capa (opcional via ImgBB)</label>
+            <input class="svp-file" id="svp-cover" type="file" accept="image/*" />
+            <img src="https://pluginicons.craft-cdn.com/icon-pickerbUDwu2AsfAwD2UfXuG1murydJQbPqnvmKcEu.svg?1551792320" class="svp-cover-preview" id="svp-cover-preview" alt="Prévia da capa" />
+            <div class="svp-hint">Você pode publicar sem capa. Se enviar, fazemos upload via ImgBB automaticamente.</div>
+          </div>
+          <button class="svp-btn" id="svp-publish">Publicar vídeo</button>
+          <div class="svp-hint" id="svp-publish-hint"></div>
         </div>
+
+        <div class="svp-mylist">
+          <h3>Meus vídeos</h3>
+          <div id="svp-myfeed"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Player Overlay Tema Claro Tela Cheia -->
+<div class="svp-overlay" id="svp-overlay">
+  <div class="svp-player-main">
+    <!-- Header do player -->
+    <div class="svp-player-header">
+      <div class="svp-player-title-wrap">
+        <div class="svp-player-title-main" id="svp-player-title">Carregando...</div>
+        <div class="svp-player-meta" id="svp-player-meta">0 visualizações</div>
+      </div>
+      <div class="svp-player-controls">
+        <button style="display:none;"  class="svp-player-btn" id="svp-fullscreen" title="Tela cheia" aria-label="Tela cheia">
+          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm12 5h-5v-2h3v-3h2v5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
+        </button>
+        <button class="svp-player-btn" id="svp-close" aria-label="Fechar">
+          <svg viewBox="0 0 24 24"><path d="M18.3 5.71L12 12.01l-6.29-6.3-1.42 1.42 6.3 6.29-6.3 6.29 1.42 1.42L12 14.85l6.29 6.28 1.42-1.41-6.3-6.29 6.3-6.29z"/></svg>
+        </button>
+      </div>
     </div>
 
-    <!-- Fullscreen Overlay -->
-    <div id="fullscreenOverlay" class="fullscreen-overlay">
-        <div class="overlay-header">
-            <span id="overlayType" class="overlay-type">VÍDEO</span>
-            <button id="overlayClose" class="overlay-close">&times;</button>
-        </div>
-        <div class="overlay-content">
-            <div id="overlayMedia"></div>
-        </div>
-        <div class="overlay-info">
-            <h3 id="overlayTitle" class="overlay-title"></h3>
-            <div class="overlay-author">
-                <img id="overlayAuthorAvatar" src="" alt="Author">
-                <span id="overlayAuthorName"></span>
-            </div>
-            <span id="overlayGenre" class="overlay-genre"></span>
-        </div>
-        <div class="overlay-actions">
-           <!-- ENCONTRE a seção .overlay-actions no seu HTML e ADICIONE os botões de navegação: -->
+    <!-- Área do vídeo -->
+    <div class="svp-player-video" id="svp-player-body"></div>
 
-<div class="overlay-actions">
-    <button id="deleteBtn" aria-label="Excluir" style="background: none; border: none; cursor: pointer; padding: 0;">
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-    <polyline points="3 6 5 6 21 6"></polyline>
-    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-    <path d="M10 11v6"></path>
-    <path d="M14 11v6"></path>
-    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-  </svg>
-</button>
+    <!-- Informações e comentários -->
+    <div class="svp-player-footer">
+      <div class="svp-player-info">
+        <div class="svp-player-actions">
+          <button class="svp-player-action" id="svp-player-like" aria-label="Curtir">
+            <svg viewBox="0 0 24 24"><path d="M12.1 8.64l-.1.1-.11-.11C10.14 6.82 7.1 7.24 5.5 9c-1.61 1.76-1.45 4.45.36 6.17l5.86 5.66 5.86-5.66c1.81-1.72 1.97-4.41.36-6.17-1.6-1.76-4.64-2.18-6.34-.36z"/></svg>
+            <span id="svp-player-like-count">0</span>
+          </button>
+        </div>
+      </div>
 
-    <div>
-        <button id="likeBtn" aria-label="Curtir" style="background: none; border: none; cursor: pointer; padding: 0;">
-  <svg id="heartIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-  </svg>
-</button>
+     <!-- Abas -->
+<div class="svp-tabs">
+  <button class="svp-tab-btn active" data-tab="related">Vídeos relacionados</button>
+  <button class="svp-tab-btn" data-tab="comments">Comentários</button>
+</div>
 
-        <div id="likeCount" class="action-count">0</div>
+<!-- Conteúdo das abas -->
+<div class="svp-tab-content">
+
+  <!-- Vídeos relacionados (aba inicial visível) -->
+  <div class="svp-related tab-pane active" id="tab-related">
+    <div class="svp-related-header">Vídeos relacionados</div>
+    <div class="svp-related-grid" id="svp-related-videos"></div>
+  </div>
+
+  <!-- Comentários (aba oculta no início) -->
+  <div class="svp-comments tab-pane" id="tab-comments">
+    <div class="svp-comments-header">Comentários</div>
+    <div class="svp-comment-form">
+      <input class="svp-comment-input" id="svp-comment-input" type="text" placeholder="Adicione um comentário..." />
+      <button class="svp-comment-btn" id="svp-comment-btn">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+             style="width:24px;height:24px">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l7-7 7 7"/>
+        </svg>
+      </button>
     </div>
-    <div>
-       <button id="commentBtn" aria-label="Comentários" style="background: none; border: none; cursor: pointer; padding: 0;">
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-</button>
-
-        <div id="commentCount" class="action-count">0</div>
-    </div>
-    <div>
-       <button id="viewBtn" aria-label="Visualizações" style="background: none; border: none; cursor: pointer; padding: 0;">
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="3"></circle>
-    <path d="M2.458 12C3.732 7.943 7.523 5 12 5s8.268 2.943 9.542 7c-1.274 4.057-5.065 7-9.542 7s-8.268-2.943-9.542-7z"></path>
-  </svg>
-</button>
-
-        <div id="viewCount" class="action-count">0</div>
-    <button id="toggleBtn" aria-label="Toggle Buttons" style="background: none; border: none; cursor: pointer; padding: 0;">
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
-</button>
-
-
+    <div id="svp-comments-list"></div>
+  </div>
 
 </div>
-        </div>
-    </div>
 
-    <!-- Comments Panel -->
-    <div id="commentsPanel" class="comments-panel">
-        <div class="comments-header">
-            <h3>Comentários</h3>
-            <button id="closeComments" class="close-btn">&times;</button>
-        </div>
-        <div id="commentsList" class="comments-list">
-            <!-- Comments will be loaded here -->
-        </div>
-        <div class="comment-input-container">
-            <input type="text" id="commentInput" class="comment-input" placeholder="Adicione um comentário...">
-            <button id="sendComment" class="send-comment-btn">➤</button>
-        </div>
-    </div>
+<script type="module">
+/* ===== Firebase SDKs ===== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithRedirect, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import {
+  getDatabase, ref, onValue, push, update, remove, runTransaction, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-    <!-- Views Modal -->
-    <div id="viewsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Visualizações</h2>
-                <button class="close-btn">&times;</button>
-            </div>
-            <div id="viewsList" class="views-list">
-                <!-- Views will be loaded here -->
-            </div>
-        </div>
-    </div>
+/* ===== Configs do projeto ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
+  authDomain: "cliente-movicel.firebaseapp.com",
+  databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
+  projectId: "cliente-movicel",
+  storageBucket: "cliente-movicel.firebasestorage.app",
+  messagingSenderId: "215414688375",
+  appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
+  measurementId: "G-7F1RGP9GHV"
+};
+const apiKeyImgBB = "e073e02267a1f0259cd69c562e780659";
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-        import { getDatabase, ref, push, set, get, onValue, off, serverTimestamp, remove, update } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
-            
+/* ===== Inicialização ===== */
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-// ADICIONE estas variáveis globais no início do seu script:
-
-let videoCache = new Map(); // Cache de vídeos carregados
-let preloadContainer = null; // Container para vídeos escondidos
-let videoVerificationMap = new Map(); // Cache de verificação de vídeos
-
-// ADICIONE esta função para criar o sistema de cache:
-
-function initVideoCache() {
-    // Cria container invisível para preload
-    preloadContainer = document.createElement('div');
-    preloadContainer.id = 'videoPreloadContainer';
-    preloadContainer.style.cssText = `
-        position: fixed;
-        top: -9999px;
-        left: -9999px;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        opacity: 0;
-        pointer-events: none;
-    `;
-    document.body.appendChild(preloadContainer);
-}
-
-// FUNÇÃO para precarregar vídeos adjacentes:
-
-function preloadAdjacentVideos(currentStoryId) {
-    const filteredStories = getFilteredStories();
-    const currentIndex = filteredStories.findIndex(s => s.id === currentStoryId);
-    
-    // Precarrega anterior e próximo
-    const toPreload = [
-        currentIndex - 1, // Anterior
-        currentIndex + 1  // Próximo
-    ];
-    
-    toPreload.forEach(index => {
-        if (index >= 0 && index < filteredStories.length) {
-            const story = filteredStories[index];
-            if (story.type === 'video' && !videoCache.has(story.id)) {
-                preloadVideo(story);
-            }
-        }
-    });
-    
-    // Remove vídeos muito distantes do cache
-    cleanupDistantVideos(currentIndex, filteredStories);
-}
-
-// SUBSTITUA a função preloadVideo por esta versão sem autoplay:
-
-function preloadVideo(story) {
-    if (videoCache.has(story.id)) return;
-    
-    const iframe = document.createElement('iframe');
-    
-    // URL SEM AUTOPLAY para preload
-    let preloadUrl = getEmbedUrl(story.url);
-    preloadUrl = preloadUrl.replace('autoplay=1', 'autoplay=0');
-    
-    iframe.src = preloadUrl;
-    iframe.className = 'overlay-media video-player';
-    iframe.width = '100%';
-    iframe.height = '100%';
-    iframe.frameBorder = '0';
-    iframe.allowFullscreen = true;
-    iframe.id = `preload-${story.id}`;
-    
-    // Adiciona ao container invisível
-    preloadContainer.appendChild(iframe);
-    
-    // Salva no cache
-    videoCache.set(story.id, {
-        iframe: iframe,
-        story: story,
-        loadTime: Date.now()
-    });
-    
-    console.log(`📹 Vídeo precarregado (sem autoplay): ${story.title}`);
-}
-
-// FUNÇÃO para usar vídeo do cache:
-
-function getVideoFromCache(storyId) {
-    if (videoCache.has(storyId)) {
-        const cached = videoCache.get(storyId);
-        
-        // Remove do container de preload
-        if (cached.iframe.parentNode === preloadContainer) {
-            preloadContainer.removeChild(cached.iframe);
-        }
-        
-        return cached.iframe;
-    }
-    return null;
-}
-
-// FUNÇÃO para limpar vídeos distantes:
-
-function cleanupDistantVideos(currentIndex, filteredStories) {
-    const keepDistance = 2; // Mantém 2 vídeos de distância
-    
-    videoCache.forEach((cached, storyId) => {
-        const storyIndex = filteredStories.findIndex(s => s.id === storyId);
-        const distance = Math.abs(storyIndex - currentIndex);
-        
-        // Remove se estiver muito distante
-        if (distance > keepDistance) {
-            if (cached.iframe.parentNode) {
-                cached.iframe.parentNode.removeChild(cached.iframe);
-            }
-            videoCache.delete(storyId);
-            console.log(`🗑️ Vídeo removido do cache: ${cached.story.title}`);
-        }
-    });
-}
-// ADICIONE esta função para parar TODOS os vídeos:
-
-function stopAllVideos() {
-    // Para vídeo atual
-    function stopCurrentVideo() {
-    // Para vídeo atual
-    const currentVideo = document.getElementById('currentVideo');
-    if (currentVideo) {
-        currentVideo.src = 'about:blank';
-        currentVideo.remove();
-    }
-    
-    // Para todos os outros também
-    stopAllVideos();
-}
-    
-    // Para todos os vídeos no cache
-    videoCache.forEach((cached, storyId) => {
-        if (cached.iframe && cached.iframe.src !== 'about:blank') {
-            cached.iframe.src = 'about:blank';
-            // Recria com src original para próxima vez
-            setTimeout(() => {
-                if (cached.iframe.parentNode === preloadContainer) {
-                    cached.iframe.src = getEmbedUrl(cached.story.url);
-                }
-            }, 100);
-        }
-    });
-    
-    // ADICIONE esta função para garantir que só um vídeo toca:
-
-function ensureOnlyCurrentVideoPlays() {
-    const currentVideo = document.getElementById('currentVideo');
-    
-    // Para todos os outros vídeos
-    document.querySelectorAll('iframe').forEach(iframe => {
-        if (iframe !== currentVideo && 
-            (iframe.src.includes('youtube.com') || iframe.src.includes('vimeo.com')) &&
-            iframe.src !== 'about:blank') {
-            
-            // Para vídeos que não são o atual
-            const originalSrc = iframe.src;
-            iframe.src = 'about:blank';
-            
-            // Se for preload, restaura SEM autoplay
-            if (iframe.parentNode === preloadContainer) {
-                setTimeout(() => {
-                    iframe.src = originalSrc.replace('autoplay=1', 'autoplay=0');
-                }, 200);
-            }
-        }
-    });
-}
-}
-
-// ===== SISTEMA DE VERIFICAÇÃO DE VÍDEO =====
-
-// Função para verificar se o vídeo está disponível
-async function verifyVideoAvailability(story) {
-    const cacheKey = story.id;
-    
-    // Verifica cache de verificação (válido por 1 hora)
-    if (videoVerificationMap.has(cacheKey)) {
-        const cached = videoVerificationMap.get(cacheKey);
-        if (Date.now() - cached.timestamp < 3600000) { // 1 hora
-            return cached.available;
-        }
-    }
-    
-    return new Promise((resolve) => {
-        const testIframe = document.createElement('iframe');
-        testIframe.style.cssText = `
-            position: fixed;
-            top: -9999px;
-            left: -9999px;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            pointer-events: none;
-        `;
-        
-        let resolved = false;
-        const timeout = setTimeout(() => {
-            if (!resolved) {
-                resolved = true;
-                document.body.removeChild(testIframe);
-                // Cache resultado negativo
-                videoVerificationMap.set(cacheKey, {
-                    available: false,
-                    timestamp: Date.now()
-                });
-                resolve(false);
-            }
-        }, 8000); // 8 segundos timeout
-        
-        testIframe.onload = () => {
-            if (!resolved) {
-                resolved = true;
-                clearTimeout(timeout);
-                document.body.removeChild(testIframe);
-                // Cache resultado positivo
-                videoVerificationMap.set(cacheKey, {
-                    available: true,
-                    timestamp: Date.now()
-                });
-                resolve(true);
-            }
-        };
-        
-        testIframe.onerror = () => {
-            if (!resolved) {
-                resolved = true;
-                clearTimeout(timeout);
-                document.body.removeChild(testIframe);
-                // Cache resultado negativo
-                videoVerificationMap.set(cacheKey, {
-                    available: false,
-                    timestamp: Date.now()
-                });
-                resolve(false);
-            }
-        };
-        
-        document.body.appendChild(testIframe);
-        testIframe.src = getEmbedUrl(story.url);
-    });
-}
-
-// Função para mostrar loading de verificação
-function showVideoLoading(container) {
-    container.innerHTML = `
-        <div class="video-loading-overlay">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Verificando disponibilidade...</div>
-        </div>
-    `;
-}
-
-// Função para mostrar erro de vídeo
-function showVideoError(container, story) {
-    const platform = detectVideoPlatform(story.url);
-    
-    container.innerHTML = `
-        <div class="video-error-overlay">
-            <div class="error-icon">🚫</div>
-            <div class="error-title">Vídeo Indisponível</div>
-            <div class="error-message">
-                Este vídeo de ${platform} não está disponível no momento.<br>
-                Tente novamente mais tarde ou verifique se o link está correto.
-            </div>
-            <button class="retry-btn" onclick="retryVideo('${story.id}')">
-                🔄 Tentar Novamente
-            </button>
-        </div>
-    `;
-}
-
-// Função para detectar plataforma do vídeo
-function detectVideoPlatform(url) {
-    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'YouTube';
-    if (url.includes('vimeo.com')) return 'Vimeo';
-    if (url.includes('tiktok.com')) return 'TikTok';
-    if (url.includes('instagram.com')) return 'Instagram';
-    if (url.includes('facebook.com') || url.includes('fb.watch')) return 'Facebook';
-    if (url.includes('twitter.com') || url.includes('x.com')) return 'Twitter';
-    if (url.includes('dailymotion.com')) return 'Dailymotion';
-    if (url.includes('twitch.tv')) return 'Twitch';
-    if (url.includes('streamable.com')) return 'Streamable';
-    return 'esta plataforma';
-}
-
-// Função global para retry
-window.retryVideo = async function(storyId) {
-    const story = allStories.find(s => s.id === storyId);
-    if (!story) return;
-    
-    // Remove do cache de verificação
-    videoVerificationMap.delete(storyId);
-    
-    // Recarrega o vídeo
-    const overlayMedia = document.getElementById('overlayMedia');
-    await loadVideoWithVerification(story, overlayMedia);
+/* ===== Estado & referências ===== */
+const state = {
+  user: null,
+  videos: [],
+  myVideos: [],
+  comments: {},
+  q: "",
+  cat: "Todos",
+  cats: ["Todos","Música","Notícias","Esportes","Entretenimento","Educação","Comédia","Tecnologia","Gaming"]
 };
 
-// Função principal para carregar vídeo com verificação
-async function loadVideoWithVerification(story, container) {
-    // Mostra loading
-    showVideoLoading(container);
-    
-    // Verifica disponibilidade
-    const isAvailable = await verifyVideoAvailability(story);
-    
-    if (!isAvailable) {
-        // Mostra erro
-        showVideoError(container, story);
-        return;
-    }
-    
-    // Se disponível, carrega o vídeo normalmente
-    container.innerHTML = '';
-    
-    const cachedVideo = getVideoFromCache(story.id);
-    
-    if (cachedVideo) {
-        cachedVideo.src = 'about:blank';
-        cachedVideo.src = getEmbedUrl(story.url);
-        cachedVideo.id = 'currentVideo';
-        container.appendChild(cachedVideo);
-        console.log(`⚡ Vídeo carregado do cache: ${story.title}`);
-    } else {
-        const iframe = document.createElement('iframe');
-        iframe.src = getEmbedUrl(story.url);
-        iframe.className = 'overlay-media video-player';
-        iframe.width = '100%';
-        iframe.height = '100%';
-        iframe.frameBorder = '0';
-        iframe.allowFullscreen = true;
-        iframe.id = 'currentVideo';
-        
-        iframe.onload = function() {
-            console.log(`🎵 Vídeo carregado: ${story.title}`);
-        };
-        
-        container.appendChild(iframe);
-    }
-    
-    // Garante que apenas este vídeo toca
-    setTimeout(() => {
-        ensureOnlyCurrentVideoPlays();
-    }, 500);
-}
-
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCE_vGty5XsV1YqdCi49Ck2xJDSFq284wc",
-            authDomain: "cliente-movicel.firebaseapp.com",
-            databaseURL: "https://cliente-movicel-default-rtdb.firebaseio.com",
-            projectId: "cliente-movicel",
-            storageBucket: "cliente-movicel.firebasestorage.app",
-            messagingSenderId: "215414688375",
-            appId: "1:215414688375:web:2c7d20a0c03c4c0fcfd472",
-            measurementId: "G-7F1RGP9GHV"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const database = getDatabase(app);
-        const provider = new GoogleAuthProvider();
-
-        // ImgBB API Key
-        const apiKeyImgBB = 'e073e02267a1f0259cd69c562e780659';
-
-        // Global variables
-        let currentUser = null;
-        let allStories = [];
-        let currentFilter = 'all';
-        let currentStoryId = null;
-        let currentStoryIndex = 0;
-        let searchQuery = '';
-
-        // DOM Elements
-        const loginScreen = document.getElementById('loginScreen');
-        const mainApp = document.getElementById('mainApp');
-        const loginBtn = document.getElementById('loginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userAvatar = document.getElementById('userAvatar');
-        const userName = document.getElementById('userName');
-        const feedContainer = document.getElementById('feedContainer');
-        const addBtn = document.getElementById('addBtn');
-        const createModal = document.getElementById('createModal');
-        const createForm = document.getElementById('createForm');
-        const searchInput = document.getElementById('searchInput');
-        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
-        const commentsPanel = document.getElementById('commentsPanel');
-        const viewsModal = document.getElementById('viewsModal');
-
-        // Auth state listener
-        // ADICIONE no início da função onAuthStateChanged, logo após definir currentUser:
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        currentUser = {
-            uid: user.uid,
-            name: user.displayName || 'Usuário Anônimo',
-            avatar: user.photoURL || 'https://via.placeholder.com/40',
-            email: user.email || ''
-        };
-        
-        // Update UI
-        userAvatar.src = currentUser.avatar;
-        userName.textContent = currentUser.name;
-        
-        // INICIALIZA SISTEMA DE CACHE
-        initVideoCache();
-        
-        // Show main app
-        loginScreen.style.display = 'none';
-        mainApp.style.display = 'block';
-        
-        // Load stories
-        loadStories();
-    } else {
-        // Show login screen
-        loginScreen.style.display = 'flex';
-        mainApp.style.display = 'none';
-        currentUser = null;
-    }
-});
-
-        // Login with Google
-        loginBtn.addEventListener('click', async () => {
-            try {
-                await signInWithPopup(auth, provider);
-                showAlert('Login realizado com sucesso!', 'success');
-            } catch (error) {
-                console.error('Login error:', error);
-                // Fallback to anonymous login
-                try {
-                    await signInAnonymously(auth);
-                    showAlert('Entrando como usuário anônimo...', 'success');
-                } catch (anonError) {
-                    showAlert('Erro ao fazer login. Tente novamente.', 'error');
-                }
-            }
-        });
-
-        // Logout
-        logoutBtn.addEventListener('click', async () => {
-            if (await showConfirm('Tem certeza que deseja sair?')) {
-                try {
-                    await signOut(auth);
-                    showAlert('Logout realizado com sucesso!', 'success');
-                } catch (error) {
-                    showAlert('Erro ao fazer logout.', 'error');
-                }
-            }
-        });
-
-     
-        // Tab switching
-      document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        currentFilter = tab.dataset.tab;
-        filterAndRenderStories();
-    });
-});
-
-
-        // Search
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase();
-            filterAndRenderStories();
-        });
-
-        // Add button
-        addBtn.addEventListener('click', () => {
-            openCreateModal();
-        });
-
-        // Load stories from Firebase
-        function loadStories() {
-            const storiesRef = ref(database, 'stories');
-            onValue(storiesRef, (snapshot) => {
-                allStories = [];
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
-                    Object.keys(data).forEach(key => {
-                        allStories.push({
-                            id: key,
-                            ...data[key]
-                        });
-                    });
-                    // Sort by timestamp (newest first)
-                    allStories.sort((a, b) => b.timestamp - a.timestamp);
-                }
-                filterAndRenderStories();
-                
-            });
-        }
-
-        // Filter and render stories
-        function filterAndRenderStories() {
-            let filteredStories = allStories;
-
-            // Filter by type
-            if (currentFilter !== 'all') {
-                filteredStories = filteredStories.filter(story => story.type === currentFilter);
-            }
-                        
-
-            // Filter by search query
-            if (searchQuery) {
-                filteredStories = filteredStories.filter(story => 
-                    story.title.toLowerCase().includes(searchQuery) ||
-                    story.author.toLowerCase().includes(searchQuery) ||
-                    story.genre.toLowerCase().includes(searchQuery)
-                );
-            }
-
-       // ORDENA POR MAIS REAGIDOS (sempre)
-    filteredStories.sort((a, b) => {
-        const aTotal = (a.stats?.views || 0) + (a.stats?.likes || 0) + (a.stats?.comments || 0);
-        const bTotal = (b.stats?.views || 0) + (b.stats?.likes || 0) + (b.stats?.comments || 0);
-        return bTotal - aTotal;
-    });     renderStories(filteredStories);
-        }
-
-        // Render stories in grid
-        function renderStories(stories) {
-            if (stories.length === 0) {
-                feedContainer.innerHTML = `
-                    <div class="empty-state">
-                        <h3>Nenhum reel encontrado</h3>
-                        <p>Seja o primeiro a compartilhar algo incrível!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const grid = document.createElement('div');
-            grid.className = 'feed-grid';
-
-            stories.forEach((story, index) => {
-                const card = createStoryCard(story, index);
-                grid.appendChild(card);
-            });
-
-            feedContainer.innerHTML = '';
-            feedContainer.appendChild(grid);
-        }
-
-        // Create story card
-        function createStoryCard(story, index) {
-            const card = document.createElement('div');
-            card.className = 'reel-card';
-            card.addEventListener('click', () => openFullscreen(story.id));
-
-            const stats = story.stats || { likes: 0, comments: 0, views: 0 };
-            
-            let thumbnailContent = '';
-            let platformBadge = '';
-            
-            if (story.type === 'image') {
-                thumbnailContent = `<img src="${story.url}" alt="${story.title}">`;
-            } else {
-                // Detecta plataforma e cria badge
-                const platform = detectVideoPlatform(story.url);
-                const platformClass = platform.toLowerCase().replace(/[^a-z]/g, '');
-                platformBadge = `<div class="platform-badge platform-${platformClass}">${platform}</div>`;
-                
-                // Tenta pegar thumbnail específica da plataforma
-                let thumbnailUrl = 'https://via.placeholder.com/400x300/333/fff?text=Vídeo';
-                
-                if (platform === 'YouTube') {
-                    const videoId = getYouTubeVideoId(story.url);
-                    if (videoId) {
-                        thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-                    }
-                } else if (platform === 'Vimeo') {
-                    thumbnailUrl = 'https://via.placeholder.com/400x300/1ab7ea/fff?text=Vimeo';
-                } else if (platform === 'TikTok') {
-                    thumbnailUrl = 'https://via.placeholder.com/400x300/ff0050/fff?text=TikTok';
-                } else if (platform === 'Instagram') {
-                    thumbnailUrl = 'https://via.placeholder.com/400x300/E4405F/fff?text=Instagram';
-                }
-                
-                thumbnailContent = `
-                    <img src="${thumbnailUrl}" alt="${story.title}" onerror="this.src='https://via.placeholder.com/400x300/333/fff?text=${platform}'">
-                    <div class="play-icon">▶</div>
-                    ${platformBadge}
-                `;
-            }
-
-            card.innerHTML = `
-                <div class="reel-thumbnail">
-                    ${thumbnailContent}
-                    <div class="type-badge ${story.type}">${story.type === 'video' ? 'VÍDEO' : 'IMAGEM'}</div>
-                </div>
-                <div class="reel-info">
-                    <h3 class="reel-title">${story.title}</h3>
-                    <div class="reel-author">
-                        <img src="${story.authorAvatar}" alt="${story.author}">
-                        <span class="reel-author-name">${story.author}</span>
-                    </div>
-                    <div class="reel-genre">#${story.genre}</div>
-                    <div class="reel-stats">
-                        <div class="stat">
-                            <span>❤️</span>
-                            <span>${stats.likes}</span>
-                        </div>
-                        <div class="stat">
-                            <span>💬</span>
-                            <span>${stats.comments}</span>
-                        </div>
-                        <div class="stat">
-                            <span>👁️</span>
-                            <span>${stats.views}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            return card;
-        }
-
-        // Open fullscreen view
-        function openFullscreen(storyId) {
-            currentStoryId = storyId;
-            const story = allStories.find(s => s.id === storyId);
-            if (!story) return;
-
-            currentStoryIndex = allStories.indexOf(story);
-
-            // Update overlay content
-            document.getElementById('overlayType').textContent = story.type.toUpperCase();
-            document.getElementById('overlayTitle').textContent = story.title;
-            document.getElementById('overlayAuthorAvatar').src = story.authorAvatar;
-            document.getElementById('overlayAuthorName').textContent = story.author;
-            document.getElementById('overlayGenre').textContent = `#${story.genre}`;
-
-            // Show/hide delete button
-            const deleteBtn = document.getElementById('deleteBtn');
-            if (currentUser && currentUser.uid === story.authorId) {
-                deleteBtn.style.display = 'block';
-            } else {
-                deleteBtn.style.display = 'none';
-            }
-
-        // Load media with verification
-        const overlayMedia = document.getElementById('overlayMedia');
-        
-        // Para todos os vídeos primeiro
-        stopAllVideos();
-        
-        // Limpa conteúdo anterior
-        overlayMedia.innerHTML = '';
-        
-        if (story.type === 'image') {
-            const img = document.createElement('img');
-            img.src = story.url;
-            img.className = 'overlay-media';
-            img.alt = story.title;
-            overlayMedia.appendChild(img);
-        } else {
-            // Carrega vídeo com verificação
-            loadVideoWithVerification(story, overlayMedia);
-            
-            // Precarrega vídeos adjacentes (sem autoplay)
-            setTimeout(() => {
-                preloadAdjacentVideos(story.id);
-            }, 1000);
-        }
-
-            // Record view
-            recordView(storyId);
-
-            // Load interactions
-            loadInteractions(storyId);
-
-            // Show overlay
-            fullscreenOverlay.style.display = 'flex';
-
-            // Add swipe/keyboard navigation
-            setupNavigation();
-        }
-
-        // Record view
-        function recordView(storyId) {
-            if (!currentUser) return;
-
-            const viewRef = ref(database, `stories/${storyId}/views/${currentUser.uid}`);
-            set(viewRef, {
-                user: currentUser.name,
-                timestamp: Date.now()
-            });
-
-            // Update stats
-            updateStats(storyId);
-        }
-
-        // Load interactions (likes, comments, views)
-        function loadInteractions(storyId) {
-            // Load likes
-            const likesRef = ref(database, `stories/${storyId}/likes`);
-            onValue(likesRef, (snapshot) => {
-                const likes = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-                document.getElementById('likeCount').textContent = likes;
-                
-                // Update like button state
-                const likeBtn = document.getElementById('likeBtn');
-                if (currentUser && snapshot.exists() && snapshot.val()[currentUser.uid]) {
-                    likeBtn.classList.add('liked');
-                } else {
-                    likeBtn.classList.remove('liked');
-                }
-            });
-
-            // Load comments
-            const commentsRef = ref(database, `stories/${storyId}/comments`);
-            onValue(commentsRef, (snapshot) => {
-                const comments = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-                document.getElementById('commentCount').textContent = comments;
-            });
-
-            // Load views
-            const viewsRef = ref(database, `stories/${storyId}/views`);
-            onValue(viewsRef, (snapshot) => {
-                const views = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-                document.getElementById('viewCount').textContent = views;
-            });
-        }
-
-        // Update stats in database
-        function updateStats(storyId) {
-            const story = allStories.find(s => s.id === storyId);
-            if (!story) return;
-
-            const likesRef = ref(database, `stories/${storyId}/likes`);
-            const commentsRef = ref(database, `stories/${storyId}/comments`);
-            const viewsRef = ref(database, `stories/${storyId}/views`);
-
-            Promise.all([
-                get(likesRef),
-                get(commentsRef),
-                get(viewsRef)
-            ]).then(([likesSnap, commentsSnap, viewsSnap]) => {
-                const stats = {
-                    likes: likesSnap.exists() ? Object.keys(likesSnap.val()).length : 0,
-                    comments: commentsSnap.exists() ? Object.keys(commentsSnap.val()).length : 0,
-                    views: viewsSnap.exists() ? Object.keys(viewsSnap.val()).length : 0
-                };
-
-                const statsRef = ref(database, `stories/${storyId}/stats`);
-                set(statsRef, stats);
-            });
-        }
-
-	    // Setup navigation for fullscreen
-        function setupNavigation() {
-    let startY = 0;
-    let isTouch = false;
-    const SWIPE_THRESHOLD = 40;
-
-    const handleKeydown = (e) => {
-        if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-            navigateStoryDirect(-1);
-        } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-            navigateStoryDirect(1);
-        } else if (e.key === 'Escape') {
-            closeFullscreen();
-        }
-    };
-
-    const handleTouchStart = (e) => {
-        if (!('ontouchstart' in window)) return;
-        if (e.target.closest('.overlay-close, .action-btn, button')) return;
-        startY = e.touches[0].clientY;
-        isTouch = true;
-    };
-
-    const handleTouchEnd = (e) => {
-        if (!isTouch) return;
-        const diffY = e.changedTouches[0].clientY - startY;
-        if (Math.abs(diffY) > SWIPE_THRESHOLD) {
-            navigateStoryDirect(diffY > 0 ? -1 : 1);
-        }
-        isTouch = false;
-    };
-
-    document.addEventListener('keydown', handleKeydown);
-    fullscreenOverlay.addEventListener('touchstart', handleTouchStart, { passive: true });
-    fullscreenOverlay.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-    fullscreenOverlay.cleanup = () => {
-        document.removeEventListener('keydown', handleKeydown);
-        fullscreenOverlay.removeEventListener('touchstart', handleTouchStart);
-        fullscreenOverlay.removeEventListener('touchend', handleTouchEnd);
-    };
-}
-
-function preloadMedia(story, callback) {
-    if (story.type === 'image') {
-        const img = new Image();
-        img.src = story.src;
-        img.onload = callback;
-        img.onerror = callback; // mesmo se falhar, não travar
-    } else if (story.type === 'video') {
-        if (videoCache.has(story.id)) {
-            callback();
-        } else {
-            const vid = document.createElement('video');
-            vid.src = story.src;
-            vid.preload = 'auto';
-            vid.oncanplaythrough = callback;
-            vid.onerror = callback;
-        }
-    } else {
-        callback();
-    }
-}
-
-function navigateStoryDirect(direction) {
-    const filteredStories = getFilteredStories();
-    const currentIndex = filteredStories.findIndex(s => s.id === currentStoryId);
-    const newIndex = currentIndex + direction;
-
-    if (newIndex >= 0 && newIndex < filteredStories.length) {
-        const nextStory = filteredStories[newIndex];
-        const overlayContent = document.querySelector('.overlay-content');
-
-        stopAllVideos();
-
-        // Adiciona classe de saída
-        overlayContent.classList.add(direction > 0 ? 'slide-up' : 'slide-down');
-
-        // Pré-carrega antes de trocar
-        preloadMedia(nextStory, () => {
-            overlayContent.addEventListener('animationend', function handler() {
-                overlayContent.removeEventListener('animationend', handler);
-
-                openFullscreen(nextStory.id);
-
-                overlayContent.classList.remove('slide-up', 'slide-down');
-                overlayContent.classList.add(direction > 0 ? 'slide-up-in' : 'slide-down-in');
-
-                overlayContent.addEventListener('animationend', function endHandler() {
-                    overlayContent.removeEventListener('animationend', endHandler);
-                    overlayContent.classList.remove('slide-up-in', 'slide-down-in');
-                });
-            });
-        });
-    }
-}
-// REMOVA as funções navigateStorySimple() antigas se existirem
-
-        // Navigate between stories
-        function navigateStory(direction) {
-            const filteredStories = getFilteredStories();
-            const currentIndex = filteredStories.findIndex(s => s.id === currentStoryId);
-            const newIndex = currentIndex + direction;
-
-            if (newIndex >= 0 && newIndex < filteredStories.length) {
-                openFullscreen(filteredStories[newIndex].id);
-            }
-        }
-
-        // Get filtered stories
-        function getFilteredStories() {
-            let filtered = allStories;
-            if (currentFilter !== 'all') {
-                filtered = filtered.filter(story => story.type === currentFilter);
-            }
-            if (searchQuery) {
-                filtered = filtered.filter(story => 
-                    story.title.toLowerCase().includes(searchQuery) ||
-                    story.author.toLowerCase().includes(searchQuery) ||
-                    story.genre.toLowerCase().includes(searchQuery)
-                );
-            }
-            return filtered;
-        }
-	
-	        // Close fullscreen
-	        // SUBSTITUA a função 	closeFullscreen() existente por esta 	versão:
-	
-	function closeFullscreen() {
-	    // PARA O VÍDEO antes de fechar
-	    const overlayMedia = document.	getElementById('overlayMedia');
-	    
-	    // Limpa completamente o 	conteúdo (para o vídeo)
-	    overlayMedia.innerHTML = '';
-	    
-	    // Esconde o overlay
-	    fullscreenOverlay.style.display 	= 'none';
-	    
-	    // Limpa listeners
-	    if (fullscreenOverlay.cleanup) {
-	        fullscreenOverlay.cleanup();
-	    }
-	    
-	    // Limpa listeners do Firebase
-	    if (currentStoryId) {
-	        const storyRef = 	ref(database, `stories/	${currentStoryId}`);
-	        off(storyRef);
-	    }
-	    
-	    // Reset de variáveis
-	    currentStoryId = null;
-	}
-	
-	        // Action button event 	listeners
-	        document.	getElementById('overlayClose').	addEventListener('click', 	closeFullscreen);
-	
-	        document.	getElementById('likeBtn').	addEventListener('click', () => {
-	            	toggleLike(currentStoryId);
-	        });
-	
-	        document.	getElementById('commentBtn').	addEventListener('click', () => {
-	            	openComments(currentStoryId);
-	        });
-	
-	        document.	getElementById('viewBtn').	addEventListener('click', () => {
-            openViews(currentStoryId);
-        });
-
-        document.getElementById('deleteBtn').addEventListener('click', async () => {
-            if (await showConfirm('Tem certeza que deseja deletar este reel?')) {
-                deleteStory(currentStoryId);
-            }
-        });
-
-        // Toggle like
-        function toggleLike(storyId) {
-            if (!currentUser) return;
-
-            const likeRef = ref(database, `stories/${storyId}/likes/${currentUser.uid}`);
-            
-            get(likeRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    // Unlike
-                    remove(likeRef);
-                } else {
-                    // Like
-                    set(likeRef, {
-                        user: currentUser.name,
-                        timestamp: Date.now()
-                    });
-                    
-                    // Heart animation
-                    const likeBtn = document.getElementById('likeBtn');
-                    likeBtn.classList.add('heart-animation');
-                    setTimeout(() => {
-                        likeBtn.classList.remove('heart-animation');
-                    }, 600);
-                }
-                
-                updateStats(storyId);
-            });
-        }
-
-        // Open comments panel
-        function openComments(storyId) {
-            currentStoryId = storyId;
-            loadComments(storyId);
-            commentsPanel.classList.add('active');
-        }
-
-        // Load comments
-        function loadComments(storyId) {
-            const commentsRef = ref(database, `stories/${storyId}/comments`);
-            onValue(commentsRef, (snapshot) => {
-                const commentsList = document.getElementById('commentsList');
-                commentsList.innerHTML = '';
-
-                if (snapshot.exists()) {
-                    const comments = [];
-                    snapshot.forEach((childSnapshot) => {
-                        comments.push({
-                            id: childSnapshot.key,
-                            ...childSnapshot.val()
-                        });
-                    });
-
-                    // Sort by timestamp
-                    comments.sort((a, b) => a.timestamp - b.timestamp);
-
-                    comments.forEach(comment => {
-                        const commentEl = createCommentElement(comment);
-                        commentsList.appendChild(commentEl);
-                    });
-
-                    // Scroll to bottom
-                    commentsList.scrollTop = commentsList.scrollHeight;
-                } else {
-                    commentsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Nenhum comentário ainda. Seja o primeiro!</p>';
-                }
-            });
-        }
-
-        // Create comment element
-        function createCommentElement(comment) {
-            const div = document.createElement('div');
-            div.className = 'comment';
-
-            const timeAgo = getTimeAgo(comment.timestamp);
-
-            div.innerHTML = `
-                <img src="${comment.authorAvatar}" alt="${comment.author}" class="comment-avatar">
-                <div class="comment-content">
-                    <div class="comment-author">${comment.author}</div>
-                    <div class="comment-text">${comment.text}</div>
-                    <div class="comment-time">${timeAgo}</div>
-                </div>
-            `;
-
-            return div;
-        }
-
-        // Comments panel event listeners
-        document.getElementById('closeComments').addEventListener('click', () => {
-            commentsPanel.classList.remove('active');
-        });
-
-        document.getElementById('sendComment').addEventListener('click', () => {
-            addComment(currentStoryId);
-        });
-
-        document.getElementById('commentInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addComment(currentStoryId);
-            }
-        });
-
-        // Add comment
-        function addComment(storyId) {
-            if (!currentUser) return;
-
-            const commentInput = document.getElementById('commentInput');
-            const text = commentInput.value.trim();
-
-            if (!text) return;
-
-            const commentsRef = ref(database, `stories/${storyId}/comments`);
-            const newCommentRef = push(commentsRef);
-
-            set(newCommentRef, {
-                text: text,
-                author: currentUser.name,
-                authorId: currentUser.uid,
-                authorAvatar: currentUser.avatar,
-                timestamp: Date.now()
-            }).then(() => {
-                commentInput.value = '';
-                updateStats(storyId);
-            });
-        }
-
-        // Open views modal
-        function openViews(storyId) {
-            const viewsRef = ref(database, `stories/${storyId}/views`);
-            get(viewsRef).then((snapshot) => {
-                const viewsList = document.getElementById('viewsList');
-                viewsList.innerHTML = '';
-
-                if (snapshot.exists()) {
-                    const views = [];
-                    snapshot.forEach((childSnapshot) => {
-                        views.push({
-                            userId: childSnapshot.key,
-                            ...childSnapshot.val()
-                        });
-                    });
-
-                    // Sort by timestamp (newest first)
-                    views.sort((a, b) => b.timestamp - a.timestamp);
-
-                    views.forEach(view => {
-                        const viewEl = createViewElement(view);
-                        viewsList.appendChild(viewEl);
-                    });
-                } else {
-                    viewsList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Nenhuma visualização ainda.</p>';
-                }
-
-                viewsModal.classList.add('active');
-            });
-        }
-
-        // Create view element
-        function createViewElement(view) {
-            const div = document.createElement('div');
-            div.className = 'view-item';
-
-            const timeAgo = getTimeAgo(view.timestamp);
-
-            div.innerHTML = `
-                <img src="https://via.placeholder.com/40" alt="${view.user}" class="view-avatar">
-                <div class="view-info">
-                    <div class="view-name">${view.user}</div>
-                    <div class="view-time">${timeAgo}</div>
-                </div>
-            `;
-
-            return div;
-        }
-
-        // FUNÇÃO DE DELETAR DIRETO
-window.deleteStory = function(storyId) {
-    console.log('🗑️ Deletando diretamente:', storyId);
-    
-    const dbRef = ref(database, `stories/${storyId}`);
-    
-    remove(dbRef).then(() => {
-        console.log('✅ Removido do Firebase');
-        
-        // Remove da lista local
-        allStories = allStories.filter(s => s.id !== storyId);
-        
-        // Fecha overlay
-        fullscreenOverlay.style.display = 'none';
-        
-        // Atualiza tela
-        filterAndRenderStories();
-        
-        showAlert('Reel deletado!', 'success');
-        
-    }).catch(error => {
-        console.log('❌ Erro:', error);
-        showAlert('Erro ao deletar', 'error');
-    });
+/* ===== Util: SVGs inline ===== */
+const Icons = {
+  like: '<svg viewBox="0 0 24 24"><path d="M12.1 8.64l-.1.1-.11-.11C10.14 6.82 7.1 7.24 5.5 9c-1.61 1.76-1.45 4.45.36 6.17l5.86 5.66 5.86-5.66c1.81-1.72 1.97-4.41.36-6.17-1.6-1.76-4.64-2.18-6.34-.36z"/></svg>',
+  liked: '<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41.81 4.5 2.09C12.09 4.81 13.76 4 15.5 4 18 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>',
+  delete: '<svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12zM8 4h8l1 1h3v2H4V5h3l1-1z"/></svg>',
+  views: '<svg style="width:24px; height:24px;" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" /></svg>',
+  play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
 };
 
-// LISTENER DIRETO - SEM CONFIRMAÇÃO
-document.getElementById('deleteBtn').onclick = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    console.log('Delete clicado - deletando diretamente!');
-    
-    if (!currentStoryId) {
-        showAlert('Erro: Nenhum vídeo selecionado', 'error');
-        return;
-    }
-    
-    // DELETA DIRETO - SEM PERGUNTAR
-    deleteStory(currentStoryId);
-};
+/* ===== Helpers ===== */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
 
-console.log('✅ Exclusão direta ativada!');
+function sanitize(str){return (str||"").trim()}
+function byDateDesc(a,b){return (b.createdAt||0)-(a.createdAt||0)}
+function matchQuery(item,q){ if(!q) return true; q=q.toLowerCase(); return (item.title||"").toLowerCase().includes(q) || (item.authorName||"").toLowerCase().includes(q); }
+function matchCat(item,cat){ if(cat==="Todos") return true; return (item.category||"")===cat; }
 
-        // Create modal functionality
-        function openCreateModal() {
-            if (!currentUser) {
-                showAlert('Você precisa estar logado para criar reels.', 'error');
-                return;
-            }
-            createModal.classList.add('active');
-        }
-
-        // Upload type tabs
-        document.querySelectorAll('.upload-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.upload-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-
-                const type = tab.dataset.type;
-                const imageUpload = document.getElementById('imageUpload');
-                const videoUpload = document.getElementById('videoUpload');
-
-                if (type === 'image') {
-                    imageUpload.style.display = 'block';
-                    videoUpload.style.display = 'none';
-                } else {
-                    imageUpload.style.display = 'none';
-                    videoUpload.style.display = 'block';
-                }
-            });
-        });
-
-        // File upload area
-        const fileUploadArea = document.getElementById('fileUploadArea');
-        const imageInput = document.getElementById('imageInput');
-
-        fileUploadArea.addEventListener('click', () => {
-            imageInput.click();
-        });
-
-        fileUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            fileUploadArea.classList.add('dragover');
-        });
-
-        fileUploadArea.addEventListener('dragleave', () => {
-            fileUploadArea.classList.remove('dragover');
-        });
-
-        fileUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            fileUploadArea.classList.remove('dragover');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                imageInput.files = files;
-                handleImageUpload(files[0]);
-            }
-        });
-
-        imageInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleImageUpload(e.target.files[0]);
-            }
-        });
-
-        // Handle image upload
-        function handleImageUpload(file) {
-            if (!file.type.startsWith('image/')) {
-                showAlert('Por favor, selecione um arquivo de imagem válido.', 'error');
-                return;
-            }
-
-            const maxSize = 10 * 1024 * 1024; // 10MB
-            if (file.size > maxSize) {
-                showAlert('O arquivo é muito grande. Máximo 10MB.', 'error');
-                return;
-            }
-
-            // Preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                fileUploadArea.innerHTML = `
-                    <img src="${e.target.result}" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
-                    <p>Imagem selecionada</p>
-                `;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Create form submission
-        createForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!currentUser) return;
-
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Publicando...';
-            submitBtn.disabled = true;
-
-            try {
-                const title = document.getElementById('titleInput').value.trim();
-                const genre = document.getElementById('genreSelect').value;
-                const activeTab = document.querySelector('.upload-tab.active').dataset.type;
-
-                let url = '';
-                let type = activeTab;
-
-                if (type === 'image') {
-                    const file = imageInput.files[0];
-                    if (!file) {
-                        throw new Error('Selecione uma imagem');
-                    }
-                    url = await uploadImageToImgBB(file);
-                } else {
-                    url = document.getElementById('videoInput').value.trim();
-                    if (!url) {
-                        throw new Error('Digite o link do vídeo');
-                    }
-                    if (!isValidVideoUrl(url)) {
-                        throw new Error('Link de vídeo inválido. Use YouTube, TikTok, Instagram, Vimeo, Facebook, Twitter ou URLs diretas.');
-                    }
-                }
-
-                // Create story object
-                const storyData = {
-                    title,
-                    genre,
-                    type,
-                    url,
-                    author: currentUser.name,
-                    authorId: currentUser.uid,
-                    authorAvatar: currentUser.avatar,
-                    timestamp: serverTimestamp(),
-                    stats: {
-                        likes: 0,
-                        comments: 0,
-                        views: 0
-                    }
-                };
-
-                // Save to Firebase
-                const storiesRef = ref(database, 'stories');
-                const newStoryRef = push(storiesRef);
-                await set(newStoryRef, storyData);
-
-                showAlert('Reel publicado com sucesso!', 'success');
-                createModal.classList.remove('active');
-                createForm.reset();
-                
-                // Reset upload area
-                fileUploadArea.innerHTML = `
-                    <div class="upload-icon">📷</div>
-                    <p>Clique ou arraste uma imagem aqui</p>
-                `;
-
-            } catch (error) {
-                showAlert(error.message, 'error');
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Upload image to ImgBB
-        async function uploadImageToImgBB(file) {
-            const formData = new FormData();
-            formData.append('image', file);
-
-            const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKeyImgBB}`, {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error('Erro ao fazer upload da imagem');
-            }
-
-            return data.data.url;
-        }
-
-        // FUNÇÃO UNIVERSAL DE VALIDAÇÃO DE VÍDEO
-        function isValidVideoUrl(url) {
-            const videoPatterns = [
-                // YouTube
-                /youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
-                /youtu\.be\/([a-zA-Z0-9_-]+)/,
-                /m\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
-                
-                // Vimeo
-                /vimeo\.com\/(\d+)/,
-                /player\.vimeo\.com\/video\/(\d+)/,
-                
-                // TikTok
-                /tiktok\.com\/@[^\/]+\/video\/(\d+)/,
-                /vm\.tiktok\.com\/([a-zA-Z0-9]+)/,
-                
-                // Instagram
-                /instagram\.com\/p\/([a-zA-Z0-9_-]+)/,
-                /instagram\.com\/reel\/([a-zA-Z0-9_-]+)/,
-                /instagram\.com\/tv\/([a-zA-Z0-9_-]+)/,
-                
-                // Facebook
-                /facebook\.com\/watch\?v=(\d+)/,
-                /fb\.watch\/([a-zA-Z0-9]+)/,
-                
-                // Twitter/X
-                /twitter\.com\/[^\/]+\/status\/(\d+)/,
-                /x\.com\/[^\/]+\/status\/(\d+)/,
-                
-                // Dailymotion
-                /dailymotion\.com\/video\/([a-zA-Z0-9]+)/,
-                /dai\.ly\/([a-zA-Z0-9]+)/,
-                
-                // Twitch
-                /twitch\.tv\/videos\/(\d+)/,
-                /clips\.twitch\.tv\/([a-zA-Z0-9]+)/,
-                
-                // Streamable
-                /streamable\.com\/([a-zA-Z0-9]+)/,
-                
-                // URLs diretas de vídeo
-                /\.(mp4|webm|ogg|mov|avi|wmv|flv|m4v)(\?.*)?$/i,
-                
-                // URLs genéricas que podem ser vídeos
-                /^https?:\/\/[^\s]+$/
-            ];
-            
-            return videoPatterns.some(pattern => pattern.test(url));
-        }
-
-        // Get YouTube video ID
-        function getYouTubeVideoId(url) {
-            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-            return match ? match[1] : '';
-        }
-
-        // FUNÇÃO UNIVERSAL PARA EMBED
-        function getEmbedUrl(url) {
-            // YouTube
-            if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-                if (videoId) {
-                    return `https://www.youtube.com/embed/${videoId[1]}?autoplay=1&controls=1&rel=0`;
-                }
-            }
-            
-            // Vimeo
-            if (url.includes('vimeo.com')) {
-                const videoId = url.match(/vimeo\.com\/(\d+)/);
-                if (videoId) {
-                    return `https://player.vimeo.com/video/${videoId[1]}?autoplay=1&controls=1`;
-                }
-            }
-            
-            // TikTok (iframe embed)
-            if (url.includes('tiktok.com')) {
-                return `https://www.tiktok.com/embed/v2?url=${encodeURIComponent(url)}`;
-            }
-            
-            // Instagram (básico - pode não funcionar sempre devido a restrições)
-            if (url.includes('instagram.com')) {
-                const postId = url.match(/\/p\/([a-zA-Z0-9_-]+)/);
-                if (postId) {
-                    return `https://www.instagram.com/p/${postId[1]}/embed/`;
-                }
-            }
-            
-            // Facebook (limitado)
-            if (url.includes('facebook.com') || url.includes('fb.watch')) {
-                return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`;
-            }
-            
-            // Dailymotion
-            if (url.includes('dailymotion.com')) {
-                const videoId = url.match(/dailymotion\.com\/video\/([a-zA-Z0-9]+)/);
-                if (videoId) {
-                    return `https://www.dailymotion.com/embed/video/${videoId[1]}?autoplay=1`;
-                }
-            }
-            
-            // Twitch
-            if (url.includes('twitch.tv')) {
-                const videoId = url.match(/videos\/(\d+)/);
-                if (videoId) {
-                    return `https://player.twitch.tv/?video=v${videoId[1]}&parent=${window.location.hostname}&autoplay=true`;
-                }
-                const clipId = url.match(/clips\.twitch\.tv\/([a-zA-Z0-9]+)/);
-                if (clipId) {
-                    return `https://clips.twitch.tv/embed?clip=${clipId[1]}&parent=${window.location.hostname}&autoplay=true`;
-                }
-            }
-            
-            // Streamable
-            if (url.includes('streamable.com')) {
-                const videoId = url.match(/streamable\.com\/([a-zA-Z0-9]+)/);
-                if (videoId) {
-                    return `https://streamable.com/e/${videoId[1]}?autoplay=1`;
-                }
-            }
-            
-            // URLs diretas de vídeo - criar elemento video
-            if (/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url)) {
-                // Para URLs diretas, retornamos a URL original para usar em um elemento <video>
-                return url;
-            }
-            
-            // Fallback - retorna URL original (pode não funcionar)
-            return url;
-        }
-
-        // Modal close functionality
-        document.querySelectorAll('.close-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const modal = e.target.closest('.modal');
-                if (modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        });
-
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            });
-        });
-
-        // Utility functions
-        function getTimeAgo(timestamp) {
-            const now = Date.now();
-            const diff = now - timestamp;
-            
-            const minutes = Math.floor(diff / (1000 * 60));
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            
-            if (minutes < 1) return 'agora';
-            if (minutes < 60) return `${minutes}m`;
-            if (hours < 24) return `${hours}h`;
-            return `${days}d`;
-        }
-
-        function showAlert(message, type = 'success') {
-            const alert = document.createElement('div');
-            alert.className = `custom-alert ${type}`;
-            alert.textContent = message;
-            document.body.appendChild(alert);
-
-            setTimeout(() => {
-                alert.classList.add('show');
-            }, 100);
-
-            setTimeout(() => {
-                alert.classList.remove('show');
-                setTimeout(() => {
-                    document.body.removeChild(alert);
-                }, 300);
-            }, 3000);
-        }
-
-        function showConfirm(message) {
-            return new Promise((resolve) => {
-                const modal = document.createElement('div');
-                modal.className = 'modal active';
-                modal.innerHTML = `
-                    <div class="modal-content" style="max-width: 400px;">
-                        <div class="modal-header">
-                            <h2 class="modal-title">Confirmação</h2>
-                        </div>
-                        <p style="margin-bottom: 20px; color: var(--text-color);">${message}</p>
-                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                            <button class="submit-btn" style="background-color: var(--border-color);" onclick="resolve(false)">Cancelar</button>
-                            <button class="submit-btn" onclick="resolve(true)">Confirmar</button>
-                        </div>
-                    </div>
-                `;
-
-                document.body.appendChild(modal);
-
-                // Add event listeners to buttons
-                const buttons = modal.querySelectorAll('button');
-                buttons[0].addEventListener('click', () => {
-                    document.body.removeChild(modal);
-                    resolve(false);
-                });
-                buttons[1].addEventListener('click', () => {
-                    document.body.removeChild(modal);
-                    resolve(true);
-                });
-
-                // Close on background click
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        document.body.removeChild(modal);
-                        resolve(false);
-                    }
-                });
-            });
-        }
-
-        // Dark mode support
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
-
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
-        
-        // 
-    
-    // ADICIONE estas variáveis globais:
-let selectedCategory = 'all';
-let categoryDropdownOpen = false;
-
-// ELEMENTOS
-const categoryBtn = document.getElementById('categoryBtn');
-const categoryDropdown = document.getElementById('categoryDropdown');
-const categoryText = categoryBtn.querySelector('.category-text');
-const categoryIcon = categoryBtn.querySelector('.category-icon');
-
-// MAPEAMENTO DE CATEGORIAS
-const categoryMap = {
-    all: { emoji: '🎯', name: 'Todas' },
-    musica: { emoji: '🎵', name: 'Música' },
-    comedia: { emoji: '😂', name: 'Comédia' },
-    danca: { emoji: '💃', name: 'Dança' },
-    educativo: { emoji: '📚', name: 'Educativo' },
-    lifestyle: { emoji: '✨', name: 'Lifestyle' },
-    outros: { emoji: '🎲', name: 'Outros' }
-};
-
-// TOGGLE DROPDOWN
-categoryBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleCategoryDropdown();
-});
-
-function toggleCategoryDropdown() {
-    categoryDropdownOpen = !categoryDropdownOpen;
-    
-    if (categoryDropdownOpen) {
-        updateCategoryCounts();
-        categoryDropdown.classList.add('show');
-        categoryBtn.classList.add('active');
-    } else {
-        categoryDropdown.classList.remove('show');
-        categoryBtn.classList.remove('active');
-    }
+/* YouTube/Facebook parsing */
+function parseYouTubeId(url){
+  try{
+    const u=new URL(url);
+    if(u.hostname.includes("youtu.be")) return u.pathname.slice(1);
+    if(u.searchParams.get("v")) return u.searchParams.get("v");
+    if(u.pathname.includes("/shorts/")) return u.pathname.split("/shorts/")[1].split("?")[0];
+  }catch(e){}
+  const m = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
+  return m?m[1]:null;
 }
+function isFacebookUrl(url){ return /facebook\.com/.test(url) }
 
-// FECHAR DROPDOWN CLICANDO FORA
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.category-filter') && categoryDropdownOpen) {
-        toggleCategoryDropdown();
-    }
-});
-
-// SELECIONAR CATEGORIA
-document.querySelectorAll('.category-option').forEach(option => {
-    option.addEventListener('click', (e) => {
-        e.stopPropagation();
-        selectCategory(option.dataset.category);
-    });
-});
-
-function selectCategory(category) {
-    selectedCategory = category;
-    
-    // Atualiza botão
-    const categoryInfo = categoryMap[category];
-    categoryIcon.textContent = categoryInfo.emoji;
-    categoryText.textContent = categoryInfo.name;
-    
-    // Atualiza opções ativas
-    document.querySelectorAll('.category-option').forEach(opt => {
-        opt.classList.remove('active');
-    });
-    document.querySelector(`[data-category="${category}"]`).classList.add('active');
-    
-    // Fecha dropdown
-    toggleCategoryDropdown();
-    
-    // Animação no botão
-    categoryBtn.classList.add('pulse');
-    setTimeout(() => categoryBtn.classList.remove('pulse'), 600);
-    
-    // Aplica filtro
-    applyCategoryFilter();
-    
-    console.log(`🎯 Categoria selecionada: ${categoryInfo.name}`);
-}
-
-// APLICAR FILTRO DE CATEGORIA
-function applyCategoryFilter() {
-    // Modifica a função filterAndRenderStories existente
-    let filteredStories = allStories;
-
-    // FILTRO POR CATEGORIA
-    if (selectedCategory !== 'all') {
-        filteredStories = filteredStories.filter(story => story.genre === selectedCategory);
-    }
-
-    // Filtro de tipo (mantém o existente)
-    if (currentFilter !== 'all') {
-        filteredStories = filteredStories.filter(story => story.type === currentFilter);
-    }
-
-    // Pesquisa (mantém o existente)
-    if (searchQuery && searchQuery.length > 0) {
-        filteredStories = searchStories(searchQuery, searchFilter);
-        if (currentFilter !== 'all') {
-            filteredStories = filteredStories.filter(story => story.type === currentFilter);
-        }
-        if (selectedCategory !== 'all') {
-            filteredStories = filteredStories.filter(story => story.genre === selectedCategory);
-        }
-    }
-
-    // Ordena por mais reagidos (mantém o existente)
-    filteredStories.sort((a, b) => {
-        const aTotal = (a.stats?.views || 0) + (a.stats?.likes || 0) + (a.stats?.comments || 0);
-        const bTotal = (b.stats?.views || 0) + (b.stats?.likes || 0) + (b.stats?.comments || 0);
-        return bTotal - aTotal;
-    });
-
-    renderStories(filteredStories);
-}
-
-// ATUALIZAR CONTADORES
-function updateCategoryCounts() {
-    const counts = {
-        all: allStories.length,
-        musica: 0,
-        comedia: 0,
-        danca: 0,
-        educativo: 0,
-        lifestyle: 0,
-        outros: 0
-    };
-
-    allStories.forEach(story => {
-        if (counts.hasOwnProperty(story.genre)) {
-            counts[story.genre]++;
-        }
-    });
-
-    // Atualiza elementos
-    Object.keys(counts).forEach(category => {
-        const countEl = document.getElementById(`count-${category}`);
-        if (countEl) {
-            countEl.textContent = counts[category];
-        }
-    });
-}
-
-// SUBSTITUA a função filterAndRenderStories pela applyCategoryFilter:
-window.filterAndRenderStories = applyCategoryFilter;
-
-// INICIALIZAR
-updateCategoryCounts();
-
-console.log('✅ Filtro de categorias ativado!');
-console.log('🎥 Sistema de verificação de vídeo ativado!');
-console.log('🌐 Suporte universal a URLs de vídeo ativado!');
-    </script>
-    <script>
-  const botao = document.querySelector('button.tab[data-tab="video"]');
-  function autoClicar() {
-    if (botao) {
-      botao.click();
-      console.log('Botão clicado automaticamente após 2 segundos.');
-    } else {
-      console.log('Botão não encontrado.');
-    }
-  }
-  setTimeout(autoClicar, 2000); // 2000 milissegundos = 2 segundos
-</script>
-
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const invisibleBtn = document.getElementById('invisibleBtn');
-    const overlayCloseBtn = document.getElementById('overlayClose');
-
-    if (invisibleBtn && overlayCloseBtn) {
-      invisibleBtn.addEventListener('click', () => {
-        overlayCloseBtn.click();
-      });
-    }
+/* ImgBB upload */
+async function uploadToImgBB(file){
+  const hint = $("#svp-publish-hint");
+  hint.textContent = "Enviando capa para ImgBB…";
+  const base64 = await new Promise((res,rej)=>{
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result.split(",")[1]);
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
   });
-</script>
-        <script>
-    const toggleBtn = document.getElementById('toggleBtn');
-    const buttons = [ 'likeBtn', 'commentBtn', 'viewBtn', 'likeCount', 'commentCount', 'viewCount' ].map(id => document.getElementById(id));
-    
-    // Estado para saber se os botões estão visíveis ou não
-    let visible = false;
+  const fd = new FormData();
+  fd.append("image", base64);
+  const r = await fetch(`https://api.imgbb.com/1/upload?key=${apiKeyImgBB}`, { method:"POST", body:fd });
+  const json = await r.json();
+  if(!json.success) throw new Error("Falha ao enviar capa");
+  hint.textContent = "Capa enviada com sucesso.";
+  return json.data?.url || json.data?.display_url;
+}
 
-    toggleBtn.addEventListener('click', () => {
-        visible = !visible;
-        buttons.forEach(btn => {
-            btn.style.display = visible ? 'inline-block' : 'none';
-        });
-    });
-</script>
-
-<style>
-  #heartIcon {
-    transition: fill 0.4s ease, stroke 0.4s ease;
-    fill: none;
-    stroke: white;
+/* Auth */
+function ensureAuth(){
+  if(!auth.currentUser){
+    const provider = new GoogleAuthProvider();
+    signInWithRedirect(auth, provider).catch(()=>{});
   }
+}
+
+/* ===== Avatar real do Firebase Auth ===== */
+function getUserAvatar(user){
+  if(user && user.photoURL){
+    return user.photoURL;
+  }
+  // Fallback para avatar gerado se não tiver foto
+  return generateAvatar(user?.uid || 'default');
+}
+
+function getAuthorAvatar(authorId, authorPhotoURL){
+  if(authorPhotoURL){
+    return authorPhotoURL;
+  }
+  return generateAvatar(authorId);
+}
+
+function generateAvatar(uid="x"){
+  const c = ["#ff6b6b","#feca57","#1dd1a1","#54a0ff","#5f27cd","#ee5253"];
+  const i = uid.split("").reduce((a,ch)=>a+ch.charCodeAt(0),0) % c.length;
+  const col = encodeURIComponent(c[i]);
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><circle cx='32' cy='32' r='30' fill='${col}'/><circle cx='32' cy='24' r='8' fill='white'/><path d='M32 36c-8 0-15 4-15 8v4h30v-4c0-4-7-8-15-8z' fill='white'/></svg>`;
+}
+
+/* ===== UI dinâmico ===== */
+function renderCategories(){
+  const cats = state.cats;
+  const sel = $("#svp-category");
+  sel.innerHTML = cats.filter(c=>c!=="Todos").map(c=>`<option value="${c}">${c}</option>`).join("");
+  if(!sel.value) sel.value = "Entretenimento";
+  const wrap = $("#svp-cats");
+  wrap.innerHTML = cats.map(c=>`<button class="svp-chip ${state.cat===c?"is-active":""}" data-cat="${c}">${c}</button>`).join("");
+}
+
+function renderFeed(){
+  const list = state.videos.filter(v => matchQuery(v, state.q) && matchCat(v, state.cat)).sort(byDateDesc);
+  const el = $("#svp-feed");
+  el.innerHTML = list.map(cardHTML).join("") || `<div class="svp-empty">Nada encontrado.</div>`;
+}
+function renderMyFeed(){
+  const my = state.videos.filter(v=> v.authorId===state.user?.uid).sort(byDateDesc);
+  state.myVideos = my;
+  const el = $("#svp-myfeed");
+  el.innerHTML = my.length ? my.map(cardHTML).join("") : `<div class="svp-empty">Você ainda não publicou vídeos.</div>`;
+}
+
+/* Card HTML */
+function cardHTML(v){
+  const cover = v.coverUrl || thumbFromVideo(v);
+  const youId = parseYouTubeId(v.url);
+  const durationBadge = youId ? "YouTube" : (isFacebookUrl(v.url) ? "Facebook" : "Vídeo");
+  const liked = !!(v.likesBy && state.user && v.likesBy[state.user.uid]);
+  const authorAvatar = getAuthorAvatar(v.authorId, v.authorPhotoURL);
   
-  #heartIcon.animating {
-    fill: red;
-    stroke: red;
+  return `
+  <article class="svp-card" data-id="${v.id}">
+    <div class="svp-thumb-wrap" data-id="${v.id}" data-action="open">
+      <img class="svp-thumb" src="${cover}" alt="${escapeHtml(v.title)}" />
+      <div class="svp-dur">${durationBadge}</div>
+    </div>
+    <div class="svp-meta">
+      <div class="svp-avatar" style="background-image:url('${authorAvatar}')"></div>
+      <div class="svp-info">
+        <h4 class="svp-title">${escapeHtml(v.title)}</h4>
+        <div class="svp-sub">${escapeHtml(v.authorName||"")} • ${escapeHtml(v.category||"")} • ${Icons.views} ${v.views||0}</div>
+        <div class="svp-actions">
+          <button class="svp-action ${liked?"is-like":""}" data-action="like" data-id="${v.id}" aria-label="Curtir">
+            ${liked?Icons.liked:Icons.like} <span>${(v.likesCount||0)}</span>
+          </button>
+          ${state.user?.uid===v.authorId?`
+          <button class="svp-action is-danger" data-action="delete" data-id="${v.id}" aria-label="Apagar">${Icons.delete} Apagar</button>
+          `:""}
+        </div>
+      </div>
+    </div>
+  </article>
+  `;
+}
+
+/* Inferir thumb se não houver capa */
+function thumbFromVideo(v){
+  const youId = parseYouTubeId(v.url);
+  if(youId) return `https://i.ytimg.com/vi/${youId}/hqdefault.jpg`;
+  if(isFacebookUrl(v.url)) return "https://static.xx.fbcdn.net/rsrc.php/yV/r/B8q7QmN8QSh.svg";
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'><rect width='100%' height='100%' fill='#ddd'/><polygon points='260,180 260,120 340,150' fill='#666'/></svg>`);
+}
+
+/* Escape HTML */
+function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m]))}
+
+/* ===== Player Overlay Tela Cheia ===== */
+let currentVideo = null;
+function openPlayer(v){
+  currentVideo = v;
+  $("#svp-player-title").textContent = v.title || "Carregando...";
+  $("#svp-player-meta").textContent = `${v.views||0} visualizações • ${v.authorName||""} • ${v.category||""}`;
+  
+  const body = $("#svp-player-body");
+  body.innerHTML = buildPlayerHTML(v);
+  
+  updatePlayerLikeButton(v);
+  loadComments(v.id);
+  loadRelatedVideos(v);
+  
+  $("#svp-overlay").classList.add("is-open");
+  document.body.style.overflow = 'hidden';
+  
+  runTransaction(ref(db, `videos/${v.id}/views`), curr => (curr||0)+1);
+}
+
+function closePlayer(){
+  $("#svp-overlay").classList.remove("is-open");
+  $("#svp-player-body").innerHTML = "";
+  $("#svp-comments-list").innerHTML = "";
+  $("#svp-related-videos").innerHTML = "";
+  document.body.style.overflow = '';
+  currentVideo = null;
+}
+
+function buildPlayerHTML(v){
+  const youId = parseYouTubeId(v.url);
+  if(youId){
+    const src = `https://www.youtube.com/embed/${youId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`;
+    return `<iframe src="${src}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
   }
-</style>
+  if(isFacebookUrl(v.url)){
+    const enc = encodeURIComponent(v.url);
+    const src = `https://www.facebook.com/plugins/video.php?href=${enc}&show_text=false&autoplay=true`;
+    return `<iframe src="${src}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  }
+  return `<video src="${v.url}" controls autoplay playsinline></video>`;
+}
 
-<script>
-  const likeBtn = document.getElementById('likeBtn');
-  const heartIcon = document.getElementById('heartIcon');
+function updatePlayerLikeButton(v){
+  const liked = !!(v.likesBy && state.user && v.likesBy[state.user.uid]);
+  const btn = $("#svp-player-like");
+  btn.className = `svp-player-action ${liked?"is-liked":""}`;
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24"><path d="${liked ? "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41.81 4.5 2.09C12.09 4.81 13.76 4 15.5 4 18 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" : "M12.1 8.64l-.1.1-.11-.11C10.14 6.82 7.1 7.24 5.5 9c-1.61 1.76-1.45 4.45.36 6.17l5.86 5.66 5.86-5.66c1.81-1.72 1.97-4.41.36-6.17-1.6-1.76-4.64-2.18-6.34-.36z"}"/></svg>
+    <span>${v.likesCount||0}</span>
+  `;
+}
 
-  likeBtn.addEventListener('click', () => {
-    heartIcon.classList.add('animating');
-    setTimeout(() => {
-      heartIcon.classList.remove('animating');
-    }, 600); // duração da animação
+function loadComments(videoId){
+  onValue(ref(db, `comments/${videoId}`), snap => {
+    const comments = [];
+    snap.forEach(child => {
+      comments.push({ id: child.key, ...child.val() });
+    });
+    renderComments(comments.sort(byDateDesc));
+  });
+}
+
+function renderComments(comments){
+  const list = $("#svp-comments-list");
+  list.innerHTML = comments.map(comment => {
+    const commentAvatar = getAuthorAvatar(comment.authorId, comment.authorPhotoURL);
+    return `
+    <div class="svp-comment">
+      <div class="svp-comment-avatar" style="background-image:url('${commentAvatar}')"></div>
+      <div class="svp-comment-content">
+        <div class="svp-comment-author">${escapeHtml(comment.authorName||"")}</div>
+        <div class="svp-comment-text">${escapeHtml(comment.text||"")}</div>
+        <div class="svp-comment-time">${timeAgo(comment.createdAt)}</div>
+      </div>
+    </div>
+  `}).join("") || '<div class="svp-empty">Seja o primeiro a comentar!</div>';
+}
+
+function loadRelatedVideos(currentVideo){
+  const related = state.videos
+    .filter(v => v.id !== currentVideo.id && v.category === currentVideo.category)
+    .sort(byDateDesc)
+    .slice(0, 10);
+  
+  const container = $("#svp-related-videos");
+  container.innerHTML = related.map(v => `
+    <div class="svp-related-item" data-id="${v.id}" data-action="open-related">
+      <img class="svp-related-thumb" src="${v.coverUrl || thumbFromVideo(v)}" alt="${escapeHtml(v.title)}" />
+      <div class="svp-related-info">
+        <div class="svp-related-title">${escapeHtml(v.title)}</div>
+        <div class="svp-related-meta">${escapeHtml(v.authorName||"")} • ${v.views||0} visualizações</div>
+      </div>
+    </div>
+  `).join("") || '<div class="svp-empty">Nenhum vídeo relacionado encontrado.</div>';
+}
+
+function timeAgo(timestamp){
+  if(!timestamp) return "";
+  const diff = Date.now() - timestamp;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  
+  if(days > 0) return `${days} dia${days>1?'s':''} atrás`;
+  if(hours > 0) return `${hours} hora${hours>1?'s':''} atrás`;
+  if(minutes > 0) return `${minutes} minuto${minutes>1?'s':''} atrás`;
+  return 'Agora';
+}
+
+function requestFullscreen(){
+  const player = $("#svp-overlay");
+  if(player.requestFullscreen){ player.requestFullscreen(); }
+  else if(player.webkitRequestFullscreen){ player.webkitRequestFullscreen(); }
+  else if(player.msRequestFullscreen){ player.msRequestFullscreen(); }
+}
+
+/* ===== Eventos ===== */
+// Navegação no header
+$$(".svp-nav-btn").forEach(btn => {
+  btn.addEventListener("click", ()=>{
+    const tab = btn.dataset.tab;
+    $$(".svp-nav-btn").forEach(b=> b.classList.toggle("is-active", b.dataset.tab===tab));
+    $$(".svp-page").forEach(p=> p.classList.toggle("is-active", p.id === `svp-page-${tab}`));
+  });
+});
+
+// Categorias
+$("#svp-cats").addEventListener("click",(e)=>{
+  const chip = e.target.closest(".svp-chip");
+  if(!chip) return;
+  state.cat = chip.dataset.cat;
+  renderCategories();
+  renderFeed();
+});
+
+// Busca
+$("#svp-search-input").addEventListener("input", debounce(()=>{
+  state.q = sanitize($("#svp-search-input").value);
+  renderFeed();
+}, 120));
+$("#svp-clear-btn").addEventListener("click", ()=>{
+  $("#svp-search-input").value = "";
+  state.q = "";
+  renderFeed();
+});
+
+// Ações do feed
+document.body.addEventListener("click",(e)=>{
+  const open = e.target.closest('[data-action="open"]');
+  const openRelated = e.target.closest('[data-action="open-related"]');
+  const like = e.target.closest('[data-action="like"]');
+  const del = e.target.closest('[data-action="delete"]');
+
+  if(open){
+    const id = open.dataset.id;
+    const v = state.videos.find(x=>x.id===id);
+    if(v) openPlayer(v);
+  }
+  if(openRelated){
+    const id = openRelated.dataset.id;
+    const v = state.videos.find(x=>x.id===id);
+    if(v) openPlayer(v);
+  }
+  if(like){
+    const id = like.dataset.id;
+    toggleLike(id).catch(()=>{});
+  }
+  if(del){
+    const id = del.dataset.id;
+    deleteVideo(id);
+  }
+});
+
+// Player
+$("#svp-close").addEventListener("click", closePlayer);
+$("#svp-fullscreen").addEventListener("click", requestFullscreen);
+$("#svp-player-like").addEventListener("click", ()=>{
+  if(currentVideo) toggleLike(currentVideo.id).catch(()=>{});
+});
+
+// Comentários
+$("#svp-comment-btn").addEventListener("click", async ()=>{
+  ensureAuth();
+  const user = auth.currentUser;
+  const text = sanitize($("#svp-comment-input").value);
+  
+  if(!user || !currentVideo || !text) return;
+  
+  const data = {
+    text,
+    authorId: user.uid,
+    authorName: user.displayName || user.email || "Usuário",
+    authorPhotoURL: user.photoURL || null,
+    createdAt: Date.now()
+  };
+  
+  await push(ref(db, `comments/${currentVideo.id}`), data);
+  $("#svp-comment-input").value = "";
+});
+
+// Publicação
+const coverInput = $("#svp-cover");
+const coverPreview = $("#svp-cover-preview");
+coverInput.addEventListener("change", ()=>{
+  const f = coverInput.files?.[0];
+  if(f){ coverPreview.src = URL.createObjectURL(f); }
+  else { coverPreview.removeAttribute("src"); }
+});
+
+$("#svp-publish").addEventListener("click", async ()=>{
+  ensureAuth();
+  const user = auth.currentUser;
+  const title = sanitize($("#svp-title").value);
+  const category = $("#svp-category").value;
+  const url = sanitize($("#svp-url").value);
+  const hint = $("#svp-publish-hint");
+
+  if(!user){ hint.textContent="Autenticando… tente novamente."; return; }
+  if(!title || !category || !url){ hint.textContent="Preencha título, categoria e URL."; return; }
+
+  try{
+    let coverUrl = "";
+    const f = coverInput.files?.[0];
+    if(f){ coverUrl = await uploadToImgBB(f); }
+    const data = {
+      title, category, url, coverUrl,
+      authorId: user.uid,
+      authorName: user.displayName || user.email || "Autor",
+      authorPhotoURL: user.photoURL || null,
+      createdAt: Date.now(),
+      likesCount: 0,
+      views: 0
+    };
+    await push(ref(db, "videos"), data);
+    hint.textContent = "Publicado com sucesso!";
+    $("#svp-title").value = "";
+    $("#svp-url").value = "";
+    coverInput.value = "";
+    coverPreview.removeAttribute("src");
+  }catch(err){
+    hint.textContent = "Erro ao publicar. Verifique o link e tente novamente.";
+  }
+});
+
+/* Like/Unlike */
+async function toggleLike(id){
+  const user = auth.currentUser;
+  if(!user){ ensureAuth(); return; }
+  const v = state.videos.find(x=>x.id===id);
+  if(!v) return;
+  const liked = !!(v.likesBy && v.likesBy[user.uid]);
+
+  await runTransaction(ref(db, `videos/${id}/likesCount`), curr => {
+    if(liked){ return Math.max((curr||0)-1, 0); }
+    return (curr||0)+1;
+  });
+  await update(ref(db, `videos/${id}`), {
+    [`likesBy/${user.uid}`]: liked ? null : true
+  });
+}
+
+/* Apagar vídeo */
+function showConfirmDialog(message, onConfirm) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+  modal.innerHTML = `
+    <div style="background:white;padding:1.5rem;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:400px;width:90%;margin:1rem">
+      <p style="color:#333;margin-bottom:1rem;font-size:1rem">${message}</p>
+      <div style="display:flex;justify-content:flex-end;gap:0.75rem">
+        <button style="padding:0.5rem 1rem;color:#666;background:transparent;border:1px solid #ddd;border-radius:6px;cursor:pointer" onclick="this.closest('div[style*=fixed]').remove()">Cancelar</button>
+        <button style="padding:0.5rem 1rem;background:#ef4444;color:white;border:0;border-radius:6px;cursor:pointer;font-weight:600" onclick="this.closest('div[style*=fixed]').remove(); (${onConfirm})()">Confirmar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function deleteVideo(id){
+  const v = state.videos.find(x=>x.id===id);
+  if(!v || state.user?.uid!==v.authorId) return;
+  
+  showConfirmDialog("Tem certeza que deseja apagar este vídeo?", async () => {
+    await remove(ref(db, `videos/${id}`));
+    await remove(ref(db, `comments/${id}`));
+  });
+}
+
+/* Realtime */
+onValue(ref(db, "videos"), snap=>{
+  const items = [];
+  snap.forEach(child=>{
+    const val = child.val()||{};
+    items.push({ id: child.key, ...val });
+  });
+  state.videos = items;
+  renderFeed();
+  renderMyFeed();
+  
+  if(currentVideo){
+    const updatedVideo = items.find(v => v.id === currentVideo.id);
+    if(updatedVideo){
+      updatePlayerLikeButton(updatedVideo);
+      currentVideo = updatedVideo;
+    }
+  }
+});
+
+onAuthStateChanged(auth, user=>{
+  state.user = user;
+  renderFeed(); 
+  renderMyFeed();
+});
+ensureAuth();
+
+renderCategories();
+
+function debounce(fn,ms){
+  let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),ms); };
+}
+</script>
+      <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const tabButtons = document.querySelectorAll(".svp-tab-btn");
+    const tabPanes = document.querySelectorAll(".tab-pane");
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        // remove active de todos os botões e conteúdos
+        tabButtons.forEach(b => b.classList.remove("active"));
+        tabPanes.forEach(p => p.classList.remove("active"));
+
+        // ativa o botão clicado
+        btn.classList.add("active");
+
+        // ativa o conteúdo correspondente
+        const target = document.getElementById("tab-" + btn.dataset.tab);
+        if (target) {
+          target.classList.add("active");
+        }
+      });
+    });
   });
 </script>
-
 </body>
 </html>
