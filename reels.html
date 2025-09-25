@@ -158,7 +158,7 @@ a{color:inherit;text-decoration:none}
 
 .svp-player-video{
   background:#000;position:relative;display:flex;align-items:center;justify-content:center;
-  flex:1;min-height:0;
+  flex:1;min-height:0;height:35%;
 }
 .svp-player-video iframe,.svp-player-video video{
   width:100%;height:100%;border:0;
@@ -272,6 +272,11 @@ a{color:inherit;text-decoration:none}
 
 .tab-pane.active {
   display: block;
+}
+  .svp-iframe {
+  width: 100%;      /* ocupa toda a largura do container */
+  height: 100%;     /* opcional: ocupa toda a altura do container */
+  display: block;   /* remove espaçamento inline */
 }
 </style>
 </head>
@@ -629,13 +634,19 @@ function buildPlayerHTML(v){
   const youId = parseYouTubeId(v.url);
   if(youId){
     const src = `https://www.youtube.com/embed/${youId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`;
-    return `<iframe src="${src}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-  }
+    return `<iframe class="svp-iframe"
+  src="${src}"
+  frameborder="0"
+  allow="autoplay; encrypted-media; picture-in-picture"
+  allowfullscreen></iframe>`;}
   if(isFacebookUrl(v.url)){
     const enc = encodeURIComponent(v.url);
     const src = `https://www.facebook.com/plugins/video.php?href=${enc}&show_text=false&autoplay=true`;
-    return `<iframe src="${src}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-  }
+    return `<iframe class="svp-iframe"
+  src="${src}"
+  frameborder="0"
+  allow="autoplay; encrypted-media; picture-in-picture"
+  allowfullscreen></iframe>`;  }
   return `<video src="${v.url}" controls autoplay playsinline></video>`;
 }
 
