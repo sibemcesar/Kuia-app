@@ -764,21 +764,23 @@ function closePlayer(){
 
 function buildPlayerHTML(v){
   const youId = parseYouTubeId(v.url);
-  if(youId){
+  if (youId){
     const src = `https://www.youtube.com/embed/${youId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`;
-    return `<iframe 
-  src="${src}"
-  frameborder="0"
-  allow="autoplay; encrypted-media; picture-in-picture"
-  allowfullscreen></iframe>`;}
-  if(isFacebookUrl(v.url)){
+    return `<iframe
+      src="${src}"
+      frameborder="0"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+      allowfullscreen></iframe>`;
+  }
+  if (isFacebookUrl(v.url)){
     const enc = encodeURIComponent(v.url);
     const src = `https://www.facebook.com/plugins/video.php?href=${enc}&show_text=false&autoplay=true`;
     return `<iframe
-  src="${src}"
-  frameborder="0"
-  allow="autoplay; encrypted-media; picture-in-picture"
-  allowfullscreen></iframe>`;  }
+      src="${src}"
+      frameborder="0"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+      allowfullscreen></iframe>`;
+  }
   return `<video src="${v.url}" controls autoplay playsinline></video>`;
 }
 
@@ -935,8 +937,24 @@ document.body.addEventListener("click",(e)=>{
 
 // Player
 $("#svp-close").addEventListener("click", closePlayer);
-$("#svp-fullscreen").addEventListener("click", requestFullscreen);
-$("#svp-player-like").addEventListener("click", ()=>{
+$("#svp-fullscreen").addEventListener("click", () => {
+  const ok = SVPFullscreen.request();
+  if (!ok) {
+    // Plano B: se for YouTube, abrir no app
+    const v = currentVideo;
+    const youId = v ? (v.url && (v.url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/)?.[1])) : null;
+    if (youId) {
+      window.open(`https://youtu.be/${youId}`, "_blank", "noopener");
+    }
+  }
+});
+
+// Troca ícone/estado automaticamente
+SVPFullscreen.onChange(isFs => {
+  const btn = $("#svp-fullscreen");
+  btn.title = isFs ? "Sair da tela cheia" : "Tela cheia";
+  // Se quiser alternar ícone, faça aqui
+});$("#svp-player-like").addEventListener("click", ()=>{
   if(currentVideo) toggleLike(currentVideo.id).catch(()=>{});
 });
 
@@ -1145,6 +1163,113 @@ function debounce(fn,ms){
       });
     });
   });
+  
 </script>
+  <script>
+  // svp-fullscreen.js
+(function (global) {
+  const log = (...args) => console.debug("[SVP-FS]", ...args);
+
+  function canFullscreenEl(el) {
+    return !!(el && (
+      el.requestFullscreen ||
+      el.webkitRequestFullscreen ||
+      el.mozRequestFullScreen ||
+      el.msRequestFullscreen
+    ));
+  }
+
+  function enter(el) {
+    if (!el) return false;
+    try {
+      if (el.requestFullscreen) return el.requestFullscreen(), true;
+      if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(), true;
+      if (el.mozRequestFullScreen) return el.mozRequestFullScreen(), true;
+      if (el.msRequestFullscreen) return el.msRequestFullscreen(), true;
+    } catch (err) {
+      log("Erro ao entrar em fullscreen:", err);
+      return false;
+    }
+    return false;
+  }
+
+  function exit() {
+    try {
+      if (document.exitFullscreen) return document.exitFullscreen();
+      if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+      if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
+      if (document.msExitFullscreen) return document.msExitFullscreen();
+    } catch (err) {
+      log("Erro ao sair de fullscreen:", err);
+    }
+  }
+
+  function currentMediaEl() {
+    // Prioridade: <video> nativo → <iframe> (YT/FB)
+    const container = document.querySelector("#svp-player-body") || document.querySelector(".svp-player-video");
+    if (!container) return null;
+    return container.querySelector("video") || container.querySelector("iframe") || null;
+  }
+
+  function ensureIframePermissions(iframe) {
+    if (!iframe) return;
+    const allow = (iframe.getAttribute("allow") || "").toLowerCase();
+    if (!allow.includes("fullscreen")) {
+      const next = (allow ? allow + "; " : "") + "fullscreen";
+      iframe.setAttribute("allow", next);
+      log("Permissão 'fullscreen' adicionada ao iframe allow=", next);
+    }
+    if (!iframe.hasAttribute("allowfullscreen")) {
+      iframe.setAttribute("allowfullscreen", "");
+      log("Atributo booleano allowfullscreen adicionado");
+    }
+  }
+
+  function request() {
+    // 1) Tenta mídia direta
+    const media = currentMediaEl();
+    if (media) {
+      if (media.tagName === "IFRAME") ensureIframePermissions(media);
+
+      if (canFullscreenEl(media)) {
+        log("Tentando fullscreen no elemento de mídia:", media.tagName);
+        const ok = enter(media);
+        if (ok) return true;
+        log("Falha ao entrar em fullscreen no elemento de mídia; tentando fallback...");
+      } else {
+        log("Elemento de mídia não tem API de fullscreen; tentando fallback...");
+      }
+    } else {
+      log("Nenhum elemento de mídia encontrado; tentando fallback...");
+    }
+
+    // 2) Fallback: documento inteiro
+    if (canFullscreenEl(document.documentElement)) {
+      log("Tentando fullscreen no documentElement");
+      const ok = enter(document.documentElement);
+      if (ok) return true;
+    }
+
+    // 3) Último recurso (ambiente bloqueado)
+    log("Fullscreen bloqueado pelo ambiente. Considere abrir no app do YouTube/Facebook.");
+    return false;
+  }
+
+  // Eventos úteis para depuração/UX
+  function onChange(handler) {
+    const fn = () => handler(!!(document.fullscreenElement ||
+                               document.webkitFullscreenElement ||
+                               document.mozFullScreenElement));
+    ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "MSFullscreenChange"]
+      .forEach(evt => document.addEventListener(evt, fn));
+  }
+
+  global.SVPFullscreen = {
+    request,
+    exit,
+    onChange
+  };
+})(window);
+  </script>
 </body>
 </html>
