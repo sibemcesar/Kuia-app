@@ -164,7 +164,7 @@ a{color:inherit;text-decoration:none}
   background:#000;
   position:relative;
   width:100%;
-  height:250px;
+  height:250px;        /* altura fixa para todos os vídeos */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -177,18 +177,19 @@ a{color:inherit;text-decoration:none}
   height:100%;
   border:0;
   display:block;
-  object-fit:contain;
+  object-fit:contain;  /* mantém proporção sem cortar */
 }
 
-/* Fullscreen video nativo */
-#fullscreen-video {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw !important;
-  height: 100vh !important;
+/* Fullscreen placeholder quando iframe está em fullscreen */
+.svp-fullscreen-placeholder {
   background: #000;
-  z-index: 10000;
-  object-fit: contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  width: 100%;
+  height: 100%;
 }
 
 .svp-player-footer {
@@ -316,16 +317,6 @@ a{color:inherit;text-decoration:none}
 .tab-pane.active {
   display: block;
 }
-
-/* Loading indicator */
-.svp-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--svp-sub);
-  font-size: 0.9rem;
-  padding: 1rem;
-}
 </style>
 </head>
 <body>
@@ -396,7 +387,7 @@ a{color:inherit;text-decoration:none}
   </main>
 </div>
 
-<!-- Player Overlay com Video Nativo para Fullscreen -->
+<!-- Player Overlay com Iframe Fullscreen Nativo -->
 <div class="svp-overlay" id="svp-overlay">
   <div class="svp-player-main">
     <!-- Header do player -->
@@ -501,7 +492,7 @@ const state = {
   q: "",
   cat: "Todos",
   cats: ["Todos","Música","Notícias","Esportes","Entretenimento","Educação","Comédia","Tecnologia","Gaming"],
-  currentVideoData: null,  // dados do vídeo atual
+  originalContainer: null,  // para restaurar iframe
   isFullscreen: false
 };
 
@@ -655,7 +646,6 @@ function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"
 let currentVideo = null;
 function openPlayer(v){
   currentVideo = v;
-  state.currentVideoData = v;
   $("#svp-player-title").textContent = v.title || "Carregando...";
   $("#svp-player-meta").textContent = `${v.views||0} visualizações • ${v.authorName||""} • ${v.category||""}`;
   
@@ -673,10 +663,9 @@ function openPlayer(v){
 }
 
 function closePlayer(){
-  // Limpar fullscreen se estiver ativo
-  const fullscreenVideo = $("#fullscreen-video");
-  if (fullscreenVideo) {
-    fullscreenVideo.remove();
+  // Restaurar iframe se estiver em fullscreen
+  if (state.isFullscreen) {
+    exitFullscreen();
   }
   
   $("#svp-overlay").classList.remove("is-open");
@@ -686,8 +675,6 @@ function closePlayer(){
   document.body.style.overflow = '';
   
   currentVideo = null;
-  state.currentVideoData = null;
-  state.isFullscreen = false;
 }
 
 function buildPlayerHTML(v){
@@ -783,213 +770,138 @@ function timeAgo(timestamp){
   return 'Agora';
 }
 
-// ===== NOVA FUNÇÃO: Converter para Video Nativo =====
-async function getVideoDirectUrl(videoData) {
-  const youId = parseYouTubeId(videoData.url);
-  
-  if (youId) {
-    // Para YouTube, vamos tentar algumas URLs conhecidas
-    const possibleUrls = [
-      // Estas são URLs que podem funcionar para alguns vídeos
-      `https://www.youtube.com/watch?v=${youId}`,
-      // Podemos tentar outras abordagens aqui
-    ];
-    
-    // Para YouTube, vamos usar um método diferente
-    return await tryYouTubeDirectStream(youId);
-  } else if (isFacebookUrl(videoData.url)) {
-    // Facebook é mais complexo, retornar iframe por enquanto
-    return null;
-  } else {
-    // URL direta de MP4
-    return videoData.url;
+// Fullscreen nativo - EXTRAIR IFRAME DO CONTAINER
+function requestFullscreen(){
+  const iframe = $("#video-iframe");
+  if (!iframe) {
+    console.log('Iframe não encontrado');
+    return;
   }
-}
 
-async function tryYouTubeDirectStream(videoId) {
   try {
-    // Método 1: Tentar API do YouTube (pode necessitar de chave)
-    // Por enquanto, vamos usar uma abordagem alternativa
-    
-    // Método 2: Usar embed URL mas extrair stream
-    // Isto é complexo e pode não funcionar sempre
-    
-    // Método 3: URL alternativa (pode não funcionar sempre)
-    const testUrls = [
-      `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&modestbranding=1`,
-      // Outras URLs possíveis aqui
-    ];
-    
-    return testUrls[0]; // Por enquanto retornar embed URL
-  } catch (error) {
-    console.error('Erro ao obter URL direta:', error);
-    return null;
-  }
-}
-
-// Fullscreen com video nativo
-async function requestFullscreen(){
-  if (!state.currentVideoData) return;
-  
-  try {
+    // Salvar container original
+    state.originalContainer = iframe.parentNode;
     state.isFullscreen = true;
-    
-    // Mostrar loading
-    const body = $("#svp-player-body");
-    body.innerHTML = '<div class="svp-loading">Carregando tela cheia...</div>';
-    
-    // Tentar obter URL direta
-    const directUrl = await getVideoDirectUrl(state.currentVideoData);
-    
-    if (directUrl && !directUrl.includes('embed')) {
-      // Criar video nativo para fullscreen
-      createNativeFullscreenVideo(directUrl);
+
+    // Colocar iframe diretamente em fullscreen
+    if (iframe.requestFullscreen) {
+      iframe.requestFullscreen().then(() => {
+        console.log('Iframe em fullscreen');
+      }).catch(err => {
+        console.error('Erro fullscreen:', err);
+        // Fallback: tentar colocar iframe temporariamente em body
+        tryFallbackFullscreen(iframe);
+      });
+    } else if (iframe.webkitRequestFullscreen) {
+      iframe.webkitRequestFullscreen();
+    } else if (iframe.mozRequestFullScreen) {
+      iframe.mozRequestFullScreen();
+    } else if (iframe.msRequestFullscreen) {
+      iframe.msRequestFullscreen();
     } else {
-      // Fallback: usar iframe em fullscreen
-      createIframeFullscreen();
+      // Fallback para browsers que não suportam
+      tryFallbackFullscreen(iframe);
     }
-    
   } catch (error) {
     console.error('Erro ao entrar em tela cheia:', error);
-    // Fallback para iframe
-    createIframeFullscreen();
+    tryFallbackFullscreen(iframe);
   }
 }
 
-function createNativeFullscreenVideo(videoUrl) {
-  // Criar elemento video nativo
-  const video = document.createElement('video');
-  video.id = 'fullscreen-video';
-  video.src = videoUrl;
-  video.controls = true;
-  video.autoplay = true;
-  video.playsInline = true;
-  
-  // Estilo fullscreen
-  video.style.cssText = `
-    position: fixed !important;
-    top: 0 !important; left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: #000 !important;
-    z-index: 10000 !important;
-    object-fit: contain !important;
+function tryFallbackFullscreen(iframe) {
+  // Criar container temporário em fullscreen
+  const fullscreenContainer = document.createElement('div');
+  fullscreenContainer.id = 'fullscreen-container';
+  fullscreenContainer.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   `;
-  
-  // Eventos
-  video.addEventListener('loadstart', () => {
-    console.log('Video iniciando carregamento');
-  });
-  
-  video.addEventListener('canplay', () => {
-    console.log('Video pronto para reproduzir');
-    // Tentar fullscreen nativo
-    if (video.requestFullscreen) {
-      video.requestFullscreen().catch(console.error);
-    } else if (video.webkitRequestFullscreen) {
-      video.webkitRequestFullscreen();
-    }
-  });
-  
-  video.addEventListener('error', (e) => {
-    console.error('Erro no video:', e);
-    video.remove();
-    // Fallback para iframe
-    createIframeFullscreen();
-  });
-  
-  // Adicionar ao body
-  document.body.appendChild(video);
   
   // Botão de fechar
-  addCloseButton();
-}
-
-function createIframeFullscreen() {
-  // Fallback: iframe em fullscreen
-  const iframe = $("#video-iframe");
-  if (!iframe) return;
-  
-  // Clonar iframe para fullscreen
-  const fullscreenIframe = iframe.cloneNode(true);
-  fullscreenIframe.id = 'fullscreen-video';
-  fullscreenIframe.style.cssText = `
-    position: fixed !important;
-    top: 0 !important; left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: #000 !important;
-    z-index: 10000 !important;
-    border: 0 !important;
-  `;
-  
-  document.body.appendChild(fullscreenIframe);
-  addCloseButton();
-  
-  // Tentar fullscreen nativo no iframe
-  setTimeout(() => {
-    if (fullscreenIframe.requestFullscreen) {
-      fullscreenIframe.requestFullscreen().catch(console.error);
-    }
-  }, 500);
-}
-
-function addCloseButton() {
   const closeBtn = document.createElement('button');
-  closeBtn.innerHTML = '✕';
+  closeBtn.innerHTML = '×';
   closeBtn.style.cssText = `
-    position: fixed !important;
-    top: 20px !important; right: 20px !important;
-    background: rgba(0,0,0,0.7) !important;
-    color: white !important;
-    border: 2px solid rgba(255,255,255,0.3) !important;
-    border-radius: 50% !important;
-    width: 50px !important; height: 50px !important;
-    font-size: 20px !important;
-    cursor: pointer !important;
-    z-index: 10001 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    position: absolute;
+    top: 20px; right: 20px;
+    background: rgba(255,255,255,0.8);
+    border: 0;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10001;
   `;
-  
   closeBtn.onclick = exitFullscreen;
-  document.body.appendChild(closeBtn);
+  
+  // Mover iframe para container fullscreen
+  iframe.style.cssText = 'width: 100%; height: 100%; border: 0;';
+  fullscreenContainer.appendChild(closeBtn);
+  fullscreenContainer.appendChild(iframe);
+  document.body.appendChild(fullscreenContainer);
+  
+  console.log('Fallback fullscreen ativado');
 }
 
 function exitFullscreen(){
-  // Remover video/iframe fullscreen
-  const fullscreenVideo = $("#fullscreen-video");
-  if (fullscreenVideo) {
-    fullscreenVideo.remove();
+  try {
+    state.isFullscreen = false;
+    
+    // Verificar se há container customizado
+    const customContainer = $("#fullscreen-container");
+    if (customContainer) {
+      const iframe = customContainer.querySelector('#video-iframe');
+      if (iframe && state.originalContainer) {
+        // Restaurar estilos originais
+        iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;object-fit:contain;';
+        state.originalContainer.appendChild(iframe);
+      }
+      customContainer.remove();
+      return;
+    }
+    
+    // Sair de fullscreen nativo
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(console.error);
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  } catch (error) {
+    console.error('Erro ao sair da tela cheia:', error);
   }
-  
-  // Remover botão de fechar
-  const closeBtn = document.querySelector('button[style*="z-index: 10001"]');
-  if (closeBtn) {
-    closeBtn.remove();
-  }
-  
-  // Sair de fullscreen nativo se ativo
-  if (document.fullscreenElement) {
-    document.exitFullscreen().catch(console.error);
-  }
-  
-  // Restaurar player normal
-  if (state.currentVideoData) {
-    const body = $("#svp-player-body");
-    body.innerHTML = buildPlayerHTML(state.currentVideoData);
-  }
-  
-  state.isFullscreen = false;
 }
 
-// Detectar saída de fullscreen
-document.addEventListener('fullscreenchange', () => {
-  if (!document.fullscreenElement && state.isFullscreen) {
-    exitFullscreen();
+// Detectar mudanças de fullscreen
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+function handleFullscreenChange() {
+  const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  
+  if (!isFullscreen && state.isFullscreen) {
+    // Saiu de fullscreen, restaurar iframe
+    const iframe = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.querySelector('#video-iframe');
+    if (iframe && state.originalContainer) {
+      iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;object-fit:contain;';
+      state.originalContainer.appendChild(iframe);
+    }
+    state.isFullscreen = false;
   }
-});
+  
+  console.log('Fullscreen status:', isFullscreen);
+}
 
 /* ===== Eventos ===== */
 // Navegação no header
@@ -1277,6 +1189,91 @@ function debounce(fn,ms){
       });
     });
   });
+</script>
+  <script>
+// Toast simples
+function showToast(msg) {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:"fixed", bottom:"20px", left:"50%",
+    transform:"translateX(-50%)",
+    background:"rgba(0,0,0,0.85)", color:"#fff",
+    padding:"8px 14px", borderRadius:"6px",
+    fontSize:"14px", zIndex:99999,
+    opacity:"0", transition:"opacity .3s"
+  });
+  document.body.appendChild(t);
+  requestAnimationFrame(()=> t.style.opacity="1");
+  setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.remove(),300); },2000);
+}
+
+// Sai do pseudo fullscreen
+function exitFullscreen() {
+  document.getElementById("svp-overlay")?.classList.remove("is-fs");
+  showToast("Clique no X pra sair");
+  removeFsCloseButton();
+
+  // 🔹 Chamada para o Android voltar ao retrato
+  if (window.AndroidInterface && AndroidInterface.exitFullscreen) {
+    AndroidInterface.exitFullscreen();
+  }
+}
+
+// Cria botão ✕ de fullscreen
+function addFsCloseButton() {
+  if (document.getElementById("svp-fs-close")) return;
+
+  const closeBtn = document.createElement('button');
+  closeBtn.id = "svp-fs-close";
+  closeBtn.innerHTML = '';
+  closeBtn.style.cssText = `
+    position: fixed;
+    top: 25px; right: 25px;
+    background: transparent;
+    color: white;
+    border: 0px solid transparent;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10001;
+    display: flex; align-items: center; justify-content: center;
+  `;
+  closeBtn.onclick = exitFullscreen;
+  document.body.appendChild(closeBtn);
+}
+
+function removeFsCloseButton() {
+  const btn = document.getElementById("svp-fs-close");
+  if (btn) btn.remove();
+}
+
+// Liga os botões
+document.addEventListener("DOMContentLoaded", () => {
+  const fsBtn = document.getElementById("svp-fullscreen");
+  const overlayCloseBtn = document.getElementById("svp-close");
+
+  if (fsBtn) {
+    fsBtn.addEventListener("click", () => {
+      // aqui você pode também adicionar a classe .is-fs no overlay
+      showToast("Tela cheia");
+      addFsCloseButton();
+
+      // 🔹 Chamada para o Android forçar landscape
+      if (window.AndroidInterface && AndroidInterface.enterFullscreen) {
+        AndroidInterface.enterFullscreen();
+      }
+    });
+  }
+
+  if (overlayCloseBtn) {
+    overlayCloseBtn.addEventListener("click", () => {
+      // fecha o overlay inteiro, sem toast de fullscreen
+      closePlayer && closePlayer();
+    });
+  }
+});
 </script>
 </body>
 </html>
