@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-<title> Vídeos</title>
+<title>SIBEM Vídeos</title>
 <meta name="theme-color" content="#fff" />
 <style>
 /* ===== SIBEM Video Player - Tema Claro Completo ===== */
@@ -140,54 +140,24 @@ a{color:inherit;text-decoration:none}
   display: flex;
 }
 
-/* Fullscreen nativo do Android */
-.svp-overlay:fullscreen {
-  background: #000;
-}
-.svp-overlay:-webkit-full-screen {
-  background: #000;
-}
-.svp-overlay:-moz-full-screen {
-  background: #000;
-}
-
 .svp-player-header{
   background:var(--svp-bg);border-bottom:1px solid var(--svp-border);
   display:flex;justify-content:space-between;align-items:center;padding:1rem;
   flex-shrink:0;
 }
-.svp-overlay:fullscreen .svp-player-header {
-  background: rgba(0,0,0,0.8);
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-.svp-overlay:-webkit-full-screen .svp-player-header {
-  background: rgba(0,0,0,0.8);
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
 
 .svp-player-title-wrap{flex:1;padding-right:1rem}
 .svp-player-title-main{font-size:1.1rem;font-weight:600;margin-bottom:.25rem;color:var(--svp-text)}
 .svp-player-meta{font-size:.85rem;color:var(--svp-sub)}
-.svp-overlay:fullscreen .svp-player-title-main {
-  color: #fff;
-}
-.svp-overlay:fullscreen .svp-player-meta {
-  color: rgba(255,255,255,0.8);
-}
 
 .svp-player-controls{display:flex;gap:.5rem}
 .svp-player-btn{
   background:var(--svp-hover);border:1px solid var(--svp-border);color:var(--svp-text);
   width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  transition:background .2s;
+  transition:background .2s;cursor:pointer;
 }
 .svp-player-btn:hover{background:var(--svp-chip)}
 .svp-player-btn svg{width:20px;height:20px;fill:currentColor}
-.svp-overlay:fullscreen .svp-player-btn {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
-}
 
 /* Vídeo com tamanho consistente */
 .svp-player-video {
@@ -210,15 +180,16 @@ a{color:inherit;text-decoration:none}
   object-fit:contain;  /* mantém proporção sem cortar */
 }
 
-/* Vídeo maior em fullscreen */
-.svp-overlay:fullscreen .svp-player-video {
-  height:60vh;
-}
-.svp-overlay:-webkit-full-screen .svp-player-video {
-  height:60vh;
-}
-.svp-overlay:-moz-full-screen .svp-player-video {
-  height:60vh;
+/* Fullscreen placeholder quando iframe está em fullscreen */
+.svp-fullscreen-placeholder {
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  width: 100%;
+  height: 100%;
 }
 
 .svp-player-footer {
@@ -228,53 +199,26 @@ a{color:inherit;text-decoration:none}
   overflow-y: auto;
   flex-shrink: 0;
 }
-.svp-overlay:fullscreen .svp-player-footer {
-  background: rgba(0,0,0,0.9);
-  border-top: 1px solid rgba(255,255,255,0.2);
-  max-height: calc(40vh - 100px);
-}
 
 .svp-player-info{padding:1rem;border-bottom:1px solid var(--svp-border)}
-.svp-overlay:fullscreen .svp-player-info {
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
 
 .svp-player-actions{display:flex;align-items:center;gap:1rem;margin-top:.75rem}
 .svp-player-action{
   display:flex;align-items:center;gap:.5rem;background:var(--svp-hover);
   border:1px solid var(--svp-border);color:var(--svp-text);padding:.5rem 1rem;
-  border-radius:20px;font-weight:600;transition:background .2s;
+  border-radius:20px;font-weight:600;transition:background .2s;cursor:pointer;
 }
 .svp-player-action:hover{background:var(--svp-chip)}
 .svp-player-action.is-liked{background:var(--svp-accent-2);color:#fff;border-color:var(--svp-accent-2)}
 .svp-player-action svg{width:18px;height:18px;fill:currentColor}
-.svp-overlay:fullscreen .svp-player-action {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
-}
 
 .svp-comments{padding:1rem;border-bottom:1px solid var(--svp-border)}
-.svp-overlay:fullscreen .svp-comments {
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-}
 .svp-comments-header{font-size:1rem;font-weight:600;margin-bottom:.75rem;color:var(--svp-text)}
-.svp-overlay:fullscreen .svp-comments-header {
-  color: #fff;
-}
 
 .svp-comment-form{display:flex;gap:.5rem;margin-bottom:1rem;}
 .svp-comment-input{
   flex:1;border:1px solid var(--svp-border);border-radius:20px;
   padding:.5rem 1rem;background:var(--svp-bg);color:var(--svp-text);font-size:16px;
-}
-.svp-overlay:fullscreen .svp-comment-input {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
-}
-.svp-overlay:fullscreen .svp-comment-input::placeholder {
-  color: rgba(255,255,255,0.6);
 }
 
 .svp-comment-btn {
@@ -291,12 +235,10 @@ a{color:inherit;text-decoration:none}
   width: auto;
   cursor: pointer;
 } 
+
 .svp-comment{
   display:flex;gap:.75rem;margin-bottom:1rem;padding-bottom:1rem;
-  border-bottom:1px solid var(--svp-border);
-}
-.svp-overlay:fullscreen .svp-comment {
-  border-bottom: 1px solid rgba(255,255,255,0.2);
+  border-bottom:1px solid var(--svp-border);position:relative;
 }
 .svp-comment:last-child{border-bottom:0}
 .svp-comment-avatar{
@@ -305,33 +247,24 @@ a{color:inherit;text-decoration:none}
   border:2px solid var(--svp-border);
 }
 .svp-comment-content{flex:1}
-.svp-comment-author{font-weight:600;font-size:.9rem;margin-bottom:.25rem;color:var(--svp-text)}
+.svp-comment-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.25rem}
+.svp-comment-author{font-weight:600;font-size:.9rem;color:var(--svp-text)}
+.svp-comment-delete{
+  background:transparent;border:0;color:var(--svp-danger);font-size:.8rem;
+  padding:.25rem;border-radius:4px;cursor:pointer;opacity:0.7;
+}
+.svp-comment-delete:hover{opacity:1;background:rgba(239,68,68,0.1)}
 .svp-comment-text{color:var(--svp-text);line-height:1.4;margin-bottom:.25rem}
 .svp-comment-time{color:var(--svp-sub);font-size:.8rem}
-.svp-overlay:fullscreen .svp-comment-author {
-  color: #fff;
-}
-.svp-overlay:fullscreen .svp-comment-text {
-  color: rgba(255,255,255,0.9);
-}
-.svp-overlay:fullscreen .svp-comment-time {
-  color: rgba(255,255,255,0.6);
-}
 
 .svp-related{padding:1rem; }
 .svp-related-header{font-size:1rem;font-weight:600;margin-bottom:.75rem;color:var(--svp-text)}
-.svp-overlay:fullscreen .svp-related-header {
-  color: #fff;
-}
 .svp-related-grid{display:grid;gap:.75rem}
 .svp-related-item{
   display:flex;gap:.75rem;cursor:pointer;padding:.5rem;border-radius:8px;
   transition:background .2s;
 }
 .svp-related-item:hover{background:var(--svp-hover)}
-.svp-overlay:fullscreen .svp-related-item:hover {
-  background: rgba(255,255,255,0.1);
-}
 .svp-related-thumb{
   width:120px;aspect-ratio:16/9;border-radius:8px;object-fit:cover;
   background:var(--svp-chip);flex:0 0 120px;
@@ -342,12 +275,6 @@ a{color:inherit;text-decoration:none}
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
 }
 .svp-related-meta{color:var(--svp-sub);font-size:.8rem}
-.svp-overlay:fullscreen .svp-related-title {
-  color: #fff;
-}
-.svp-overlay:fullscreen .svp-related-meta {
-  color: rgba(255,255,255,0.7);
-}
 
 /* Responsivo Desktop */
 @media(min-width:768px){
@@ -359,17 +286,11 @@ a{color:inherit;text-decoration:none}
   .svp-player-video {
     height:400px;
   }
-  .svp-overlay:fullscreen .svp-player-video {
-    height:70vh;
-  }
 }
 
 .svp-tabs {
   display: flex;
   border-bottom: 1px solid #ddd;
-}
-.svp-overlay:fullscreen .svp-tabs {
-  border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
 .svp-tab-btn {
@@ -379,19 +300,13 @@ a{color:inherit;text-decoration:none}
   border: none;
   cursor: pointer;
   font-weight: 600;
-}
-.svp-overlay:fullscreen .svp-tab-btn {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.8);
+  color: var(--svp-text);
 }
 
 .svp-tab-btn.active {
   background: var(--svp-bg);
   border-bottom: 2px solid var(--svp-accent-2);
-}
-.svp-overlay:fullscreen .svp-tab-btn.active {
-  background: rgba(255,255,255,0.2);
-  color: #fff;
+  color: var(--svp-text);
 }
 
 .tab-pane {
@@ -409,9 +324,7 @@ a{color:inherit;text-decoration:none}
   <!-- Header com navegação -->
   <div class="svp-topbar">
     <div class="svp-header-main">
-      <div class="svp-logo">
-       
-      </div>
+      
       
       <div class="svp-search" id="svp-search">
         <button id="svp-search-btn" aria-label="Pesquisar">
@@ -423,7 +336,7 @@ a{color:inherit;text-decoration:none}
         </button>
       </div>
        
-<div class="svp-nav-btns">
+      <div class="svp-nav-btns">
         <button class="svp-nav-btn is-active" data-tab="explore">Explorar</button>
         <button class="svp-nav-btn" data-tab="studio">Estúdio</button>
       </div>
@@ -474,7 +387,7 @@ a{color:inherit;text-decoration:none}
   </main>
 </div>
 
-<!-- Player Overlay com Tela Cheia Nativa -->
+<!-- Player Overlay com Iframe Fullscreen Nativo -->
 <div class="svp-overlay" id="svp-overlay">
   <div class="svp-player-main">
     <!-- Header do player -->
@@ -578,7 +491,9 @@ const state = {
   comments: {},
   q: "",
   cat: "Todos",
-  cats: ["Todos","Música","Notícias","Esportes","Entretenimento","Educação","Comédia","Tecnologia","Gaming"]
+  cats: ["Todos","Música","Notícias","Esportes","Entretenimento","Educação","Comédia","Tecnologia","Gaming"],
+  originalContainer: null,  // para restaurar iframe
+  isFullscreen: false
 };
 
 /* ===== Util: SVGs inline ===== */
@@ -586,7 +501,7 @@ const Icons = {
   like: '<svg viewBox="0 0 24 24"><path d="M12.1 8.64l-.1.1-.11-.11C10.14 6.82 7.1 7.24 5.5 9c-1.61 1.76-1.45 4.45.36 6.17l5.86 5.66 5.86-5.66c1.81-1.72 1.97-4.41.36-6.17-1.6-1.76-4.64-2.18-6.34-.36z"/></svg>',
   liked: '<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41.81 4.5 2.09C12.09 4.81 13.76 4 15.5 4 18 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>',
   delete: '<svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 002 2h8a2 2 0 002-2V7H6v12zM8 4h8l1 1h3v2H4V5h3l1-1z"/></svg>',
-  views: '<svg style="width:24px; height:24px;" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" /></svg>',
+  views: '<svg style="width:16px; height:16px;" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" /></svg>',
   play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
 };
 
@@ -748,40 +663,40 @@ function openPlayer(v){
 }
 
 function closePlayer(){
+  // Restaurar iframe se estiver em fullscreen
+  if (state.isFullscreen) {
+    exitFullscreen();
+  }
+  
   $("#svp-overlay").classList.remove("is-open");
   $("#svp-player-body").innerHTML = "";
   $("#svp-comments-list").innerHTML = "";
   $("#svp-related-videos").innerHTML = "";
   document.body.style.overflow = '';
   
-  // Sair de fullscreen se estiver ativo
-  if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
-    exitFullscreen();
-  }
-  
   currentVideo = null;
 }
 
 function buildPlayerHTML(v){
   const youId = parseYouTubeId(v.url);
-  if (youId){
+  if(youId){
     const src = `https://www.youtube.com/embed/${youId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`;
-    return `<iframe
-      src="${src}"
-      frameborder="0"
-      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-      allowfullscreen></iframe>`;
-  }
-  if (isFacebookUrl(v.url)){
+    return `<iframe 
+  id="video-iframe"
+  src="${src}"
+  frameborder="0"
+  allow="autoplay; encrypted-media; picture-in-picture"
+  allowfullscreen></iframe>`;}
+  if(isFacebookUrl(v.url)){
     const enc = encodeURIComponent(v.url);
     const src = `https://www.facebook.com/plugins/video.php?href=${enc}&show_text=false&autoplay=true`;
     return `<iframe
-      src="${src}"
-      frameborder="0"
-      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-      allowfullscreen></iframe>`;
-  }
-  return `<video src="${v.url}" controls autoplay playsinline></video>`;
+  id="video-iframe"
+  src="${src}"
+  frameborder="0"
+  allow="autoplay; encrypted-media; picture-in-picture"
+  allowfullscreen></iframe>`;  }
+  return `<video id="video-iframe" src="${v.url}" controls autoplay playsinline></video>`;
 }
 
 function updatePlayerLikeButton(v){
@@ -808,11 +723,15 @@ function renderComments(comments){
   const list = $("#svp-comments-list");
   list.innerHTML = comments.map(comment => {
     const commentAvatar = getAuthorAvatar(comment.authorId, comment.authorPhotoURL);
+    const canDelete = state.user && state.user.uid === comment.authorId;
     return `
     <div class="svp-comment">
       <div class="svp-comment-avatar" style="background-image:url('${commentAvatar}')"></div>
       <div class="svp-comment-content">
-        <div class="svp-comment-author">${escapeHtml(comment.authorName||"")}</div>
+        <div class="svp-comment-header">
+          <div class="svp-comment-author">${escapeHtml(comment.authorName||"")}</div>
+          ${canDelete ? `<button class="svp-comment-delete" data-action="delete-comment" data-comment-id="${comment.id}" data-video-id="${currentVideo?.id}" title="Apagar comentário">×</button>` : ''}
+        </div>
         <div class="svp-comment-text">${escapeHtml(comment.text||"")}</div>
         <div class="svp-comment-time">${timeAgo(comment.createdAt)}</div>
       </div>
@@ -851,31 +770,137 @@ function timeAgo(timestamp){
   return 'Agora';
 }
 
-// Fullscreen nativo do Android
+// Fullscreen nativo - EXTRAIR IFRAME DO CONTAINER
 function requestFullscreen(){
-  const overlay = $("#svp-overlay");
-  
-  if (overlay.requestFullscreen) {
-    overlay.requestFullscreen();
-  } else if (overlay.webkitRequestFullscreen) {
-    overlay.webkitRequestFullscreen();
-  } else if (overlay.mozRequestFullScreen) {
-    overlay.mozRequestFullScreen();
-  } else if (overlay.msRequestFullscreen) {
-    overlay.msRequestFullscreen();
+  const iframe = $("#video-iframe");
+  if (!iframe) {
+    console.log('Iframe não encontrado');
+    return;
+  }
+
+  try {
+    // Salvar container original
+    state.originalContainer = iframe.parentNode;
+    state.isFullscreen = true;
+
+    // Colocar iframe diretamente em fullscreen
+    if (iframe.requestFullscreen) {
+      iframe.requestFullscreen().then(() => {
+        console.log('Iframe em fullscreen');
+      }).catch(err => {
+        console.error('Erro fullscreen:', err);
+        // Fallback: tentar colocar iframe temporariamente em body
+        tryFallbackFullscreen(iframe);
+      });
+    } else if (iframe.webkitRequestFullscreen) {
+      iframe.webkitRequestFullscreen();
+    } else if (iframe.mozRequestFullScreen) {
+      iframe.mozRequestFullScreen();
+    } else if (iframe.msRequestFullscreen) {
+      iframe.msRequestFullscreen();
+    } else {
+      // Fallback para browsers que não suportam
+      tryFallbackFullscreen(iframe);
+    }
+  } catch (error) {
+    console.error('Erro ao entrar em tela cheia:', error);
+    tryFallbackFullscreen(iframe);
   }
 }
 
+function tryFallbackFullscreen(iframe) {
+  // Criar container temporário em fullscreen
+  const fullscreenContainer = document.createElement('div');
+  fullscreenContainer.id = 'fullscreen-container';
+  fullscreenContainer.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  
+  // Botão de fechar
+  const closeBtn = document.createElement('button');
+  closeBtn.innerHTML = '×';
+  closeBtn.style.cssText = `
+    position: absolute;
+    top: 20px; right: 20px;
+    background: rgba(255,255,255,0.8);
+    border: 0;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10001;
+  `;
+  closeBtn.onclick = exitFullscreen;
+  
+  // Mover iframe para container fullscreen
+  iframe.style.cssText = 'width: 100%; height: 100%; border: 0;';
+  fullscreenContainer.appendChild(closeBtn);
+  fullscreenContainer.appendChild(iframe);
+  document.body.appendChild(fullscreenContainer);
+  
+  console.log('Fallback fullscreen ativado');
+}
+
 function exitFullscreen(){
-  if (document.exitFullscreen) {
-    document.exitFullscreen();
-  } else if (document.webkitExitFullscreen) {
-    document.webkitExitFullscreen();
-  } else if (document.mozCancelFullScreen) {
-    document.mozCancelFullScreen();
-  } else if (document.msExitFullscreen) {
-    document.msExitFullscreen();
+  try {
+    state.isFullscreen = false;
+    
+    // Verificar se há container customizado
+    const customContainer = $("#fullscreen-container");
+    if (customContainer) {
+      const iframe = customContainer.querySelector('#video-iframe');
+      if (iframe && state.originalContainer) {
+        // Restaurar estilos originais
+        iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;object-fit:contain;';
+        state.originalContainer.appendChild(iframe);
+      }
+      customContainer.remove();
+      return;
+    }
+    
+    // Sair de fullscreen nativo
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(console.error);
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  } catch (error) {
+    console.error('Erro ao sair da tela cheia:', error);
   }
+}
+
+// Detectar mudanças de fullscreen
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+function handleFullscreenChange() {
+  const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  
+  if (!isFullscreen && state.isFullscreen) {
+    // Saiu de fullscreen, restaurar iframe
+    const iframe = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.querySelector('#video-iframe');
+    if (iframe && state.originalContainer) {
+      iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;object-fit:contain;';
+      state.originalContainer.appendChild(iframe);
+    }
+    state.isFullscreen = false;
+  }
+  
+  console.log('Fullscreen status:', isFullscreen);
 }
 
 /* ===== Eventos ===== */
@@ -914,6 +939,7 @@ document.body.addEventListener("click",(e)=>{
   const openRelated = e.target.closest('[data-action="open-related"]');
   const like = e.target.closest('[data-action="like"]');
   const del = e.target.closest('[data-action="delete"]');
+  const delComment = e.target.closest('[data-action="delete-comment"]');
 
   if(open){
     const id = open.dataset.id;
@@ -933,28 +959,17 @@ document.body.addEventListener("click",(e)=>{
     const id = del.dataset.id;
     deleteVideo(id);
   }
+  if(delComment){
+    const commentId = delComment.dataset.commentId;
+    const videoId = delComment.dataset.videoId;
+    deleteComment(commentId, videoId);
+  }
 });
 
 // Player
 $("#svp-close").addEventListener("click", closePlayer);
-$("#svp-fullscreen").addEventListener("click", () => {
-  const ok = SVPFullscreen.request();
-  if (!ok) {
-    // Plano B: se for YouTube, abrir no app
-    const v = currentVideo;
-    const youId = v ? (v.url && (v.url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/)?.[1])) : null;
-    if (youId) {
-      window.open(`https://youtu.be/${youId}`, "_blank", "noopener");
-    }
-  }
-});
-
-// Troca ícone/estado automaticamente
-SVPFullscreen.onChange(isFs => {
-  const btn = $("#svp-fullscreen");
-  btn.title = isFs ? "Sair da tela cheia" : "Tela cheia";
-  // Se quiser alternar ícone, faça aqui
-});$("#svp-player-like").addEventListener("click", ()=>{
+$("#svp-fullscreen").addEventListener("click", requestFullscreen);
+$("#svp-player-like").addEventListener("click", ()=>{
   if(currentVideo) toggleLike(currentVideo.id).catch(()=>{});
 });
 
@@ -1039,6 +1054,19 @@ async function toggleLike(id){
   });
 }
 
+/* Apagar comentário */
+async function deleteComment(commentId, videoId) {
+  if (!commentId || !videoId) return;
+  
+  showConfirmDialog("Tem certeza que deseja apagar este comentário?", async () => {
+    try {
+      await remove(ref(db, `comments/${videoId}/${commentId}`));
+    } catch (err) {
+      console.error("Erro ao deletar comentário:", err);
+    }
+  });
+}
+
 function showConfirmDialog(message, onConfirm) {
   const modal = document.createElement('div');
   modal.style.cssText = `
@@ -1083,12 +1111,10 @@ function showConfirmDialog(message, onConfirm) {
         if (result instanceof Promise) {
           result.catch(err => {
             console.error("Erro ao confirmar:", err);
-            alert("Ocorreu um erro ao apagar o vídeo.");
           });
         }
       } catch (err) {
         console.error("Erro ao confirmar:", err);
-        alert("Ocorreu um erro ao apagar o vídeo.");
       }
     }
   });
@@ -1163,113 +1189,6 @@ function debounce(fn,ms){
       });
     });
   });
-  
 </script>
-  <script>
-  // svp-fullscreen.js
-(function (global) {
-  const log = (...args) => console.debug("[SVP-FS]", ...args);
-
-  function canFullscreenEl(el) {
-    return !!(el && (
-      el.requestFullscreen ||
-      el.webkitRequestFullscreen ||
-      el.mozRequestFullScreen ||
-      el.msRequestFullscreen
-    ));
-  }
-
-  function enter(el) {
-    if (!el) return false;
-    try {
-      if (el.requestFullscreen) return el.requestFullscreen(), true;
-      if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen(), true;
-      if (el.mozRequestFullScreen) return el.mozRequestFullScreen(), true;
-      if (el.msRequestFullscreen) return el.msRequestFullscreen(), true;
-    } catch (err) {
-      log("Erro ao entrar em fullscreen:", err);
-      return false;
-    }
-    return false;
-  }
-
-  function exit() {
-    try {
-      if (document.exitFullscreen) return document.exitFullscreen();
-      if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
-      if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
-      if (document.msExitFullscreen) return document.msExitFullscreen();
-    } catch (err) {
-      log("Erro ao sair de fullscreen:", err);
-    }
-  }
-
-  function currentMediaEl() {
-    // Prioridade: <video> nativo → <iframe> (YT/FB)
-    const container = document.querySelector("#svp-player-body") || document.querySelector(".svp-player-video");
-    if (!container) return null;
-    return container.querySelector("video") || container.querySelector("iframe") || null;
-  }
-
-  function ensureIframePermissions(iframe) {
-    if (!iframe) return;
-    const allow = (iframe.getAttribute("allow") || "").toLowerCase();
-    if (!allow.includes("fullscreen")) {
-      const next = (allow ? allow + "; " : "") + "fullscreen";
-      iframe.setAttribute("allow", next);
-      log("Permissão 'fullscreen' adicionada ao iframe allow=", next);
-    }
-    if (!iframe.hasAttribute("allowfullscreen")) {
-      iframe.setAttribute("allowfullscreen", "");
-      log("Atributo booleano allowfullscreen adicionado");
-    }
-  }
-
-  function request() {
-    // 1) Tenta mídia direta
-    const media = currentMediaEl();
-    if (media) {
-      if (media.tagName === "IFRAME") ensureIframePermissions(media);
-
-      if (canFullscreenEl(media)) {
-        log("Tentando fullscreen no elemento de mídia:", media.tagName);
-        const ok = enter(media);
-        if (ok) return true;
-        log("Falha ao entrar em fullscreen no elemento de mídia; tentando fallback...");
-      } else {
-        log("Elemento de mídia não tem API de fullscreen; tentando fallback...");
-      }
-    } else {
-      log("Nenhum elemento de mídia encontrado; tentando fallback...");
-    }
-
-    // 2) Fallback: documento inteiro
-    if (canFullscreenEl(document.documentElement)) {
-      log("Tentando fullscreen no documentElement");
-      const ok = enter(document.documentElement);
-      if (ok) return true;
-    }
-
-    // 3) Último recurso (ambiente bloqueado)
-    log("Fullscreen bloqueado pelo ambiente. Considere abrir no app do YouTube/Facebook.");
-    return false;
-  }
-
-  // Eventos úteis para depuração/UX
-  function onChange(handler) {
-    const fn = () => handler(!!(document.fullscreenElement ||
-                               document.webkitFullscreenElement ||
-                               document.mozFullScreenElement));
-    ["fullscreenchange", "webkitfullscreenchange", "mozfullscreenchange", "MSFullscreenChange"]
-      .forEach(evt => document.addEventListener(evt, fn));
-  }
-
-  global.SVPFullscreen = {
-    request,
-    exit,
-    onChange
-  };
-})(window);
-  </script>
 </body>
 </html>
