@@ -71,6 +71,9 @@
                             <button id="categoriesBtn" class="nav-btn text-gray-700 dark:text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
                                 <span class="mr-2">📂</span>Categorias
                             </button>
+                            <button id="favoritesBtn" class="nav-btn text-gray-700 dark:text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                                <span class="mr-2">❤️</span>Favoritos
+                            </button>
                         </div>
                     </div>
                     
@@ -92,14 +95,11 @@
                         
                         <!-- User Menu -->
                         <div class="relative">
-                            <button id="userMenuBtn" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <button style="display:none;"  id="userMenuBtn" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                                 <img id="userAvatar" src="" alt="Avatar" class="w-8 h-8 rounded-full">
                                 <span id="userName" class="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300"></span>                             
                             </button>
-                            <div style="display:none;" id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                                <button id="adminBtn" class="hidden w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg">
-                                    <span class="mr-2">⚙️</span>Administração
-                                </button>
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                                 <button id="logoutBtn" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg">
                                     <span class="mr-2">🚪</span>Sair
                                 </button>
@@ -125,6 +125,10 @@
                     <div class="text-lg">📂</div>
                     <span class="text-xs mt-1">Categorias</span>
                 </button>
+                <button id="mobileFavoritesBtn" class="flex-1 nav-btn text-center py-3 text-gray-700 dark:text-gray-300 hover:text-primary">
+                    <div class="text-lg">❤️</div>
+                    <span class="text-xs mt-1">Favoritos</span>
+                </button>
             </div>
         </div>
 
@@ -134,10 +138,35 @@
             <div id="homeSection">
                 <div class="mb-8">
                     <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-4">Produtos Disponíveis</h2>
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        <button class="category-filter-btn bg-primary text-white px-4 py-2 rounded-full text-sm font-medium" data-category="all">
-                            Todos
-                        </button>
+                    
+                    <!-- Filters -->
+                    <div class="space-y-4 mb-6">
+                        <!-- Category Filters -->
+                        <div class="flex flex-wrap gap-2" id="categoryFilters">
+                            <button class="category-filter-btn bg-primary text-white px-4 py-2 rounded-full text-sm font-medium" data-category="all">
+                                Todos
+                            </button>
+                        </div>
+                        
+                        <!-- Price Filters -->
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2 py-2">Filtrar por preço:</span>
+                            <button class="price-filter-btn bg-primary text-white px-3 py-1 rounded-full text-sm" data-price="all">
+                                Todos os preços
+                            </button>
+                            <button class="price-filter-btn bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-1 rounded-full text-sm" data-price="0-1000">
+                                Até 1.000 Kz
+                            </button>
+                            <button class="price-filter-btn bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-1 rounded-full text-sm" data-price="1000-5000">
+                                1.000 - 5.000 Kz
+                            </button>
+                            <button class="price-filter-btn bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-1 rounded-full text-sm" data-price="5000-10000">
+                                5.000 - 10.000 Kz
+                            </button>
+                            <button class="price-filter-btn bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-1 rounded-full text-sm" data-price="10000+">
+                                Acima de 10.000 Kz
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -160,36 +189,13 @@
                 </div>
             </div>
 
-            <!-- Admin Section -->
-            <div id="adminSection" class="hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-200">Administração</h2>
-                    <button id="addProductBtn" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors">
-                        <span class="mr-2">➕</span>Adicionar Produto
-                    </button>
-                </div>
-                
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Produto</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Categoria</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Preço</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estoque</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminProductsList" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
-                                        Carregando produtos...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+            <!-- Favorites Section -->
+            <div id="favoritesSection" class="hidden">
+                <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-8">Meus Favoritos</h2>
+                <div id="favoritesGrid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                    <div class="text-center py-12">
+                        <div class="text-4xl mb-4">❤️</div>
+                        <p class="text-gray-600 dark:text-gray-400">Carregando favoritos...</p>
                     </div>
                 </div>
             </div>
@@ -278,7 +284,7 @@
                             Cancelar
                         </button>
                         <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-                            <span class="mr-2">✅</span>Confirmar Pedido
+                            <span class="mr-2"></span>Confirmar Pedido
                         </button>
                     </div>
                 </form>
@@ -327,94 +333,16 @@
                             <p id="detailDescription" class="text-gray-600 dark:text-gray-400 text-sm"></p>
                         </div>
                         
-                        <button id="detailAddToCartBtn" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span class="mr-2">🛒</span>Adicionar ao Carrinho
-                        </button>
+                        <div class="flex space-x-2">
+                            <button id="detailFavoriteBtn" class="px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                <span id="detailFavoriteIcon">🤍</span>
+                            </button>
+                            <button id="detailAddToCartBtn" class="flex-1 bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="mr-2">🛒</span>Adicionar ao Carrinho
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Product Modal -->
-    <div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 id="modalTitle" class="text-xl font-semibold text-gray-800 dark:text-gray-200"></h3>
-                    <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl">
-                        ❌
-                    </button>
-                </div>
-                
-                <form id="productForm">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome do Produto</label>
-                            <input type="text" id="productName" required class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categoria</label>
-                            <select id="productCategory" required 
-    class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 
-           rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 
-           focus:ring-2 focus:ring-primary focus:border-transparent">
-    <option value="">Selecione uma categoria</option>
-    <option value="eletronicos">Eletrônicos</option>
-    <option value="roupas">Roupas</option>
-    <option value="casa">Casa e Jardim</option>
-    <option value="livros">Livros</option>
-    <option value="esportes">Esportes</option>
-    <option value="beleza">Beleza</option>
-    <option value="acessorios">Acessórios & Joias</option>
-    <option value="calcados">Calçados</option>
-    <option value="alimentacao">Alimentação & Bebidas</option>
-    <option value="saude">Saúde & Bem-estar</option>
-    <option value="automotivo">Automotivo</option>
-    <option value="brinquedos">Brinquedos & Jogos</option>
-    <option value="musica">Música & Instrumentos</option>
-    <option value="arte">Arte & Artesanato</option>
-    <option value="pets">Pets</option>
-    <option value="servicos">Serviços</option>
-</select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preço Atual (Kz)</label>
-                            <input type="number" id="productPrice" step="0.01" min="0" required class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preço Anterior (Kz) - Opcional</label>
-                            <input type="number" id="productOldPrice" step="0.01" min="0" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Para mostrar desconto">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Estoque</label>
-                            <input type="number" id="productStock" min="0" required class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent">
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Descrição</label>
-                        <textarea id="productDescription" rows="3" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">URL da Imagem</label>
-                        <input type="url" id="productImage" placeholder="https://exemplo.com/imagem.jpg" class="w-full px-3 py-2 text-base border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent">
-                    </div>
-                    
-                    <div class="flex justify-end space-x-3 mt-6">
-                        <button type="button" id="cancelModalBtn" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-                            <span class="mr-2">💾</span>Salvar
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -474,11 +402,9 @@
         let cart = [];
         let products = {};
         let categories = [];
+        let favorites = [];
         let currentSection = 'home';
-        let editingProductId = null;
-
-        // Initialize admin emails
-        const adminEmails = ['sibemcesar@gmail.com']; // Add your email here
+        let currentPriceFilter = 'all';
 
         // DOM elements
         const loadingScreen = document.getElementById('loadingScreen');
@@ -490,7 +416,6 @@
         const userName = document.getElementById('userName');
         const userMenuBtn = document.getElementById('userMenuBtn');
         const userMenu = document.getElementById('userMenu');
-        const adminBtn = document.getElementById('adminBtn');
 
         // Cart elements
         const cartBtn = document.getElementById('cartBtn');
@@ -505,28 +430,22 @@
         // Navigation elements
         const homeBtn = document.getElementById('homeBtn');
         const categoriesBtn = document.getElementById('categoriesBtn');
+        const favoritesBtn = document.getElementById('favoritesBtn');
         const mobileHomeBtn = document.getElementById('mobileHomeBtn');
         const mobileCategoriesBtn = document.getElementById('mobileCategoriesBtn');
+        const mobileFavoritesBtn = document.getElementById('mobileFavoritesBtn');
 
         // Section elements
         const homeSection = document.getElementById('homeSection');
         const categoriesSection = document.getElementById('categoriesSection');
-        const adminSection = document.getElementById('adminSection');
+        const favoritesSection = document.getElementById('favoritesSection');
 
         // Product elements
         const productsGrid = document.getElementById('productsGrid');
         const categoriesGrid = document.getElementById('categoriesGrid');
+        const favoritesGrid = document.getElementById('favoritesGrid');
         const searchInput = document.getElementById('searchInput');
         const mobileSearchInput = document.getElementById('mobileSearchInput');
-
-        // Modal elements
-        const productModal = document.getElementById('productModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const cancelModalBtn = document.getElementById('cancelModalBtn');
-        const productForm = document.getElementById('productForm');
-        const addProductBtn = document.getElementById('addProductBtn');
-        const adminProductsList = document.getElementById('adminProductsList');
 
         // Checkout elements
         const checkoutModal = document.getElementById('checkoutModal');
@@ -550,6 +469,8 @@
         const detailDescription = document.getElementById('detailDescription');
         const detailDescriptionContainer = document.getElementById('detailDescriptionContainer');
         const detailAddToCartBtn = document.getElementById('detailAddToCartBtn');
+        const detailFavoriteBtn = document.getElementById('detailFavoriteBtn');
+        const detailFavoriteIcon = document.getElementById('detailFavoriteIcon');
 
         // Authentication
         onAuthStateChanged(auth, (user) => {
@@ -561,13 +482,9 @@
                 userAvatar.src = user.photoURL || 'https://via.placeholder.com/32';
                 userName.textContent = user.displayName || user.email;
                 
-                // Check if user is admin
-                if (adminEmails.includes(user.email)) {
-                    adminBtn.classList.remove('hidden');
-                }
-                
                 showMainApp();
                 loadData();
+                loadFavorites();
             } else {
                 // User is signed out
                 showLoginScreen();
@@ -588,8 +505,8 @@
             try {
                 await signOut(auth);
                 cart = [];
+                favorites = [];
                 updateCartUI();
-                adminBtn.classList.add('hidden');
             } catch (error) {
                 console.error('Logout error:', error);
             }
@@ -624,19 +541,14 @@
         // Navigation
         homeBtn.addEventListener('click', () => showSection('home'));
         categoriesBtn.addEventListener('click', () => showSection('categories'));
+        favoritesBtn.addEventListener('click', () => showSection('favorites'));
         mobileHomeBtn.addEventListener('click', () => showSection('home'));
         mobileCategoriesBtn.addEventListener('click', () => showSection('categories'));
-        adminBtn.addEventListener('click', () => showSection('admin'));
+        mobileFavoritesBtn.addEventListener('click', () => showSection('favorites'));
 
         // Search functionality
         searchInput.addEventListener('input', filterProducts);
         mobileSearchInput.addEventListener('input', filterProducts);
-
-        // Modal functionality
-        addProductBtn.addEventListener('click', () => openProductModal());
-        closeModalBtn.addEventListener('click', closeProductModal);
-        cancelModalBtn.addEventListener('click', closeProductModal);
-        productForm.addEventListener('submit', saveProduct);
 
         // Checkout
         checkoutBtn.addEventListener('click', openCheckout);
@@ -722,10 +634,26 @@
             const productsRef = ref(database, 'products');
             onValue(productsRef, (snapshot) => {
                 products = snapshot.val() || {};
+                console.log('Products loaded:', Object.keys(products).length);
                 renderProducts();
                 updateCategories();
-                renderAdminProducts();
             });
+        }
+
+        function loadFavorites() {
+            if (currentUser) {
+                const favoritesRef = ref(database, `favorites/${currentUser.uid}`);
+                onValue(favoritesRef, (snapshot) => {
+                    const favoritesData = snapshot.val() || {};
+                    favorites = Object.keys(favoritesData);
+                    console.log('Favorites loaded:', favorites.length);
+                    renderFavorites();
+                    // Update product grid to reflect favorite status
+                    if (currentSection === 'home') {
+                        renderProducts();
+                    }
+                });
+            }
         }
 
         function renderProducts() {
@@ -735,6 +663,7 @@
             
             let filteredProducts = productsArray;
             
+            // Apply search filter
             if (searchTerm) {
                 filteredProducts = filteredProducts.filter(product => 
                     product.name.toLowerCase().includes(searchTerm) ||
@@ -743,8 +672,28 @@
                 );
             }
             
+            // Apply category filter
             if (activeCategory !== 'all') {
                 filteredProducts = filteredProducts.filter(product => product.category === activeCategory);
+            }
+
+            // Apply price filter
+            if (currentPriceFilter !== 'all') {
+                filteredProducts = filteredProducts.filter(product => {
+                    const price = product.price;
+                    switch (currentPriceFilter) {
+                        case '0-1000':
+                            return price <= 1000;
+                        case '1000-5000':
+                            return price > 1000 && price <= 5000;
+                        case '5000-10000':
+                            return price > 5000 && price <= 10000;
+                        case '10000+':
+                            return price > 10000;
+                        default:
+                            return true;
+                    }
+                });
             }
 
             if (filteredProducts.length === 0) {
@@ -760,6 +709,7 @@
             productsGrid.innerHTML = filteredProducts.map(product => {
                 const hasDiscount = product.oldPrice && product.oldPrice > product.price;
                 const discountPercent = hasDiscount ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100) : 0;
+                const isFavorite = favorites.includes(product.id);
                 
                 return `
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
@@ -771,6 +721,94 @@
                                 <div class="text-2xl sm:text-3xl text-gray-400">🖼️</div>
                             </div>`
                         }
+                        <button onclick="event.stopPropagation(); toggleFavorite('${product.id}')" 
+                                class="absolute top-2 right-2 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md hover:shadow-lg transition-shadow">
+                            <span class="text-lg">${isFavorite ? '❤️' : '🤍'}</span>
+                        </button>
+                        ${hasDiscount ? `
+                            <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                                -${discountPercent}%
+                            </div>
+                        ` : ''}
+                        ${product.stock === 0 ? `
+                            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                <span class="text-white font-bold text-sm">Esgotado</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="p-3 sm:p-4">
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-200 mb-2 text-sm sm:text-base line-clamp-2">${product.name}</h3>
+                        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2 capitalize">${getCategoryName(product.category)}</p>
+                        
+                        <div class="flex items-center space-x-2 mb-2">
+                            <span class="text-lg sm:text-xl font-bold text-primary">${formatPrice(product.price)}</span>
+                            ${hasDiscount ? `<span class="text-sm text-gray-400 line-through">${formatPrice(product.oldPrice)}</span>` : ''}
+                        </div>
+                        
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                <span class="mr-1">📦</span>${product.stock} disponível
+                            </span>
+                            ${product.stock > 0 && product.stock <= 5 ? `
+                                <span class="text-xs text-orange-500 font-medium">Últimas unidades!</span>
+                            ` : ''}
+                        </div>
+                        
+                        <button onclick="event.stopPropagation(); addToCart('${product.id}')" 
+                                class="w-full text-sm sm:text-base bg-primary text-white py-2 rounded-lg hover:bg-primary-dark transition-colors ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+                                ${product.stock === 0 ? 'disabled' : ''}>
+                            <span class="mr-1 sm:mr-2">🛒</span>${product.stock === 0 ? 'Sem Estoque' : 'Adicionar'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function renderFavorites() {
+            if (favorites.length === 0) {
+                favoritesGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-4xl mb-4">❤️</div>
+                        <p class="text-gray-500 dark:text-gray-400">Você ainda não tem produtos favoritos</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Clique no coração dos produtos para adicioná-los aos favoritos</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const favoriteProducts = favorites
+                .map(id => products[id] ? { id, ...products[id] } : null)
+                .filter(p => p !== null);
+
+            if (favoriteProducts.length === 0) {
+                favoritesGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-4xl mb-4">❤️</div>
+                        <p class="text-gray-500 dark:text-gray-400">Produtos favoritos não encontrados</p>
+                    </div>
+                `;
+                return;
+            }
+
+            favoritesGrid.innerHTML = favoriteProducts.map(product => {
+                const hasDiscount = product.oldPrice && product.oldPrice > product.price;
+                const discountPercent = hasDiscount ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100) : 0;
+                
+                return `
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                     onclick="showProductDetail('${product.id}')">
+                    <div class="relative aspect-w-1 aspect-h-1 w-full h-40 sm:h-48 bg-gray-200 dark:bg-gray-700">
+                        ${product.image ? 
+                            `<img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">` :
+                            `<div class="w-full h-full flex items-center justify-center">
+                                <div class="text-2xl sm:text-3xl text-gray-400">🖼️</div>
+                            </div>`
+                        }
+                        <button onclick="event.stopPropagation(); toggleFavorite('${product.id}')" 
+                                class="absolute top-2 right-2 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md hover:shadow-lg transition-shadow">
+                            <span class="text-lg">❤️</span>
+                        </button>
                         ${hasDiscount ? `
                             <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
                                 -${discountPercent}%
@@ -816,9 +854,9 @@
             categories = productCategories;
             
             // Update category filters
-            const filterContainer = document.querySelector('.flex.flex-wrap.gap-2');
-            if (filterContainer) {
-                filterContainer.innerHTML = `
+            const categoryFilters = document.getElementById('categoryFilters');
+            if (categoryFilters) {
+                categoryFilters.innerHTML = `
                     <button class="category-filter-btn bg-primary text-white px-4 py-2 rounded-full text-sm font-medium" data-category="all">
                         Todos
                     </button>
@@ -829,7 +867,7 @@
                     `).join('')}
                 `;
                 
-                // Add event listeners to filter buttons
+                // Add event listeners to category filter buttons
                 document.querySelectorAll('.category-filter-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         document.querySelectorAll('.category-filter-btn').forEach(b => {
@@ -842,6 +880,20 @@
                     });
                 });
             }
+
+            // Add price filter event listeners
+            document.querySelectorAll('.price-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.price-filter-btn').forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white');
+                        b.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
+                    });
+                    btn.classList.add('bg-primary', 'text-white');
+                    btn.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-300', 'dark:hover:bg-gray-600');
+                    currentPriceFilter = btn.dataset.price;
+                    renderProducts();
+                });
+            });
             
             renderCategories();
         }
@@ -874,59 +926,28 @@
             }).join('');
         }
 
-        function renderAdminProducts() {
-            if (!adminBtn.classList.contains('hidden')) {
-                const productsArray = Object.entries(products).map(([id, product]) => ({ id, ...product }));
-                
-                if (productsArray.length === 0) {
-                    adminProductsList.innerHTML = `
-                        <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                Nenhum produto cadastrado
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                adminProductsList.innerHTML = productsArray.map(product => `
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10">
-                                    ${product.image ? 
-                                        `<img class="h-10 w-10 rounded object-cover" src="${product.image}" alt="${product.name}">` :
-                                        `<div class="h-10 w-10 rounded bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                                            🖼️
-                                        </div>`
-                                    }
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">${product.name}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 capitalize">
-                            ${getCategoryName(product.category)}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                            ${formatPrice(product.price)}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                            ${product.stock}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="editProduct('${product.id}')" class="text-primary hover:text-primary-dark mr-3" title="Editar">
-                                ✏️
-                            </button>
-                            <button onclick="deleteProduct('${product.id}')" class="text-red-600 hover:text-red-900" title="Excluir">
-                                🗑️
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
+        // Favorites functions
+        window.toggleFavorite = async function(productId) {
+            if (!currentUser) {
+                showCustomAlert('Faça login para adicionar favoritos.');
+                return;
             }
-        }
+
+            try {
+                const userFavoritesRef = ref(database, `favorites/${currentUser.uid}/${productId}`);
+                
+                if (favorites.includes(productId)) {
+                    await remove(userFavoritesRef);
+                    console.log('Removed from favorites:', productId);
+                } else {
+                    await set(userFavoritesRef, true);
+                    console.log('Added to favorites:', productId);
+                }
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                showCustomAlert('Erro ao atualizar favoritos.');
+            }
+        };
 
         // Cart functions
         window.addToCart = function(productId) {
@@ -943,6 +964,7 @@
             }
             
             updateCartUI();
+            showCustomAlert('Produto adicionado ao carrinho!');
         };
 
         function removeFromCart(productId) {
@@ -1012,63 +1034,6 @@
             }
         }
 
-        // Product management
-        function openProductModal(productId = null) {
-            editingProductId = productId;
-            
-            if (productId) {
-                modalTitle.textContent = 'Editar Produto';
-                const product = products[productId];
-                document.getElementById('productName').value = product.name;
-                document.getElementById('productCategory').value = product.category;
-                document.getElementById('productPrice').value = product.price;
-                document.getElementById('productOldPrice').value = product.oldPrice || '';
-                document.getElementById('productStock').value = product.stock;
-                document.getElementById('productDescription').value = product.description || '';
-                document.getElementById('productImage').value = product.image || '';
-            } else {
-                modalTitle.textContent = 'Adicionar Produto';
-                productForm.reset();
-            }
-            
-            productModal.classList.remove('hidden');
-        }
-
-        function closeProductModal() {
-            productModal.classList.add('hidden');
-            editingProductId = null;
-            productForm.reset();
-        }
-
-        async function saveProduct(e) {
-            e.preventDefault();
-            
-            const oldPriceValue = document.getElementById('productOldPrice').value;
-            const productData = {
-                name: document.getElementById('productName').value,
-                category: document.getElementById('productCategory').value,
-                price: parseFloat(document.getElementById('productPrice').value),
-                oldPrice: oldPriceValue ? parseFloat(oldPriceValue) : null,
-                stock: parseInt(document.getElementById('productStock').value),
-                description: document.getElementById('productDescription').value,
-                image: document.getElementById('productImage').value,
-                createdAt: editingProductId ? products[editingProductId].createdAt : Date.now(),
-                updatedAt: Date.now()
-            };
-            
-            try {
-                if (editingProductId) {
-                    await set(ref(database, `products/${editingProductId}`), productData);
-                } else {
-                    await push(ref(database, 'products'), productData);
-                }
-                closeProductModal();
-            } catch (error) {
-                console.error('Error saving product:', error);
-                showCustomAlert('Erro ao salvar produto');
-            }
-        }
-
         // Product detail functions
         window.showProductDetail = function(productId) {
             const product = products[productId];
@@ -1116,6 +1081,11 @@
             } else {
                 detailImage.innerHTML = '<div class="text-4xl text-gray-400">🖼️</div>';
             }
+
+            // Handle favorite button
+            const isFavorite = favorites.includes(productId);
+            detailFavoriteIcon.textContent = isFavorite ? '❤️' : '🤍';
+            detailFavoriteBtn.onclick = () => toggleFavorite(productId);
             
             // Set up add to cart button
             detailAddToCartBtn.onclick = () => {
@@ -1132,27 +1102,6 @@
             productDetailModal.classList.add('hidden');
         }
 
-        window.editProduct = function(productId) {
-            openProductModal(productId);
-        };
-
-        window.deleteProduct = function(productId) {
-            function showCustomConfirm(message, onConfirm) {
-  if (confirm(message)) {
-    onConfirm();
-  }
-}
-            showCustomConfirm('Tem certeza que deseja excluir este produto?', async () => {
-                try {
-                    await remove(ref(database, `products/${productId}`));
-                    showCustomAlert('Produto excluído com sucesso!');
-                } catch (error) {
-                    console.error('Error deleting product:', error);
-                    showCustomAlert('Erro ao excluir produto: ' + error.message);
-                }
-            });
-        };
-
         // Navigation functions
         function showSection(section) {
             currentSection = section;
@@ -1160,7 +1109,7 @@
             // Hide all sections
             homeSection.classList.add('hidden');
             categoriesSection.classList.add('hidden');
-            adminSection.classList.add('hidden');
+            favoritesSection.classList.add('hidden');
             
             // Update navigation buttons
             document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -1180,8 +1129,11 @@
                     categoriesBtn.classList.add('text-primary');
                     mobileCategoriesBtn.classList.add('text-primary');
                     break;
-                case 'admin':
-                    adminSection.classList.remove('hidden');
+                case 'favorites':
+                    favoritesSection.classList.remove('hidden');
+                    favoritesBtn.classList.add('text-primary');
+                    mobileFavoritesBtn.classList.add('text-primary');
+                    renderFavorites(); // Re-render when showing favorites
                     break;
             }
         }
@@ -1214,48 +1166,48 @@
         }
 
         function getCategoryName(category) {
-    const categoryNames = {
-        'eletronicos': 'Eletrônicos',
-        'roupas': 'Roupas',
-        'casa': 'Casa e Jardim',
-        'livros': 'Livros',
-        'esportes': 'Esportes',
-        'beleza': 'Beleza',
-        'acessorios': 'Acessórios & Joias',
-        'calcados': 'Calçados',
-        'alimentacao': 'Alimentação & Bebidas',
-        'saude': 'Saúde & Bem-estar',
-        'automotivo': 'Automotivo',
-        'brinquedos': 'Brinquedos & Jogos',
-        'musica': 'Música & Instrumentos',
-        'arte': 'Arte & Artesanato',
-        'pets': 'Pets',
-        'servicos': 'Serviços'
-    };
-    return categoryNames[category] || category;
-}
+            const categoryNames = {
+                'eletronicos': 'Eletrônicos',
+                'roupas': 'Roupas',
+                'casa': 'Casa e Jardim',
+                'livros': 'Livros',
+                'esportes': 'Esportes',
+                'beleza': 'Beleza',
+                'acessorios': 'Acessórios & Joias',
+                'calcados': 'Calçados',
+                'alimentacao': 'Alimentação & Bebidas',
+                'saude': 'Saúde & Bem-estar',
+                'automotivo': 'Automotivo',
+                'brinquedos': 'Brinquedos & Jogos',
+                'musica': 'Música & Instrumentos',
+                'arte': 'Arte & Artesanato',
+                'pets': 'Pets',
+                'servicos': 'Serviços'
+            };
+            return categoryNames[category] || category;
+        }
 
-function getCategoryIcon(category) {
-    const categoryIcons = {
-        'eletronicos': '💻',
-        'roupas': '👕',
-        'casa': '🏠',
-        'livros': '📚',
-        'esportes': '⚽',
-        'beleza': '💄',
-        'acessorios': '💍',
-        'calcados': '👟',
-        'alimentacao': '🍔',
-        'saude': '💊',
-        'automotivo': '🚗',
-        'brinquedos': '🧸',
-        'musica': '🎸',
-        'arte': '🎨',
-        'pets': '🐶',
-        'servicos': '🛠️'
-    };
-    return categoryIcons[category] || '🏷️';
-}
+        function getCategoryIcon(category) {
+            const categoryIcons = {
+                'eletronicos': '💻',
+                'roupas': '👕',
+                'casa': '🏠',
+                'livros': '📚',
+                'esportes': '⚽',
+                'beleza': '💄',
+                'acessorios': '💍',
+                'calcados': '👟',
+                'alimentacao': '🍔',
+                'saude': '💊',
+                'automotivo': '🚗',
+                'brinquedos': '🧸',
+                'musica': '🎸',
+                'arte': '🎨',
+                'pets': '🐶',
+                'servicos': '🛠️'
+            };
+            return categoryIcons[category] || '🏷️';
+        }
 
         function showMainApp() {
             loadingScreen.classList.add('hidden');
@@ -1269,7 +1221,7 @@ function getCategoryIcon(category) {
             loginScreen.classList.remove('hidden');
         }
 
-        // Custom alert and confirm functions
+        // Custom alert function
         function showCustomAlert(message) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
@@ -1278,21 +1230,6 @@ function getCategoryIcon(category) {
                     <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
                     <div class="flex justify-end">
                         <button class="px-4 py-2 bg-primary text-white hover:bg-primary-dark rounded" onclick="this.closest('.fixed').remove()">OK</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function showCustomConfirm(message, onConfirm) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
-                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
-                    <div class="flex justify-end space-x-3">
-                        <button class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded" onclick="this.closest('.fixed').remove()">Cancelar</button>
-                        <button class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded" onclick="this.closest('.fixed').remove(); (${onConfirm.toString()})()">Confirmar</button>
                     </div>
                 </div>
             `;
