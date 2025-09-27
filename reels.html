@@ -9,7 +9,7 @@
 /* ===== SIBEM Video Player - Tema Claro Completo ===== */
 :root{
   --svp-bg:#ffffff; --svp-card:#ffffff; --svp-elev:#f8f9fa; --svp-text:#0f0f0f; --svp-sub:#606060;
-  --svp-accent:#ff2d55; --svp-accent-2:#3ea6ff; --svp-ok:#22c55e; --svp-warn:#f59e0b; --svp-danger:#ef4444;
+  --svp-accent:#ff2d55; --svp-accent-2:red; --svp-ok:#22c55e; --svp-warn:#f59e0b; --svp-danger:#ef4444;
   --svp-chip:#e5e5e5; --svp-border:#e5e5e5; --svp-hover:#f5f5f5;
 }
 *{box-sizing:border-box}
@@ -164,7 +164,7 @@ a{color:inherit;text-decoration:none}
   background:#000;
   position:relative;
   width:100%;
-  height:250px;        /* altura fixa para todos os vídeos */
+  height:250px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -177,32 +177,20 @@ a{color:inherit;text-decoration:none}
   height:100%;
   border:0;
   display:block;
-  object-fit:contain;  /* mantém proporção sem cortar */
-}
-
-/* Fullscreen placeholder quando iframe está em fullscreen */
-.svp-fullscreen-placeholder {
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1.2rem;
-  width: 100%;
-  height: 100%;
+  object-fit:contain;
 }
 
 .svp-player-footer {
   background: var(--svp-bg);
   border-top: 1px solid var(--svp-border);
-  max-height: calc(100vh - 250px);
+  flex: 1;
   overflow-y: auto;
-  flex-shrink: 0;
+  padding: 1rem;
 }
 
-.svp-player-info{padding:1rem;border-bottom:1px solid var(--svp-border)}
+.svp-player-info{padding-bottom:1rem;border-bottom:1px solid var(--svp-border)}
 
-.svp-player-actions{display:flex;align-items:center;gap:1rem;margin-top:.75rem}
+.svp-player-actions{display:flex;align-items:center;gap:1rem;margin-top:.75rem;flex-wrap:wrap}
 .svp-player-action{
   display:flex;align-items:center;gap:.5rem;background:var(--svp-hover);
   border:1px solid var(--svp-border);color:var(--svp-text);padding:.5rem 1rem;
@@ -210,112 +198,317 @@ a{color:inherit;text-decoration:none}
 }
 .svp-player-action:hover{background:var(--svp-chip)}
 .svp-player-action.is-liked{background:var(--svp-accent-2);color:#fff;border-color:var(--svp-accent-2)}
+.svp-player-action.is-report{background:var(--svp-warn);color:#fff;border-color:var(--svp-warn)}
+.svp-player-action.is-reported{background:var(--svp-danger);color:#fff;border-color:var(--svp-danger)}
 .svp-player-action svg{width:18px;height:18px;fill:currentColor}
 
-.svp-comments{padding:1rem;border-bottom:1px solid var(--svp-border)}
-.svp-comments-header{font-size:1rem;font-weight:600;margin-bottom:.75rem;color:var(--svp-text)}
-
-.svp-comment-form{display:flex;gap:.5rem;margin-bottom:1rem;}
-.svp-comment-input{
-  flex:1;border:1px solid var(--svp-border);border-radius:20px;
-  padding:.5rem 1rem;background:var(--svp-bg);color:var(--svp-text);font-size:16px;
+/* Novos botões para overlays */
+/* Container dos botões */
+.svp-overlay-btns {
+  display: flex;
+  gap: .75rem;
+  margin-top: 1rem;
 }
 
+/* Botão estilizado */
+.svp-overlay-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+
+  /* fundo cinza claro e texto preto */
+  background: #f2f2f2;
+  color: #111;
+
+  border: 1px solid var(--svp-border, #ddd);
+  padding: .7rem 1rem;
+  border-radius: 12px;
+
+  font-weight: 600;
+  font-size: .95rem;
+  cursor: pointer;
+
+  transition: transform .2s ease, box-shadow .2s ease, background .3s ease;
+}
+
+/* Hover com leve destaque */
+.svp-overlay-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  background: #e6e6e6;
+}
+
+/* Pressionado */
+.svp-overlay-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  background: #dcdcdc;
+}
+
+/* Ícones */
+.svp-overlay-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+/* Overlay de Comentários */
+/* Backdrop escuro atrás do sheet */
+.svp-comments-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 1999;
+  display: none;
+}
+.svp-comments-backdrop.is-open {
+  display: block;
+}
+
+/* Overlay de comentários (bottom sheet) */
+.svp-comments-overlay {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 50vh; /* ocupa metade da tela */
+  background: var(--svp-bg);
+  border-top-left-radius: 24px;   /* curva no topo */
+  border-top-right-radius: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+
+  /* animação */
+  transform: translateY(100%);
+  transition: transform .35s ease-out;
+  box-shadow: 0 -4px 12px rgba(0,0,0,.15);
+}
+
+/* estado aberto */
+.svp-comments-overlay.is-open {
+  transform: translateY(0);
+}
+
+/* handle no topo (opcional) */
+.svp-comments-overlay::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 5px;
+  background: var(--svp-border);
+  border-radius: 3px;
+  margin: 8px auto;
+}
+
+/* header */
+.svp-comments-header-bar {
+  background: var(--svp-bg);
+  border-bottom: 1px solid var(--svp-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+.svp-comments-title {
+  font-size: 1.2rem;
+  font: var(--svp-text);
+}
+
+/* conteúdo */
+.svp-comments-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* formulário de comentário */
+.svp-comment-form {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1.5rem;
+  position: sticky;
+  bottom: 0;
+  background: var(--svp-bg);
+  padding: 1rem 0;
+}
+.svp-comment-input {
+  flex: 1;
+  border: 1px solid var(--svp-border);
+  border-radius: 20px;
+  padding: .75rem 1rem;
+  background: var(--svp-bg);
+  color: var(--svp-text);
+  font-size: 16px;
+}
 .svp-comment-btn {
   background: var(--svp-accent-2);
   color: #fff;
   border: 0;
   border-radius: 20px;
-  padding: .5rem 1rem;
+  padding: .75rem 1.5rem;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  width: auto;
   cursor: pointer;
-} 
+}
 
+/* Overlay de Relacionados */
+/* Backdrop escuro atrás do sheet */
+.svp-related-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 1999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+}
+.svp-related-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Overlay de Relacionados (bottom sheet) */
+.svp-related-overlay {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 50vh; /* ocupa metade da tela */
+  background: var(--svp-bg);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+
+  /* animação */
+  transform: translateY(100%);
+  transition: transform .35s ease-out;
+  box-shadow: 0 -4px 12px rgba(0,0,0,.15);
+}
+.svp-related-overlay.is-open {
+  transform: translateY(0);
+}
+
+/* handle no topo (opcional) */
+.svp-related-overlay::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 5px;
+  background: var(--svp-border);
+  border-radius: 3px;
+  margin: 8px auto;
+}
+
+/* header */
+.svp-related-header-bar {
+  background: var(--svp-bg);
+  border-bottom: 1px solid var(--svp-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+.svp-related-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--svp-text);
+}
+
+/* conteúdo */
+.svp-related-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+.svp-related-grid {
+  display: grid;
+  gap: 1rem;
+}
+.svp-related-item {
+  display: flex;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 1rem;
+  border-radius: 12px;
+  transition: background .2s;
+  border: 1px solid var(--svp-border);
+}
+.svp-related-item:hover {
+  background: var(--svp-hover);
+}
+.svp-related-thumb {
+  width: 160px;
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--svp-chip);
+  flex: 0 0 160px;
+}
+.svp-related-info {
+  flex: 1;
+  min-width: 0;
+}
+.svp-related-item-title {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.3;
+  margin-bottom: .5rem;
+  color: var(--svp-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.svp-related-meta {
+  color: var(--svp-sub);
+  font-size: .9rem;
+}
 .svp-comment{
-  display:flex;gap:.75rem;margin-bottom:1rem;padding-bottom:1rem;
+  display:flex;gap:.75rem;margin-bottom:1.5rem;padding-bottom:1rem;
   border-bottom:1px solid var(--svp-border);position:relative;
 }
 .svp-comment:last-child{border-bottom:0}
 .svp-comment-avatar{
-  width:32px;height:32px;border-radius:50%;background:var(--svp-chip);
-  flex:0 0 32px;background-size:cover;background-position:center;
+  width:40px;height:40px;border-radius:50%;background:var(--svp-chip);
+  flex:0 0 40px;background-size:cover;background-position:center;
   border:2px solid var(--svp-border);
 }
 .svp-comment-content{flex:1}
-.svp-comment-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.25rem}
-.svp-comment-author{font-weight:600;font-size:.9rem;color:var(--svp-text)}
+.svp-comment-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem}
+.svp-comment-author{font-weight:600;font-size:1rem;color:var(--svp-text)}
 .svp-comment-delete{
-  background:transparent;border:0;color:var(--svp-danger);font-size:.8rem;
+  background:transparent;border:0;color:var(--svp-danger);font-size:.9rem;
   padding:.25rem;border-radius:4px;cursor:pointer;opacity:0.7;
 }
 .svp-comment-delete:hover{opacity:1;background:rgba(239,68,68,0.1)}
-.svp-comment-text{color:var(--svp-text);line-height:1.4;margin-bottom:.25rem}
-.svp-comment-time{color:var(--svp-sub);font-size:.8rem}
-
-.svp-related{padding:1rem; }
-.svp-related-header{font-size:1rem;font-weight:600;margin-bottom:.75rem;color:var(--svp-text)}
-.svp-related-grid{display:grid;gap:.75rem}
-.svp-related-item{
-  display:flex;gap:.75rem;cursor:pointer;padding:.5rem;border-radius:8px;
-  transition:background .2s;
-}
-.svp-related-item:hover{background:var(--svp-hover)}
-.svp-related-thumb{
-  width:120px;aspect-ratio:16/9;border-radius:8px;object-fit:cover;
-  background:var(--svp-chip);flex:0 0 120px;
-}
-.svp-related-info{flex:1;min-width:0}
-.svp-related-title{
-  font-weight:600;font-size:.9rem;line-height:1.3;margin-bottom:.25rem;color:var(--svp-text);
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-}
-.svp-related-meta{color:var(--svp-sub);font-size:.8rem}
+.svp-comment-text{color:var(--svp-text);line-height:1.5;margin-bottom:.5rem;font-size:.95rem}
+.svp-comment-time{color:var(--svp-sub);font-size:.85rem}
 
 /* Responsivo Desktop */
 @media(min-width:768px){
   .svp-overlay{flex-direction:row}
   .svp-player-main{flex:1;display:flex;flex-direction:column}
-  .svp-player-sidebar{width:350px;background:var(--svp-elev);border-left:1px solid var(--svp-border)}
-  .svp-player-footer{max-height:none;overflow:visible}
-  .svp-related{border-top:0}
   .svp-player-video {
     height:400px;
   }
+  .svp-related-grid{grid-template-columns:1fr 1fr}
 }
 
-.svp-tabs {
-  display: flex;
-  border-bottom: 1px solid #ddd;
+.close-btn{
+  background:var(--svp-hover);border:1px solid var(--svp-border);color:var(--svp-text);
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .2s;
 }
+.close-btn:hover{background:var(--svp-chip)}
+.close-btn svg{width:20px;height:20px;fill:currentColor}
 
-.svp-tab-btn {
-  flex: 1;
-  padding: .75rem;
-  background: #f5f5f5;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--svp-text);
-}
-
-.svp-tab-btn.active {
-  background: var(--svp-bg);
-  border-bottom: 2px solid var(--svp-accent-2);
-  color: var(--svp-text);
-}
-
-.tab-pane {
-  display: none;
-  padding: 1rem 0;
-}
-
-.tab-pane.active {
-  display: block;
+/* Alert para vídeo denunciado */
+.svp-alert{
+  background:var(--svp-warn);color:#fff;padding:.75rem 1rem;
+  border-radius:8px;margin-bottom:1rem;font-weight:600;
 }
 </style>
 </head>
@@ -328,7 +521,7 @@ a{color:inherit;text-decoration:none}
       
       <div class="svp-search" id="svp-search">
         <button id="svp-search-btn" aria-label="Pesquisar">
-          <svg viewBox="0 0 24 24"><path d="M9.5 3a6.5 6.5 0 015.164 10.45l4.443 4.443-1.414 1.414-4.443-4.443A6.5 6.5 0 119.5 3zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M9.5 3a6.5 6.5 0 515.164 10.45l4.443 4.443-1.414 1.414-4.443-4.443A6.5 6.5 0 119.5 3zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/></svg>
         </button>
         <input id="svp-search-input" type="search" placeholder="Pesquisar" autocomplete="off" />
         <button style="display:none;" id="svp-clear-btn" aria-label="Limpar">
@@ -387,7 +580,7 @@ a{color:inherit;text-decoration:none}
   </main>
 </div>
 
-<!-- Player Overlay com Iframe Fullscreen Nativo -->
+<!-- Player Overlay Principal -->
 <div class="svp-overlay" id="svp-overlay">
   <div class="svp-player-main">
     <!-- Header do player -->
@@ -397,63 +590,90 @@ a{color:inherit;text-decoration:none}
         <div class="svp-player-meta" id="svp-player-meta">0 visualizações</div>
       </div>
       <div class="svp-player-controls">
-        <button class="svp-player-btn" id="svp-fullscreen" title="Tela cheia" aria-label="Tela cheia">
-          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm12 5h-5v-2h3v-3h2v5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
-        </button>
+        
         <button class="svp-player-btn" id="svp-close" aria-label="Fechar">
           <svg viewBox="0 0 24 24"><path d="M18.3 5.71L12 12.01l-6.29-6.3-1.42 1.42 6.3 6.29-6.3 6.29 1.42 1.42L12 14.85l6.29 6.28 1.42-1.41-6.3-6.29 6.3-6.29z"/></svg>
         </button>
       </div>
     </div>
 
-    <!-- Área do vídeo com tamanho consistente -->
+    <!-- Área do vídeo -->
     <div class="svp-player-video" id="svp-player-body"></div>
 
-    <!-- Informações e comentários -->
+    <!-- Informações e ações -->
     <div class="svp-player-footer">
+      <div id="svp-reported-alert" style="display:none"></div>
+      
       <div class="svp-player-info">
         <div class="svp-player-actions">
           <button class="svp-player-action" id="svp-player-like" aria-label="Curtir">
             <svg viewBox="0 0 24 24"><path d="M12.1 8.64l-.1.1-.11-.11C10.14 6.82 7.1 7.24 5.5 9c-1.61 1.76-1.45 4.45.36 6.17l5.86 5.66 5.86-5.66c1.81-1.72 1.97-4.41.36-6.17-1.6-1.76-4.64-2.18-6.34-.36z"/></svg>
             <span id="svp-player-like-count">0</span>
           </button>
+          
+          <button class="svp-player-action" id="svp-player-report" aria-label="Denunciar">
+            <svg viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+            <span id="svp-player-report-count">Denunciar</span>
+          </button>
+         <button class="svp-player-btn" id="svp-fullscreen" title="Tela cheia" aria-label="Tela cheia"
+        style="margin:auto;display:flex;align-items:center;justify-content:center;">
+  <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor;">
+    <path d="M7 14H5v5h5v-2H7v-3zm12 5h-5v-2h3v-3h2v5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/>
+  </svg>
+</button>
+        </div>
+        
+        <!-- Botões para abrir overlays -->
+        <div class="svp-overlay-btns">
+          <button class="svp-overlay-btn" id="open-related">
+            <svg viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6zM10 16.5l6-4.5-6-4.5v9z"/></svg>
+            Vídeos Relacionados
+          </button>
+          <button class="svp-overlay-btn" id="open-comments">
+            <svg viewBox="0 0 24 24"><path d="M9 22a1 1 0 01-1-1v-3H4a2 2 0 01-2-2V4a2 2 0 012-2h16a2 2 0 012 2v12a2 2 0 01-2 2h-6.1l-3.7 3.7c-.2.2-.4.3-.7.3H9z"/></svg>
+            Comentários
+          </button>
         </div>
       </div>
-
-     <!-- Abas -->
-<div class="svp-tabs">
-  <button class="svp-tab-btn active" data-tab="related">Vídeos relacionados</button>
-  <button class="svp-tab-btn" data-tab="comments">Comentários</button>
+    </div>
+  </div>
 </div>
 
-<!-- Conteúdo das abas -->
-<div class="svp-tab-content">
-
-  <!-- Vídeos relacionados (aba inicial visível) -->
-  <div class="svp-related tab-pane active" id="tab-related">
-    <div class="svp-related-header">Vídeos relacionados</div>
-    <div class="svp-related-grid" id="svp-related-videos"></div>
+<!-- Overlay de Comentários -->
+<div class="svp-comments-overlay" id="comments-overlay">
+  <div class="svp-comments-header-bar">
+    <div class="svp-comments-title">Comentários</div>
+    <button class="close-btn" id="close-comments">
+      <svg viewBox="0 0 24 24"><path d="M18.3 5.71L12 12.01l-6.29-6.3-1.42 1.42 6.3 6.29-6.3 6.29 1.42 1.42L12 14.85l6.29 6.28 1.42-1.41-6.3-6.29 6.3-6.29z"/></svg>
+    </button>
   </div>
-
-  <!-- Comentários (aba oculta no início) -->
-  <div class="svp-comments tab-pane" id="tab-comments">
-    <div class="svp-comments-header">Comentários</div>
+  <div class="svp-comments-content">
     <div class="svp-comment-form">
-      <input class="svp-comment-input" id="svp-comment-input" type="text" placeholder="Adicione um comentário..." />
-      <button class="svp-comment-btn" id="svp-comment-btn">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
-             style="width:24px;height:24px">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5"/>
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l7-7 7 7"/>
-        </svg>
-      </button>
+      <input class="svp-comment-input" id="svp-comment-input-overlay" type="text" placeholder="Adicione um comentário..." />
+      <button class="svp-comment-btn" id="svp-comment-btn-overlay"><svg xmlns="http://www.w3.org/2000/svg" 
+     viewBox="0 0 24 24" 
+     stroke-width="1.5" 
+     stroke="white" 
+     fill="none" 
+     style="width:24px;height:24px;display:block;margin-right:auto;">
+  <path stroke-linecap="round" stroke-linejoin="round" 
+        d="m15 11.25-3-3m0 0-3 3m3-3v7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg></button>
     </div>
-    <div id="svp-comments-list"></div>
+    <div id="svp-comments-list-overlay"></div>
   </div>
-
 </div>
-    </div>
+
+<!-- Overlay de Relacionados -->
+<div class="svp-related-overlay" id="related-overlay">
+  <div class="svp-related-header-bar">
+    <div class="svp-related-title">Vídeos Relacionados</div>
+    <button class="close-btn" id="close-related">
+      <svg viewBox="0 0 24 24"><path d="M18.3 5.71L12 12.01l-6.29-6.3-1.42 1.42 6.3 6.29-6.3 6.29 1.42 1.42L12 14.85l6.29 6.28 1.42-1.41-6.3-6.29 6.3-6.29z"/></svg>
+    </button>
+  </div>
+  <div class="svp-related-content">
+    <div class="svp-related-grid" id="svp-related-videos-overlay"></div>
   </div>
 </div>
 
@@ -478,6 +698,9 @@ const firebaseConfig = {
 };
 const apiKeyImgBB = "e073e02267a1f0259cd69c562e780659";
 
+// Lista de emails de administradores
+const ADMIN_EMAILS = ["admin@sibem.com", "moderador@sibem.com"];
+
 /* ===== Inicialização ===== */
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -492,7 +715,7 @@ const state = {
   q: "",
   cat: "Todos",
   cats: ["Todos","Música","Notícias","Esportes","Entretenimento","Educação","Comédia","Tecnologia","Gaming"],
-  originalContainer: null,  // para restaurar iframe
+  originalContainer: null,
   isFullscreen: false
 };
 
@@ -513,6 +736,19 @@ function sanitize(str){return (str||"").trim()}
 function byDateDesc(a,b){return (b.createdAt||0)-(a.createdAt||0)}
 function matchQuery(item,q){ if(!q) return true; q=q.toLowerCase(); return (item.title||"").toLowerCase().includes(q) || (item.authorName||"").toLowerCase().includes(q); }
 function matchCat(item,cat){ if(cat==="Todos") return true; return (item.category||"")===cat; }
+
+function isAdmin(user) {
+  return user && ADMIN_EMAILS.includes(user.email);
+}
+
+function isVideoVisible(video, user) {
+  // Se é admin, vê tudo
+  if (isAdmin(user)) return true;
+  
+  // Se não tem denúncias ou tem menos de 10, todos veem
+  const reportCount = video.reportCount || 0;
+  return reportCount < 10;
+}
 
 /* YouTube/Facebook parsing */
 function parseYouTubeId(url){
@@ -587,10 +823,18 @@ function renderCategories(){
 }
 
 function renderFeed(){
-  const list = state.videos.filter(v => matchQuery(v, state.q) && matchCat(v, state.cat)).sort(byDateDesc);
+  const list = state.videos
+    .filter(v => matchQuery(v, state.q) && matchCat(v, state.cat) && isVideoVisible(v, state.user))
+    .sort((a, b) => {
+      const scoreA = (a.likesCount||0) * 3 + (a.views||0) * 0.2;
+      const scoreB = (b.likesCount||0) * 3 + (b.views||0) * 0.2;
+      if (scoreA !== scoreB) return scoreB - scoreA;
+      return (b.createdAt||0) - (a.createdAt||0);
+    });
   const el = $("#svp-feed");
   el.innerHTML = list.map(cardHTML).join("") || `<div class="svp-empty">Nada encontrado.</div>`;
 }
+
 function renderMyFeed(){
   const my = state.videos.filter(v=> v.authorId===state.user?.uid).sort(byDateDesc);
   state.myVideos = my;
@@ -606,11 +850,18 @@ function cardHTML(v){
   const liked = !!(v.likesBy && state.user && v.likesBy[state.user.uid]);
   const authorAvatar = getAuthorAvatar(v.authorId, v.authorPhotoURL);
   
+  // Badge de denúncia para admin
+  const reportBadge = isAdmin(state.user) && (v.reportCount >= 10) ? 
+    `<div style="position:absolute;top:8px;left:8px;background:var(--svp-danger);color:#fff;padding:0.25rem 0.5rem;border-radius:12px;font-size:0.75rem;font-weight:600;">
+      🚨 ${v.reportCount} denúncias
+    </div>` : '';
+  
   return `
   <article class="svp-card" data-id="${v.id}">
-    <div class="svp-thumb-wrap" data-id="${v.id}" data-action="open">
+    <div class="svp-thumb-wrap" data-id="${v.id}" data-action="open" style="position:relative;">
       <img class="svp-thumb" src="${cover}" alt="${escapeHtml(v.title)}" />
       <div class="svp-dur">${durationBadge}</div>
+      ${reportBadge}
     </div>
     <div class="svp-meta">
       <div class="svp-avatar" style="background-image:url('${authorAvatar}')"></div>
@@ -631,7 +882,6 @@ function cardHTML(v){
   `;
 }
 
-/* Inferir thumb se não houver capa */
 function thumbFromVideo(v){
   const youId = parseYouTubeId(v.url);
   if(youId) return `https://i.ytimg.com/vi/${youId}/hqdefault.jpg`;
@@ -639,10 +889,9 @@ function thumbFromVideo(v){
   return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'><rect width='100%' height='100%' fill='#ddd'/><polygon points='260,180 260,120 340,150' fill='#666'/></svg>`);
 }
 
-/* Escape HTML */
 function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m]))}
 
-/* ===== Player Overlay Tela Cheia ===== */
+/* ===== Player Overlay ===== */
 let currentVideo = null;
 function openPlayer(v){
   currentVideo = v;
@@ -653,8 +902,8 @@ function openPlayer(v){
   body.innerHTML = buildPlayerHTML(v);
   
   updatePlayerLikeButton(v);
-  loadComments(v.id);
-  loadRelatedVideos(v);
+  updatePlayerReportButton(v);
+  showReportAlert(v);
   
   $("#svp-overlay").classList.add("is-open");
   document.body.style.overflow = 'hidden';
@@ -663,15 +912,12 @@ function openPlayer(v){
 }
 
 function closePlayer(){
-  // Restaurar iframe se estiver em fullscreen
   if (state.isFullscreen) {
     exitFullscreen();
   }
   
   $("#svp-overlay").classList.remove("is-open");
   $("#svp-player-body").innerHTML = "";
-  $("#svp-comments-list").innerHTML = "";
-  $("#svp-related-videos").innerHTML = "";
   document.body.style.overflow = '';
   
   currentVideo = null;
@@ -709,18 +955,62 @@ function updatePlayerLikeButton(v){
   `;
 }
 
-function loadComments(videoId){
+function updatePlayerReportButton(v){
+  const reported = !!(v.reportsBy && state.user && v.reportsBy[state.user.uid]);
+  const btn = $("#svp-player-report");
+  btn.className = `svp-player-action ${reported?"is-reported":""}`;
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24"><path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/></svg>
+    <span>${reported ? "Denunciado" : "Denunciar"}</span>
+  `;
+}
+
+function showReportAlert(v) {
+  const alertDiv = $("#svp-reported-alert");
+  const reportCount = v.reportCount || 0;
+  
+  if (isAdmin(state.user) && reportCount >= 10) {
+    alertDiv.style.display = "block";
+    alertDiv.className = "svp-alert";
+    alertDiv.innerHTML = `🚨 Este vídeo tem ${reportCount} denúncias e só é visível para administradores.`;
+  } else {
+    alertDiv.style.display = "none";
+  }
+}
+
+/* ===== Overlays de Comentários e Relacionados ===== */
+function openCommentsOverlay() {
+  loadCommentsForOverlay(currentVideo.id);
+  $("#comments-overlay").classList.add("is-open");
+}
+
+function openRelatedOverlay() {
+  loadRelatedForOverlay(currentVideo);
+  $("#related-overlay").classList.add("is-open");
+}
+
+function closeCommentsOverlay() {
+  $("#comments-overlay").classList.remove("is-open");
+  $("#svp-comments-list-overlay").innerHTML = "";
+}
+
+function closeRelatedOverlay() {
+  $("#related-overlay").classList.remove("is-open");
+  $("#svp-related-videos-overlay").innerHTML = "";
+}
+
+function loadCommentsForOverlay(videoId){
   onValue(ref(db, `comments/${videoId}`), snap => {
     const comments = [];
     snap.forEach(child => {
       comments.push({ id: child.key, ...child.val() });
     });
-    renderComments(comments.sort(byDateDesc));
+    renderCommentsOverlay(comments.sort(byDateDesc));
   });
 }
 
-function renderComments(comments){
-  const list = $("#svp-comments-list");
+function renderCommentsOverlay(comments){
+  const list = $("#svp-comments-list-overlay");
   list.innerHTML = comments.map(comment => {
     const commentAvatar = getAuthorAvatar(comment.authorId, comment.authorPhotoURL);
     const canDelete = state.user && state.user.uid === comment.authorId;
@@ -739,18 +1029,18 @@ function renderComments(comments){
   `}).join("") || '<div class="svp-empty">Seja o primeiro a comentar!</div>';
 }
 
-function loadRelatedVideos(currentVideo){
+function loadRelatedForOverlay(currentVideo){
   const related = state.videos
-    .filter(v => v.id !== currentVideo.id && v.category === currentVideo.category)
+    .filter(v => v.id !== currentVideo.id && v.category === currentVideo.category && isVideoVisible(v, state.user))
     .sort(byDateDesc)
-    .slice(0, 10);
+    .slice(0, 20);
   
-  const container = $("#svp-related-videos");
+  const container = $("#svp-related-videos-overlay");
   container.innerHTML = related.map(v => `
     <div class="svp-related-item" data-id="${v.id}" data-action="open-related">
       <img class="svp-related-thumb" src="${v.coverUrl || thumbFromVideo(v)}" alt="${escapeHtml(v.title)}" />
       <div class="svp-related-info">
-        <div class="svp-related-title">${escapeHtml(v.title)}</div>
+        <div class="svp-related-item-title">${escapeHtml(v.title)}</div>
         <div class="svp-related-meta">${escapeHtml(v.authorName||"")} • ${v.views||0} visualizações</div>
       </div>
     </div>
@@ -770,28 +1060,17 @@ function timeAgo(timestamp){
   return 'Agora';
 }
 
-// Fullscreen nativo - EXTRAIR IFRAME DO CONTAINER
+// Fullscreen
 function requestFullscreen(){
   const iframe = $("#video-iframe");
-  if (!iframe) {
-    console.log('Iframe não encontrado');
-    return;
-  }
+  if (!iframe) return;
 
   try {
-    // Salvar container original
     state.originalContainer = iframe.parentNode;
     state.isFullscreen = true;
 
-    // Colocar iframe diretamente em fullscreen
     if (iframe.requestFullscreen) {
-      iframe.requestFullscreen().then(() => {
-        console.log('Iframe em fullscreen');
-      }).catch(err => {
-        console.error('Erro fullscreen:', err);
-        // Fallback: tentar colocar iframe temporariamente em body
-        tryFallbackFullscreen(iframe);
-      });
+      iframe.requestFullscreen().catch(err => tryFallbackFullscreen(iframe));
     } else if (iframe.webkitRequestFullscreen) {
       iframe.webkitRequestFullscreen();
     } else if (iframe.mozRequestFullScreen) {
@@ -799,66 +1078,43 @@ function requestFullscreen(){
     } else if (iframe.msRequestFullscreen) {
       iframe.msRequestFullscreen();
     } else {
-      // Fallback para browsers que não suportam
       tryFallbackFullscreen(iframe);
     }
   } catch (error) {
-    console.error('Erro ao entrar em tela cheia:', error);
     tryFallbackFullscreen(iframe);
   }
 }
 
 function tryFallbackFullscreen(iframe) {
-  // Criar container temporário em fullscreen
   const fullscreenContainer = document.createElement('div');
   fullscreenContainer.id = 'fullscreen-container';
   fullscreenContainer.style.cssText = `
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center;
   `;
   
-  // Botão de fechar
   const closeBtn = document.createElement('button');
   closeBtn.innerHTML = '×';
   closeBtn.style.cssText = `
-    position: absolute;
-    top: 20px; right: 20px;
-    background: rgba(255,255,255,0.8);
-    border: 0;
-    border-radius: 50%;
-    width: 40px; height: 40px;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 10001;
+    position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.7);
+    color: white; border: 0; border-radius: 50%; width: 40px; height: 40px;
+    font-size: 24px; cursor: pointer; z-index: 10001;
   `;
   closeBtn.onclick = exitFullscreen;
   
-  // Mover iframe para container fullscreen
   iframe.style.cssText = 'width: 100%; height: 100%; border: 0;';
   fullscreenContainer.appendChild(closeBtn);
   fullscreenContainer.appendChild(iframe);
   document.body.appendChild(fullscreenContainer);
-  
-  console.log('Fallback fullscreen ativado');
 }
 
 function exitFullscreen(){
   try {
     state.isFullscreen = false;
-    
-    // Verificar se há container customizado
     const customContainer = $("#fullscreen-container");
     if (customContainer) {
       const iframe = customContainer.querySelector('#video-iframe');
       if (iframe && state.originalContainer) {
-        // Restaurar estilos originais
         iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;object-fit:contain;';
         state.originalContainer.appendChild(iframe);
       }
@@ -866,7 +1122,6 @@ function exitFullscreen(){
       return;
     }
     
-    // Sair de fullscreen nativo
     if (document.exitFullscreen) {
       document.exitFullscreen().catch(console.error);
     } else if (document.webkitExitFullscreen) {
@@ -881,30 +1136,19 @@ function exitFullscreen(){
   }
 }
 
-// Detectar mudanças de fullscreen
-document.addEventListener('fullscreenchange', handleFullscreenChange);
-document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-
-function handleFullscreenChange() {
+document.addEventListener('fullscreenchange', () => {
   const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-  
   if (!isFullscreen && state.isFullscreen) {
-    // Saiu de fullscreen, restaurar iframe
-    const iframe = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.querySelector('#video-iframe');
+    const iframe = document.querySelector('#video-iframe');
     if (iframe && state.originalContainer) {
       iframe.style.cssText = 'width:100%;height:100%;border:0;display:block;object-fit:contain;';
       state.originalContainer.appendChild(iframe);
     }
     state.isFullscreen = false;
   }
-  
-  console.log('Fullscreen status:', isFullscreen);
-}
+});
 
 /* ===== Eventos ===== */
-// Navegação no header
 $$(".svp-nav-btn").forEach(btn => {
   btn.addEventListener("click", ()=>{
     const tab = btn.dataset.tab;
@@ -913,7 +1157,6 @@ $$(".svp-nav-btn").forEach(btn => {
   });
 });
 
-// Categorias
 $("#svp-cats").addEventListener("click",(e)=>{
   const chip = e.target.closest(".svp-chip");
   if(!chip) return;
@@ -922,18 +1165,17 @@ $("#svp-cats").addEventListener("click",(e)=>{
   renderFeed();
 });
 
-// Busca
 $("#svp-search-input").addEventListener("input", debounce(()=>{
   state.q = sanitize($("#svp-search-input").value);
   renderFeed();
 }, 120));
+
 $("#svp-clear-btn").addEventListener("click", ()=>{
   $("#svp-search-input").value = "";
   state.q = "";
   renderFeed();
 });
 
-// Ações do feed
 document.body.addEventListener("click",(e)=>{
   const open = e.target.closest('[data-action="open"]');
   const openRelated = e.target.closest('[data-action="open-related"]');
@@ -949,7 +1191,11 @@ document.body.addEventListener("click",(e)=>{
   if(openRelated){
     const id = openRelated.dataset.id;
     const v = state.videos.find(x=>x.id===id);
-    if(v) openPlayer(v);
+    if(v) {
+      closeRelatedOverlay();
+      closeCommentsOverlay();
+      openPlayer(v);
+    }
   }
   if(like){
     const id = like.dataset.id;
@@ -966,18 +1212,29 @@ document.body.addEventListener("click",(e)=>{
   }
 });
 
-// Player
+// Player events
 $("#svp-close").addEventListener("click", closePlayer);
 $("#svp-fullscreen").addEventListener("click", requestFullscreen);
 $("#svp-player-like").addEventListener("click", ()=>{
   if(currentVideo) toggleLike(currentVideo.id).catch(()=>{});
 });
 
-// Comentários
-$("#svp-comment-btn").addEventListener("click", async ()=>{
+// Report button
+$("#svp-player-report").addEventListener("click", ()=>{
+  if(currentVideo) toggleReport(currentVideo.id).catch(()=>{});
+});
+
+// Overlay buttons
+$("#open-comments").addEventListener("click", openCommentsOverlay);
+$("#open-related").addEventListener("click", openRelatedOverlay);
+$("#close-comments").addEventListener("click", closeCommentsOverlay);
+$("#close-related").addEventListener("click", closeRelatedOverlay);
+
+// Comment forms
+$("#svp-comment-btn-overlay").addEventListener("click", async ()=>{
   ensureAuth();
   const user = auth.currentUser;
-  const text = sanitize($("#svp-comment-input").value);
+  const text = sanitize($("#svp-comment-input-overlay").value);
   
   if(!user || !currentVideo || !text) return;
   
@@ -990,7 +1247,7 @@ $("#svp-comment-btn").addEventListener("click", async ()=>{
   };
   
   await push(ref(db, `comments/${currentVideo.id}`), data);
-  $("#svp-comment-input").value = "";
+  $("#svp-comment-input-overlay").value = "";
 });
 
 // Publicação
@@ -1024,7 +1281,8 @@ $("#svp-publish").addEventListener("click", async ()=>{
       authorPhotoURL: user.photoURL || null,
       createdAt: Date.now(),
       likesCount: 0,
-      views: 0
+      views: 0,
+      reportCount: 0
     };
     await push(ref(db, "videos"), data);
     hint.textContent = "Publicado com sucesso!";
@@ -1052,6 +1310,32 @@ async function toggleLike(id){
   await update(ref(db, `videos/${id}`), {
     [`likesBy/${user.uid}`]: liked ? null : true
   });
+}
+
+/* Report Video */
+async function toggleReport(id){
+  const user = auth.currentUser;
+  if(!user){ ensureAuth(); return; }
+  const v = state.videos.find(x=>x.id===id);
+  if(!v) return;
+  
+  // Não pode denunciar próprio vídeo
+  if(v.authorId === user.uid) {
+    showToast("Você não pode denunciar seu próprio vídeo");
+    return;
+  }
+  
+  const reported = !!(v.reportsBy && v.reportsBy[user.uid]);
+
+  await runTransaction(ref(db, `videos/${id}/reportCount`), curr => {
+    if(reported){ return Math.max((curr||0)-1, 0); }
+    return (curr||0)+1;
+  });
+  await update(ref(db, `videos/${id}`), {
+    [`reportsBy/${user.uid}`]: reported ? null : true
+  });
+  
+  showToast(reported ? "Denúncia removida" : "Vídeo denunciado");
 }
 
 /* Apagar comentário */
@@ -1097,21 +1381,14 @@ function showConfirmDialog(message, onConfirm) {
   `;
 
   document.body.appendChild(modal);
-
-  const cancelBtn = modal.querySelector('.confirm-cancel');
-  const yesBtn = modal.querySelector('.confirm-yes');
-
-  cancelBtn.addEventListener('click', () => modal.remove());
-
-  yesBtn.addEventListener('click', () => {
+  modal.querySelector('.confirm-cancel').addEventListener('click', () => modal.remove());
+  modal.querySelector('.confirm-yes').addEventListener('click', () => {
     modal.remove();
     if (typeof onConfirm === 'function') {
       try {
         const result = onConfirm();
         if (result instanceof Promise) {
-          result.catch(err => {
-            console.error("Erro ao confirmar:", err);
-          });
+          result.catch(err => console.error("Erro ao confirmar:", err));
         }
       } catch (err) {
         console.error("Erro ao confirmar:", err);
@@ -1134,6 +1411,22 @@ async function deleteVideo(id) {
   });
 }
 
+function showToast(msg) {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:"fixed", bottom:"20px", left:"50%",
+    transform:"translateX(-50%)",
+    background:"rgba(0,0,0,0.85)", color:"#fff",
+    padding:"8px 14px", borderRadius:"6px",
+    fontSize:"14px", zIndex:99999,
+    opacity:"0", transition:"opacity .3s"
+  });
+  document.body.appendChild(t);
+  requestAnimationFrame(()=> t.style.opacity="1");
+  setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.remove(),300); },2000);
+}
+
 /* Realtime */
 onValue(ref(db, "videos"), snap=>{
   const items = [];
@@ -1149,6 +1442,8 @@ onValue(ref(db, "videos"), snap=>{
     const updatedVideo = items.find(v => v.id === currentVideo.id);
     if(updatedVideo){
       updatePlayerLikeButton(updatedVideo);
+      updatePlayerReportButton(updatedVideo);
+      showReportAlert(updatedVideo);
       currentVideo = updatedVideo;
     }
   }
@@ -1160,35 +1455,11 @@ onAuthStateChanged(auth, user=>{
   renderMyFeed();
 });
 ensureAuth();
-
 renderCategories();
 
 function debounce(fn,ms){
   let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),ms); };
 }
-</script>
-      <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const tabButtons = document.querySelectorAll(".svp-tab-btn");
-    const tabPanes = document.querySelectorAll(".tab-pane");
-
-    tabButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        // remove active de todos os botões e conteúdos
-        tabButtons.forEach(b => b.classList.remove("active"));
-        tabPanes.forEach(p => p.classList.remove("active"));
-
-        // ativa o botão clicado
-        btn.classList.add("active");
-
-        // ativa o conteúdo correspondente
-        const target = document.getElementById("tab-" + btn.dataset.tab);
-        if (target) {
-          target.classList.add("active");
-        }
-      });
-    });
-  });
 </script>
   <script>
 // Toast simples
@@ -1275,5 +1546,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
+
 </body>
 </html>
