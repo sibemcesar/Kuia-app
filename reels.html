@@ -510,6 +510,58 @@ a{color:inherit;text-decoration:none}
   background:var(--svp-warn);color:#fff;padding:.75rem 1rem;
   border-radius:8px;margin-bottom:1rem;font-weight:600;
 }
+  /* Estado normal (não mexe no resto do app) */
+#svp-search-btn {
+  background: transparent;
+  border-radius: 8px;
+  transition: background .2s ease, transform .15s ease, color .2s ease;
+}
+
+/* Ícone suaviza a transição de cor (usa currentColor) */
+#svp-search-btn svg {
+  color: black; 
+  transition: color .2s ease, opacity .2s ease;
+}
+
+/* Estado ativo: fundo vermelho e ícone/branco via currentColor */
+#svp-search-btn.active {
+  background: #ffffff; /* vermelho */
+  color: #ff0000;      /* deixa o SVG branco */
+  transform: translateY(-1px);
+}
+
+/* Acessibilidade opcional: foco visível sem interferir no app */
+#svp-search-btn:focus-visible {
+  outline: 2px solid rgba(255,0,0,.6);
+  outline-offset: 2px;
+}
+  /* Toast container */
+#toast {
+  visibility: hidden;
+  min-width: 220px;
+  max-width: 80%;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 12px 16px;
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity .4s ease, visibility .4s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+
+/* Estado visível */
+#toast.show {
+  visibility: visible;
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -537,7 +589,7 @@ a{color:inherit;text-decoration:none}
           <svg viewBox="0 0 24 24"><path d="M18.3 5.71L12 12.01l-6.29-6.3-1.42 1.42 6.3 6.29-6.3 6.29 1.42 1.42L12 14.85l6.29 6.28 1.42-1.41-6.3-6.29 6.3-6.29z"/></svg>
         </button>
       </div>
-       
+       <div id="toast"></div>
       <div class="svp-nav-btns">
         <button class="svp-nav-btn is-active" data-tab="explore">Explorar</button>
         <button class="svp-nav-btn" data-tab="studio">Estúdio</button>
@@ -1470,90 +1522,36 @@ function debounce(fn,ms){
   let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),ms); };
 }
 </script>
-  <script>
-// Toast simples
-function showToast(msg) {
-  const t = document.createElement("div");
-  t.textContent = msg;
-  Object.assign(t.style, {
-    position:"fixed", bottom:"20px", left:"50%",
-    transform:"translateX(-50%)",
-    background:"rgba(0,0,0,0.85)", color:"#fff",
-    padding:"8px 14px", borderRadius:"6px",
-    fontSize:"14px", zIndex:99999,
-    opacity:"0", transition:"opacity .3s"
+ 
+<script>
+  const btn = document.getElementById('svp-search-btn');
+  const toast = document.getElementById('toast');
+
+  btn.addEventListener('click', () => {
+    btn.classList.add('active');
+    if (toast) {
+      toast.textContent = "Abrindo Vídeos curtos…";
+      toast.classList.add('show');
+    }
+
+    const url = 'https://www.youtube.com/shorts';
+
+    // Tenta abrir em nova aba; se falhar (WebView/popup bloqueado), faz fallback no mesmo window
+    let win = null;
+    try { win = window.open(url, '_blank'); } catch (e) {}
+
+    if (!win) {
+      // Fallback confiável para WebView/Android: navega na mesma janela
+      window.location.assign(url);
+      return;
+    }
+
+    // Reset visual (não será visto se navegar na mesma janela)
+    setTimeout(() => {
+      btn.classList.remove('active');
+      if (toast) toast.classList.remove('show');
+    }, 2000);
   });
-  document.body.appendChild(t);
-  requestAnimationFrame(()=> t.style.opacity="1");
-  setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.remove(),300); },2000);
-}
-
-// Sai do pseudo fullscreen
-function exitFullscreen() {
-  document.getElementById("svp-overlay")?.classList.remove("is-fs");
-  showToast("Clique no X pra sair");
-  removeFsCloseButton();
-
-  // 🔹 Chamada para o Android voltar ao retrato
-  if (window.AndroidInterface && AndroidInterface.exitFullscreen) {
-    AndroidInterface.exitFullscreen();
-  }
-}
-
-// Cria botão ✕ de fullscreen
-function addFsCloseButton() {
-  if (document.getElementById("svp-fs-close")) return;
-
-  const closeBtn = document.createElement('button');
-  closeBtn.id = "svp-fs-close";
-  closeBtn.innerHTML = '';
-  closeBtn.style.cssText = `
-    position: fixed;
-    top: 25px; right: 25px;
-    background: transparent;
-    color: white;
-    border: 0px solid transparent;
-    border-radius: 50%;
-    width: 40px; height: 40px;
-    font-size: 20px;
-    cursor: pointer;
-    z-index: 10001;
-    display: flex; align-items: center; justify-content: center;
-  `;
-  closeBtn.onclick = exitFullscreen;
-  document.body.appendChild(closeBtn);
-}
-
-function removeFsCloseButton() {
-  const btn = document.getElementById("svp-fs-close");
-  if (btn) btn.remove();
-}
-
-// Liga os botões
-document.addEventListener("DOMContentLoaded", () => {
-  const fsBtn = document.getElementById("svp-fullscreen");
-  const overlayCloseBtn = document.getElementById("svp-close");
-
-  if (fsBtn) {
-    fsBtn.addEventListener("click", () => {
-      // aqui você pode também adicionar a classe .is-fs no overlay
-      showToast("Tela cheia");
-      addFsCloseButton();
-
-      // 🔹 Chamada para o Android forçar landscape
-      if (window.AndroidInterface && AndroidInterface.enterFullscreen) {
-        AndroidInterface.enterFullscreen();
-      }
-    });
-  }
-
-  if (overlayCloseBtn) {
-    overlayCloseBtn.addEventListener("click", () => {
-      // fecha o overlay inteiro, sem toast de fullscreen
-      closePlayer && closePlayer();
-    });
-  }
-});
 </script>
 
 </body>
