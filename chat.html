@@ -271,6 +271,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .tab-btn.active {
@@ -357,6 +358,53 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   background: #ef4444;
 }
 
+.friend-action.pending {
+  background: #f59e0b;
+}
+
+/* Friend Request Styles */
+.friend-request-badge {
+  background: #ef4444;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 11px;
+  margin-left: 4px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.request-actions {
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+}
+
+.request-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.request-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.request-btn.decline {
+  background: #ef4444;
+  color: white;
+}
+
+.request-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
 .chat{flex-direction:column; width:100%; height:100vh;max-height:100vh}
 .chat-header{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);background:var(--card)}
 .chat-header .avatar{width:40px;height:40px}
@@ -392,24 +440,13 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 .chat-btn.block:hover{background:#ef4444;color:white}
 .chat-btn.unblock{border-color:#10b981;color:#10b981}
 .chat-btn.unblock:hover{background:#10b981;color:white}
-.chat-btn.clear{border-color:#f59e0b;color:#f59e0b}
-.chat-btn.clear:hover{background:#f59e0b;color:white}
 
 .messages{flex:1;overflow:auto;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
 
 /* Mensagens com Avatares e Status */
-.row{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;transition:all 0.3s ease}
+.row{display:flex;align-items:flex-start;gap:8px;margin-bottom:12px}
 .row.in{justify-content:flex-start}
 .row.out{justify-content:flex-end;flex-direction:row-reverse}
-
-/* Deleted Message Style */
-.row.deleting {
-  opacity: 0;
-  transform: translateX(-20px);
-  margin-bottom: 0;
-  max-height: 0;
-  overflow: hidden;
-}
 
 .message-avatar{
   width:32px;
@@ -440,6 +477,44 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   position: relative;
 }
 
+.message-actions {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.row.out .message-actions {
+  left: -8px;
+  right: auto;
+}
+
+.row:hover .message-actions {
+  opacity: 1;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
 .bubble{
   padding:10px 12px;
   border-radius:16px;
@@ -447,7 +522,6 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   word-wrap:break-word;
   overflow-wrap:anywhere;
   box-shadow:0 1px 2px rgba(0,0,0,0.1);
-  position: relative;
 }
 
 .in .bubble{
@@ -461,58 +535,7 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   border-bottom-right-radius:4px;
 }
 
-/* Message Delete Button */
-.message-delete {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #ef4444;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  z-index: 10;
-}
-
-.message-delete:hover {
-  background: #dc2626;
-  transform: scale(1.1);
-}
-
-.message-wrapper:hover .message-delete {
-  display: flex;
-}
-
 .msg-img{border-radius:10px;max-width:100%;cursor:pointer;display:block}
-
-/* Video Message Styles */
-.msg-video{
-  width: 100%;
-  max-width: 320px;
-  height: 180px;
-  border-radius: 10px;
-  border: none;
-  background: #000;
-  display: block;
-}
-
-.video-error {
-  background: var(--line);
-  color: var(--text);
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  font-size: 12px;
-  max-width: 320px;
-}
-
 .meta{font-size:11px;color:var(--muted);margin-top:4px;padding:0 4px;display:flex;align-items:center;gap:6px}
 
 /* Message Status Icons */
@@ -534,12 +557,228 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   color: #10b981;
 }
 
-.composer{display:none;gap:8px;padding:10px;border-top:1px solid var(--line);background:var(--card)}
+.composer{display:none;gap:8px;padding:10px;border-top:1px solid var(--line);background:var(--card);position:relative}
 .composer button{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:0 0px;cursor:pointer;height:40px;transition:all 0.2s ease}
 .composer button:hover{opacity:0.9;transform:translateY(-1px)}
 
 #textInput{flex:1;min-height:40px;max-height:120px;resize:none;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
-#btnImage, #btnVideo{width:40px;display:grid;place-items:center}
+#btnImage{width:40px;display:grid;place-items:center}
+#btnEmoji{width:40px;display:grid;place-items:center}
+
+/* Attachment Menu */
+.attachment-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  display: none;
+  z-index: 1000;
+  padding: 8px;
+  min-width: 180px;
+}
+
+.attachment-menu.show {
+  display: block;
+}
+
+.attachment-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.attachment-option:hover {
+  background: var(--card);
+}
+
+.attachment-option .icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* Video Link Modal */
+.video-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+  backdrop-filter: blur(4px);
+}
+
+.video-modal-content {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 500px;
+  width: calc(100% - 40px);
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+}
+
+.video-modal h3 {
+  margin: 0 0 16px 0;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.video-modal input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.video-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.video-modal-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.video-modal-btn.cancel {
+  background: var(--line);
+  color: var(--text);
+}
+
+.video-modal-btn.send {
+  background: var(--brand);
+  color: white;
+}
+
+.video-modal-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+/* Emoji Picker */
+.emoji-picker {
+  position: absolute;
+  bottom: 100%;
+  left: 50px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  display: none;
+  z-index: 1000;
+  width: 320px;
+  max-height: 300px;
+  overflow: hidden;
+}
+
+.emoji-picker.show {
+  display: block;
+}
+
+.emoji-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.emoji-categories {
+  display: flex;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  gap: 4px;
+}
+
+.emoji-category {
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.emoji-category:hover,
+.emoji-category.active {
+  background: var(--line);
+}
+
+.emoji-grid {
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.emoji-item {
+  padding: 8px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-item:hover {
+  background: var(--line);
+  transform: scale(1.2);
+}
+
+/* Large Emoji Messages */
+.emoji-large {
+  font-size: 64px !important;
+  line-height: 1.2;
+  padding: 8px !important;
+}
+
+.emoji-medium {
+  font-size: 48px !important;
+  line-height: 1.2;
+  padding: 6px !important;
+}
+
+.emoji-small {
+  font-size: 32px !important;
+  line-height: 1.2;
+  padding: 4px !important;
+}
 
 .viewer{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;z-index:1000}
 .viewer img{max-width:95vw;max-height:90vh;border-radius:12px}
@@ -550,16 +789,6 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
 .avatar-viewer img{max-width:80vw;max-height:80vh;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.5)}
 .avatar-viewer-close{position:fixed;top:20px;right:20px;background:rgba(255,255,255,0.2);color:#fff;border:0;border-radius:50%;width:50px;height:50px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;backdrop-filter:blur(10px)}
 .avatar-viewer-name{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);color:white;font-size:18px;font-weight:600;text-shadow:0 2px 10px rgba(0,0,0,0.5)}
-
-/* Video URL Modal */
-.video-modal{position:fixed;inset:0;background:rgba(15,23,42,0.8);display:none;align-items:center;justify-content:center;padding:20px;z-index:1150;backdrop-filter:blur(4px)}
-.video-modal-card{background:var(--card);border-radius:16px;max-width:450px;width:100%;padding:20px;display:flex;flex-direction:column;gap:15px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
-.video-modal-card h3{margin:0;color:var(--text)}
-.video-modal-card input{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px}
-.video-modal-buttons{display:flex;gap:10px;justify-content:flex-end}
-.video-modal-btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s ease}
-.video-modal-btn.primary{background:var(--brand);color:white}
-.video-modal-btn.secondary{background:var(--line);color:var(--text)}
 
 .auth{position:fixed;inset:0;background:rgba(15,23,42,0.8);display:none;align-items:center;justify-content:center;padding:20px;z-index:1100;backdrop-filter:blur(4px)}
 .auth-card{background:var(--card);border-radius:16px;max-width:380px;width:100%;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
@@ -681,10 +910,10 @@ body{width:100%; margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ub
   .chat-btn { padding: 4px 8px; font-size: 11px; }
   .pin-input { gap: 10px; }
   .pin-digit { width: 45px; height: 45px; font-size: 20px; }
-  .msg-video { max-width: 280px; height: 160px; }
+  .emoji-picker { width: 280px; }
+  .emoji-grid { grid-template-columns: repeat(6, 1fr); }
 }
-
-.icon {
+  .icon {
   background-color: #fff;   /* fundo branco */
   display: inline-flex;     /* centraliza o SVG */
   align-items: center;
@@ -765,12 +994,19 @@ window.addEventListener("load", function() {
 
 <div id="app">
   <aside class="sidebar">
-    <div class="topbar">     
-      <div class="me">
+    <div class="topbar">  
+      <span style="font-weight:bold;
+             font-size:18px;
+             color:#111;
+             margin-right:auto;
+             display:inline-block;">
+  Mensagens
+</span>
+      <div style="display:none;"  class="me">
         <img src="" id="meAvatar" class="avatar" alt="Meu Avatar" onclick="openAvatarViewer(this.src, document.getElementById('meName').textContent)">
         <div class="info">
           <div id="meName" class="name">Carregando...</div>
-          <div id="meEmail" class="email">—</div>
+          <div id="meEmail" class="email">--</div>
         </div>
       </div>
       <div class="actions">
@@ -820,7 +1056,10 @@ window.addEventListener("load", function() {
     <!-- Tabs Navigation -->
     <div class="tabs-nav">
       <button class="tab-btn active" data-tab="my-chats">Meus Chats</button>
-      <button class="tab-btn" data-tab="all-friends">Todos Amigos</button>
+      <button class="tab-btn" data-tab="all-friends" id="friendsTab">
+        Adicionar Amigos
+        <span class="friend-request-badge" id="friendRequestBadge" style="display:none;">0</span>
+      </button>
     </div>
 
     <!-- Tab: Meus Chats -->
@@ -848,56 +1087,28 @@ window.addEventListener("load", function() {
         <div id="chatName" class="name">Selecione um usuário</div>
         <div class="status">
           <span id="chatDot" class="dot offline"></span>
-          <span id="chatStatus">—</span>
+          <span id="chatStatus">--</span>
         </div>
       </div>
       <div class="chat-actions">
-        <a href="#"  id="clearChatBtn"  style="display:none"></a>
         <button id="blockBtn" class="chat-btn block" style="display:none">🚫 Bloquear</button>
         <button id="unblockBtn" class="chat-btn unblock" style="display:none">✅ Desbloquear</button>
       </div>
     </header>
     <div id="messages" class="messages"></div>
     <div id="composer" class="composer">
-      <button id="btnImage" title="Enviar imagem"><!-- Ícone de imagem com fundo branco -->
-<!-- Ícone de imagem transparente (herda a cor via currentColor) -->
-<span class="icon" aria-hidden="true" style="color:#fff">
-  <!-- Ícone de imagem com fundo branco e ícone preto -->
-<svg width="24" height="24" viewBox="0 0 24 24"
-     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Imagem">
-  <title>Imagem</title>
-  <!-- Fundo branco -->
-  <rect width="24" height="24" fill="white"/>
-  <!-- Moldura -->
-  <rect x="3" y="5" width="18" height="14" rx="2"
-        stroke="black" stroke-width="1.8" fill="none"/>
-  <!-- Montanha -->
-  <path d="M5 15l4-4 4 4 4-5 4 5"
-        stroke="black" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Sol -->
-  <circle cx="9" cy="9" r="1.5" fill="black"/>
-</svg>
-</span></button>
-      <button id="btnVideo" title="Enviar vídeo"><!-- Ícone de vídeo com fundo branco -->
-<span class="icon" aria-hidden="true" style="color:#fff">
-<svg width="24" height="24" viewBox="0 0 24 24"
-     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vídeo">
-  <title>Vídeo</title>
-  <!-- Fundo branco -->
-  <rect width="24" height="24" fill="white"/>
-  <!-- Câmera -->
-  <rect x="3" y="6" width="14" height="10" rx="2"
-        stroke="black" stroke-width="1.8" fill="none"/>
-  <!-- Lente -->
-  <path d="M17 8l3-2v8l-3-2"
-        stroke="black" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Play button -->
-  <path d="M9 9l3 2-3 2z"
-        fill="black"/>
-</svg>
-</span></button>
+      <button id="btnAttachment" title="Anexos" style="background: var(--card); color: black; padding: 4px 4px;"><svg xmlns="http://www.w3.org/2000/svg" 
+     fill="none" 
+     viewBox="0 0 24 24" 
+     stroke-width="1.5" 
+     stroke="currentColor" 
+     style="width:32px;height:32px;display:block;margin-right:auto;">
+  <path stroke-linecap="round" stroke-linejoin="round" 
+        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg></button>
       <input id="imageInput" type="file" accept="image/*" class="hidden" />
-      <textarea id="textInput" rows="1" placeholder="Digite algo"></textarea>
+      
+      <textarea id="textInput" rows="1" placeholder="Digite uma mensagem"></textarea>
       <button style="
   background-color: white;
   color: black;
@@ -912,8 +1123,66 @@ window.addEventListener("load", function() {
   <path d="M3 20L21 12L3 4V10L15 12L3 14V20Z"
         fill="black"/>
 </svg></button>
+
+      <!-- Attachment Menu -->
+      <div class="attachment-menu" id="attachmentMenu">
+        <button class="attachment-option" id="optionImage" style="background: var(--card); color: black;">
+          <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+</svg>
+</span>
+          <span>Imagem</span>
+        </button>     
+        <button class="attachment-option" id="optionVideoLink" style="background: var(--card); color: black;">
+          <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
+</svg>
+</span>
+          <span>Vídeo (link)</span>
+        </button>
+        <button class="attachment-option" id="optionEmoji" style="background: var(--card); color: black;">
+          <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+</svg>
+</span>
+          <span>Emoji</span>
+        </button>
+      </div>
+
+      <!-- Emoji Picker -->
+      <div class="emoji-picker" id="emojiPicker">
+        <div class="emoji-header">Escolha um emoji</div>
+        <div class="emoji-categories">
+          <button class="emoji-category active" data-category="smileys">😊</button>
+          <button class="emoji-category" data-category="people">👨</button>
+          <button class="emoji-category" data-category="animals">🐶</button>
+          <button class="emoji-category" data-category="food">🍎</button>
+          <button class="emoji-category" data-category="activities">⚽</button>
+          <button class="emoji-category" data-category="travel">🚗</button>
+          <button class="emoji-category" data-category="objects">💡</button>
+          <button class="emoji-category" data-category="symbols">❤️</button>
+        </div>
+        <div class="emoji-grid" id="emojiGrid"></div>
+      </div>
     </div>
   </section>
+</div>
+
+<!-- Video Link Modal -->
+<div class="video-modal" id="videoModal">
+  <div class="video-modal-content">
+    <h3>Adicionar vídeo por link</h3>
+    <input 
+      type="url" 
+      id="videoLinkInput" 
+      placeholder="Cole aqui o link do YouTube ou vídeo direto (mp4, webm, etc.)" 
+    />
+    <div class="video-modal-buttons">
+      <button class="video-modal-btn cancel" id="videoModalCancel">Cancelar</button>
+      <button class="video-modal-btn send" id="videoModalSend">Enviar</button>
+    </div>
+  </div>
 </div>
 
 <div id="viewer" class="viewer">
@@ -926,19 +1195,6 @@ window.addEventListener("load", function() {
   <img id="avatarViewerImg" alt="">
   <button class="avatar-viewer-close" id="avatarViewerClose">×</button>
   <div class="avatar-viewer-name" id="avatarViewerName"></div>
-</div>
-
-<!-- Video URL Modal -->
-<div id="videoModal" class="video-modal">
-  <div class="video-modal-card">
-    <h3>Adicionar Vídeo</h3>
-    <p class="help">Cole a URL do vídeo (YouTube, Vimeo, etc.)</p>
-    <input id="videoUrlInput" type="url" placeholder="https://www.youtube.com/watch?v=..." />
-    <div class="video-modal-buttons">
-      <button class="video-modal-btn secondary" id="videoCancelBtn">Cancelar</button>
-      <button class="video-modal-btn primary" id="videoSendBtn">Enviar</button>
-    </div>
-  </div>
 </div>
 
 <div id="auth" class="auth">
@@ -1053,11 +1309,21 @@ let usersCache = {};
 let blockedUsers = {};
 let messageStatusCache = {};
 let friendsInChat = {}; // Lista de amigos que estão no chat
-let hiddenMessages = {}; // Mensagens ocultas para o usuário atual
+let friendRequests = {}; // Pedidos de amizade enviados
+let receivedRequests = {}; // Pedidos de amizade recebidos
 let currentTab = 'my-chats';
 
-// Avatar Cache System
-let avatarCache = {};
+// Emoji categories data
+const emojiCategories = {
+  smileys: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐'],
+  people: ['👶','🧒','👦','👧','🧑','👱','👨','🧔','👨‍🦰','👨‍🦱','👨‍🦳','👨‍🦲','👩','👩‍🦰','🧑‍🦰','👩‍🦱','🧑‍🦱','👩‍🦳','🧑‍🦳','👩‍🦲','🧑‍🦲','👱‍♀️','👱‍♂️','🧓','👴','👵','🙍','🙍‍♂️','🙍‍♀️','🙎','🙎‍♂️','🙎‍♀️','🙅','🙅‍♂️','🙅‍♀️','🙆','🙆‍♂️','🙆‍♀️','💁','💁‍♂️','💁‍♀️','🙋','🙋‍♂️','🙋‍♀️','🧏','🧏‍♂️','🧏‍♀️','🙇','🙇‍♂️','🙇‍♀️','🤦','🤦‍♂️','🤦‍♀️'],
+  animals: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐻‍❄️','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🕸️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐈‍⬛','🐓','🦃','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿️','🦔'],
+  food: ['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶️','🫑','🌽','🥕','🫒','🧄','🧅','🥔','🍠','🥐','🥯','🍞','🥖','🥨','🧀','🥚','🍳','🧈','🥞','🧇','🥓','🥩','🍗','🍖','🦴','🌭','🍔','🍟','🍕','🫓','🥪','🥙','🧆','🌮','🌯','🫔','🥗','🥘','🫕','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🦪','🍤','🍙','🍚','🍘','🍥','🥠','🥮','🍢','🍡','🍧','🍨','🍦','🥧','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯'],
+  activities: ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂','🏋️','🏋️‍♂️','🏋️‍♀️','🤼','🤼‍♂️','🤼‍♀️','🤸','🤸‍♂️','🤸‍♀️','⛹️','⛹️‍♂️','⛹️‍♀️','🤺','🤾','🤾‍♂️','🤾‍♀️','🏌️','🏌️‍♂️','🏌️‍♀️','🏇','🧘','🧘‍♂️','🧘‍♀️','🏄','🏄‍♂️','🏄‍♀️','🏊','🏊‍♂️','🏊‍♀️','🤽','🤽‍♂️','🤽‍♀️','🚣','🚣‍♂️','🚣‍♀️','🧗','🧗‍♂️','🧗‍♀️','🚵','🚵‍♂️','🚵‍♀️','🚴','🚴‍♂️','🚴‍♀️','🏆','🥇','🥈','🥉','🏅','🎖️','🏵️','🎗️'],
+  travel: ['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🏍️','🛵','🚲','🛴','🛹','🛼','🚁','🛸','✈️','🛩️','🛫','🛬','🪂','💺','🚀','🛰️','🚉','🚊','🚝','🚞','🚋','🚃','🚋','🚞','🚝','🚄','🚅','🚈','🚂','🚆','🚇','🚊','🚉','✈️','🛫','🛬','🛩️','💺','🛰️','🚀','🛸','🚁','🚟','🚠','🚡','🛶','🚤','🛳️','⛴️','🛥️','🚢','⚓','⛵','🪝','🏊','🏄','🏝️','🗿','🗼','🗽','🏛️','🏰','🏯','🏟️','🎡','🎢','🎠','⛱️','🏖️','🏞️','🌋','⛰️','🏔️','🗻','🏕️','⛺','🏠','🏡','🏘️','🏚️','🏗️','🏭','🏢','🏬','🏣','🏤','🏥','🏦','🏨','🏪','🏫','🏩','💒','🏛️','⛪','🕌','🕍','🛕'],
+  objects: ['⌚','📱','📲','💻','⌨️','🖥️','🖨️','🖱️','🖲️','🕹️','🗜️','💽','💾','💿','📀','📼','📷','📸','📹','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏱️','⏲️','⏰','🕰️','⌛','⏳','📡','🔋','🔌','💡','🔦','🕯️','🪔','🧯','🛢️','💸','💵','💴','💶','💷','💰','💳','💎','⚖️','🧰','🔧','🔨','⚒️','🛠️','⛏️','🔩','⚙️','🧱','⛓️','🧲','🔫','💣','🧨','🪓','🔪','🗡️','⚔️','🛡️','🚬','⚰️','🪦','⚱️','🏺','🔮','📿','🧿','💈','⚗️','🔭','🔬','🕳️','🩹','🩺','💊','💉','🧬','🦠','🧫','🧪','🌡️','🧹','🧺','🧻','🚽','🚰','🚿','🛁','🛀','🧼','🪒','🧽','🧴','🛎️','🔑','🗝️','🚪','🪑','🛋️','🛏️','🛌','🧸','🖼️','🛍️','🛒','🎁','🎈','🎏','🎀','🎊','🎉','🎎','🏮','🎐','🧧','✉️','📩','📨','📧','💌','📥','📤','📦','🏷️','📪','📫','📬','📭','📮','📯','📜','📃','📄','📑','📊','📈','📉','🗒️','🗓️','📆','📅','📇','🗃️','🗳️','🗄️','📋','📁','📂','🗂️','🗞️','📰','📓','📔','📒','📕','📗','📘','📙','📚','📖','🔖','🧷','🔗','📎','🖇️','📐','📏','🧮','📌','📍','✂️','🖊️','🖋️','✒️','🖌️','🖍️','📝','✏️','🔍','🔎','🔏','🔐','🔒','🔓'],
+  symbols: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','❗','❕','❓','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🈳','🈂️','🛂','🛃','🛄','🛅','🚹','🚺','🚼','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆖','🆗','🆙','🆒','🆕','🆓','0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟']
+};
 
 // Loading state management
 let loadingState = {
@@ -1068,7 +1334,7 @@ let loadingState = {
   previews: false,
   blocked: false,
   friends: false,
-  hidden: false
+  requests: false
 };
 
 const el = (id)=>document.getElementById(id);
@@ -1096,9 +1362,18 @@ const messagesEl = el("messages");
 const composer = el("composer");
 const textInput = el("textInput");
 const btnSend = el("btnSend");
-const btnImage = el("btnImage");
-const btnVideo = el("btnVideo");
+const btnAttachment = el("btnAttachment");
+const attachmentMenu = el("attachmentMenu");
+const optionImage = el("optionImage");
+const optionVideoLink = el("optionVideoLink");
+const optionEmoji = el("optionEmoji");
+const emojiPicker = el("emojiPicker");
+const emojiGrid = el("emojiGrid");
 const imageInput = el("imageInput");
+const videoModal = el("videoModal");
+const videoLinkInput = el("videoLinkInput");
+const videoModalCancel = el("videoModalCancel");
+const videoModalSend = el("videoModalSend");
 const viewer = el("viewer");
 const viewerImg = el("viewerImg");
 const viewerClose = el("viewerClose");
@@ -1106,10 +1381,6 @@ const avatarViewer = el("avatarViewer");
 const avatarViewerImg = el("avatarViewerImg");
 const avatarViewerClose = el("avatarViewerClose");
 const avatarViewerName = el("avatarViewerName");
-const videoModal = el("videoModal");
-const videoUrlInput = el("videoUrlInput");
-const videoCancelBtn = el("videoCancelBtn");
-const videoSendBtn = el("videoSendBtn");
 const authModal = el("auth");
 const btnGoogle = el("btnGoogle");
 const btnAnon = el("btnAnon");
@@ -1128,197 +1399,212 @@ const closeBlockedModal = el("closeBlockedModal");
 const blockedList = el("blockedList");
 const blockBtn = el("blockBtn");
 const unblockBtn = el("unblockBtn");
-const clearChatBtn = el("clearChatBtn");
 const pinEnabled = el("pinEnabled");
 const pinSetup = el("pinSetup");
 const newPin = el("newPin");
 const btnNotif = el("btnNotif");
+const friendsTab = el("friendsTab");
+const friendRequestBadge = el("friendRequestBadge");
 
-// Avatar Cache Management
-function loadAvatarCache() {
-  try {
-    const cached = localStorage.getItem('chatAvatarCache');
-    if (cached) {
-      avatarCache = JSON.parse(cached);
-      console.log('📸 Avatar cache carregado:', Object.keys(avatarCache).length);
-    }
-  } catch (error) {
-    console.error('Erro ao carregar cache de avatares:', error);
-    avatarCache = {};
-  }
+// Message processing functions
+function linkify(text){
+  return text.replace(/(https?:\/\/[^\s]+)/g,'<a class="link" href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
 }
 
-function saveAvatarCache() {
-  try {
-    localStorage.setItem('chatAvatarCache', JSON.stringify(avatarCache));
-  } catch (error) {
-    console.error('Erro ao salvar cache de avatares:', error);
-  }
-}
-
-function cacheAvatar(userId, avatarUrl) {
-  if (avatarUrl && avatarUrl.trim() && !avatarUrl.includes('data:image/svg')) {
-    avatarCache[userId] = {
-      url: avatarUrl,
-      timestamp: Date.now()
-    };
-    saveAvatarCache();
-  }
-}
-
-function getCachedAvatar(userId) {
-  const cached = avatarCache[userId];
-  if (cached) {
-    // Cache válido por 24 horas
-    const isValid = (Date.now() - cached.timestamp) < (24 * 60 * 60 * 1000);
-    if (isValid) {
-      return cached.url;
-    } else {
-      delete avatarCache[userId];
-      saveAvatarCache();
-    }
-  }
-  return null;
-}
-
-function clearAvatarCache() {
-  avatarCache = {};
-  localStorage.removeItem('chatAvatarCache');
-  showToast('Cache de avatares limpo', 'info');
-}
-
-// Message Deletion System (Opção 1 - Ultra Segura)
-async function hideMessage(messageId, chatId) {
-  try {
-    const updates = {};
-    updates[`hiddenMessages/${me.uid}/${chatId}/${messageId}`] = {
-      hiddenAt: now(),
-      reason: 'user_deleted'
-    };
-    
-    await db.ref().update(updates);
-    showToast('Mensagem removida para você', 'success');
-    
-    // Recalcular preview se necessário
-    await recalculatePreview(chatId);
-    
-  } catch (error) {
-    console.error('Erro ao ocultar mensagem:', error);
-    showToast('Erro ao remover mensagem', 'error');
-  }
-}
-
-async function clearMyMessagesFromChat(chatId) {
-  try {
-    const chatRef = db.ref(`chats/${chatId}`);
-    const snapshot = await chatRef.get();
-    const messages = snapshot.val() || {};
-    
-    const updates = {};
-    let hiddenCount = 0;
-    
-    // Ocultar apenas mensagens do usuário atual
-    Object.keys(messages).forEach(messageKey => {
-      const message = messages[messageKey];
-      if (message.from === me.uid) {
-        updates[`hiddenMessages/${me.uid}/${chatId}/${messageKey}`] = {
-          hiddenAt: now(),
-          reason: 'chat_cleared'
-        };
-        hiddenCount++;
-      }
-    });
-    
-    if (hiddenCount > 0) {
-      await db.ref().update(updates);
-      showToast(`${hiddenCount} mensagens suas foram removidas`, 'success');
-      
-      // Recalcular preview
-      await recalculatePreview(chatId);
-    } else {
-      showToast('Nenhuma mensagem sua encontrada nesta conversa', 'info');
-    }
-    
-  } catch (error) {
-    console.error('Erro ao limpar mensagens:', error);
-    showToast('Erro ao limpar conversa', 'error');
-  }
-}
-
-async function recalculatePreview(chatId) {
-  try {
-    const chatRef = db.ref(`chats/${chatId}`);
-    const snapshot = await chatRef.get();
-    const messages = snapshot.val() || {};
-    
-    // Encontrar a última mensagem visível
-    const visibleMessages = Object.keys(messages)
-      .map(key => ({...messages[key], messageKey: key}))
-      .filter(msg => !isMessageHidden(msg.messageKey, chatId))
-      .sort((a, b) => b.time - a.time);
-    
-    if (visibleMessages.length > 0) {
-      const lastMessage = visibleMessages[0];
-      let previewText;
-      
-      if (lastMessage.type === "text") previewText = lastMessage.text;
-      else if (lastMessage.type === "image") previewText = "🖼️ Imagem";
-      else if (lastMessage.type === "video") previewText = "🎥 Vídeo";
-      else previewText = "Mensagem";
-      
-      const otherUserId = currentChat;
-      const updates = {};
-      updates[`userChats/${me.uid}/${otherUserId}`] = {
-        other: otherUserId,
-        lastText: previewText,
-        lastTime: lastMessage.time
-      };
-      
-      await db.ref().update(updates);
-    }
-    
-  } catch (error) {
-    console.error('Erro ao recalcular preview:', error);
-  }
-}
-
-function isMessageHidden(messageKey, chatId) {
-  return hiddenMessages[chatId] && hiddenMessages[chatId][messageKey];
-}
-
-// Video URL Processing
-function processVideoUrl(url) {
-  if (!url) return null;
+// Function to process text messages - preserves line breaks and linkifies
+function processTextMessage(text) {
+  // First preserve line breaks by converting \n to <br>
+  let processedText = text.replace(/\n/g, '<br>');
   
-  // YouTube
-  let youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+  // Then linkify URLs (but don't convert to video players)
+  processedText = linkify(processedText);
+  
+  return processedText;
+}
+
+// Function to process video links for video-link messages
+function processVideoPlayer(videoUrl) {
+  // YouTube patterns
+  const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/;
+  
+  // Direct video file patterns
+  const directVideoRegex = /(https?:\/\/[^\s]+\.(mp4|webm|ogg|mov|avi|mkv)(\?[^\s]*)?)/i;
+  
+  // Check for YouTube videos
+  const youtubeMatch = videoUrl.match(youtubeRegex);
   if (youtubeMatch) {
-    return `https://www.youtube.com/embed/${youtubeMatch[1]}?rel=0&modestbranding=1`;
+    const videoId = youtubeMatch[1];
+    const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+    return `<iframe 
+      width="100%" 
+      height="250" 
+      src="${embedUrl}" 
+      frameborder="0" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+      allowfullscreen
+      style="border-radius: 10px; margin: 6px 0;">
+    </iframe>`;
   }
   
-  // Vimeo
-  let vimeoMatch = url.match(/(?:vimeo\.com\/)([0-9]+)/);
-  if (vimeoMatch) {
-    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  // Check for direct video links
+  const directMatch = videoUrl.match(directVideoRegex);
+  if (directMatch) {
+    return `<video 
+      controls 
+      style="max-width: 100%; border-radius: 10px; margin: 6px 0;"
+      preload="metadata">
+      <source src="${videoUrl}" type="video/${directMatch[2]}">
+      Seu navegador não suporta vídeos.
+    </video>`;
   }
   
-  // Dailymotion
-  let dailymotionMatch = url.match(/(?:dailymotion\.com\/video\/)([^&\n?#]+)/);
-  if (dailymotionMatch) {
-    return `https://www.dailymotion.com/embed/video/${dailymotionMatch[1]}`;
-  }
-  
-  // Direct video URLs
-  if (url.match(/\.(mp4|webm|ogg)(\?.*)?$/i)) {
-    return url;
-  }
-  
-  return null;
+  // If not a recognized video format, return as link
+  return `<a class="link" href="${videoUrl}" target="_blank" rel="noopener noreferrer">${videoUrl}</a>`;
 }
 
-function isValidVideoUrl(url) {
-  return processVideoUrl(url) !== null;
+// Video Modal Functions
+function showVideoModal() {
+  videoModal.style.display = 'flex';
+  videoLinkInput.value = '';
+  videoLinkInput.focus();
 }
+
+function hideVideoModal() {
+  videoModal.style.display = 'none';
+  videoLinkInput.value = '';
+}
+
+// Video modal event listeners
+videoModalCancel.onclick = hideVideoModal;
+
+videoModalSend.onclick = () => {
+  const url = videoLinkInput.value.trim();
+  if (!url || !currentChat) {
+    hideVideoModal();
+    return;
+  }
+  
+  // Validate URL
+  try {
+    new URL(url);
+  } catch {
+    showToast('URL inválida. Verifique o link e tente novamente.', 'error');
+    return;
+  }
+  
+  const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  sendMessage({type: "video-link", url: url, id: messageId});
+  hideVideoModal();
+  showToast('Link de vídeo enviado! 🎥', 'success');
+};
+
+// Close modal when clicking outside
+videoModal.onclick = (e) => {
+  if (e.target === videoModal) {
+    hideVideoModal();
+  }
+};
+
+// Enter key to send video link
+videoLinkInput.onkeydown = (e) => {
+  if (e.key === 'Enter') {
+    videoModalSend.click();
+  }
+};
+
+// Emoji Picker Functions
+function initEmojiPicker() {
+  // Initialize with smileys category
+  renderEmojiGrid('smileys');
+  
+  // Category buttons
+  document.querySelectorAll('.emoji-category').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.emoji-category').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderEmojiGrid(btn.dataset.category);
+    };
+  });
+}
+
+function renderEmojiGrid(category) {
+  emojiGrid.innerHTML = '';
+  const emojis = emojiCategories[category] || [];
+  
+  emojis.forEach(emoji => {
+    const btn = document.createElement('button');
+    btn.className = 'emoji-item';
+    btn.textContent = emoji;
+    btn.onclick = () => insertEmoji(emoji);
+    emojiGrid.appendChild(btn);
+  });
+}
+
+function insertEmoji(emoji) {
+  const cursorPos = textInput.selectionStart;
+  const textBefore = textInput.value.substring(0, cursorPos);
+  const textAfter = textInput.value.substring(cursorPos);
+  
+  textInput.value = textBefore + emoji + textAfter;
+  textInput.focus();
+  textInput.setSelectionRange(cursorPos + emoji.length, cursorPos + emoji.length);
+  
+  hideEmojiPicker();
+}
+
+function showEmojiPicker() {
+  emojiPicker.classList.add('show');
+}
+
+function hideEmojiPicker() {
+  emojiPicker.classList.remove('show');
+}
+
+// Attachment Menu Functions
+function showAttachmentMenu() {
+  attachmentMenu.classList.add('show');
+}
+
+function hideAttachmentMenu() {
+  attachmentMenu.classList.remove('show');
+}
+
+// Attachment button events
+btnAttachment.onclick = (e) => {
+  e.stopPropagation();
+  if (attachmentMenu.classList.contains('show')) {
+    hideAttachmentMenu();
+  } else {
+    hideEmojiPicker(); // Close emoji picker if open
+    showAttachmentMenu();
+  }
+};
+
+// Attachment menu options
+optionImage.onclick = () => {
+  hideAttachmentMenu();
+  imageInput.click();
+};
+
+optionVideoLink.onclick = () => {
+  hideAttachmentMenu();
+  showVideoModal();
+};
+
+optionEmoji.onclick = () => {
+  hideAttachmentMenu();
+  showEmojiPicker();
+};
+
+// Close attachment menu and emoji picker when clicking outside
+document.addEventListener('click', (e) => {
+  if (!attachmentMenu.contains(e.target) && e.target !== btnAttachment) {
+    hideAttachmentMenu();
+  }
+  if (!emojiPicker.contains(e.target) && e.target !== btnAttachment && !attachmentMenu.contains(e.target)) {
+    hideEmojiPicker();
+  }
+});
 
 // Tab Navigation
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1366,70 +1652,6 @@ avatarViewer.onclick = (e) => {
   if (e.target === avatarViewer) {
     avatarViewer.style.display = 'none';
     avatarViewerImg.src = '';
-  }
-};
-
-// Video Modal Functions
-btnVideo.onclick = () => {
-  videoModal.style.display = 'flex';
-  videoUrlInput.focus();
-};
-
-videoCancelBtn.onclick = () => {
-  videoModal.style.display = 'none';
-  videoUrlInput.value = '';
-};
-
-videoSendBtn.onclick = () => {
-  const url = videoUrlInput.value.trim();
-  if (!url) {
-    showToast('Digite uma URL de vídeo', 'error');
-    return;
-  }
-  
-  if (!isValidVideoUrl(url)) {
-    showToast('URL de vídeo não suportada. Use YouTube, Vimeo ou links diretos.', 'error');
-    return;
-  }
-  
-  if (!currentChat) {
-    showToast('Selecione um usuário para enviar o vídeo', 'error');
-    return;
-  }
-  
-  const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  sendMessage({type: "video", url: url, id: messageId});
-  
-  videoModal.style.display = 'none';
-  videoUrlInput.value = '';
-  showToast('Vídeo enviado! 🎥', 'success');
-};
-
-videoModal.onclick = (e) => {
-  if (e.target === videoModal) {
-    videoModal.style.display = 'none';
-    videoUrlInput.value = '';
-  }
-};
-
-// Enter key in video URL input
-videoUrlInput.onkeydown = (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    videoSendBtn.click();
-  }
-};
-
-// Clear Chat Button
-clearChatBtn.onclick = () => {
-  if (currentChat) {
-    showConfirmDialog(
-      `Tem certeza que deseja remover todas as suas mensagens desta conversa?<br><small>As mensagens só serão removidas para você.</small>`,
-      () => {
-        const chatId = chatId(me.uid, currentChat);
-        clearMyMessagesFromChat(chatId);
-      }
-    );
   }
 };
 
@@ -1632,7 +1854,7 @@ function createNotificationSound(frequency, duration) {
 function showToast(message, type = 'info', duration = 3000) {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  toast.innerHTML = message; // Changed to innerHTML to support HTML content
+  toast.textContent = message;
   toastContainer.appendChild(toast);
   
   setTimeout(() => {
@@ -1664,54 +1886,23 @@ function getDefaultAvatar(name) {
   return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><circle cx='32' cy='32' r='32' fill='${encodeURIComponent(color)}'/><text x='32' y='38' text-anchor='middle' fill='white' font-family='Arial,sans-serif' font-size='20' font-weight='bold'>${encodeURIComponent(initials)}</text></svg>`;
 }
 
-// Função para carregar avatar com cache e fallback robusto
-function loadAvatar(imgElement, avatarUrl, userName, userId = null) {
+// Função para carregar avatar com fallback robusto
+function loadAvatar(imgElement, avatarUrl, userName) {
   if (!imgElement) return;
   
-  // Reset element state
   imgElement.classList.remove('loaded');
-  imgElement.textContent = '';
   
-  // Try to get from cache first
-  let urlToUse = avatarUrl;
-  if (userId) {
-    const cachedUrl = getCachedAvatar(userId);
-    if (cachedUrl) {
-      urlToUse = cachedUrl;
-    }
-  }
-  
-  if (urlToUse && urlToUse.trim() && urlToUse !== 'null' && urlToUse !== 'undefined' && !urlToUse.includes('data:image/svg')) {
+  if (avatarUrl && avatarUrl.trim() && avatarUrl !== 'null' && avatarUrl !== 'undefined') {
     const testImg = new Image();
-    
     testImg.onload = () => {
-      imgElement.src = urlToUse;
+      imgElement.src = avatarUrl;
       imgElement.classList.add('loaded');
-      // Cache the successful URL
-      if (userId && urlToUse === avatarUrl) {
-        cacheAvatar(userId, avatarUrl);
-      }
+      imgElement.textContent = '';
     };
-    
     testImg.onerror = () => {
-      // If cached URL fails, try original URL if different
-      if (urlToUse !== avatarUrl && avatarUrl && avatarUrl.trim()) {
-        const retryImg = new Image();
-        retryImg.onload = () => {
-          imgElement.src = avatarUrl;
-          imgElement.classList.add('loaded');
-          cacheAvatar(userId, avatarUrl);
-        };
-        retryImg.onerror = () => {
-          setAvatarWithInitials(imgElement, userName);
-        };
-        retryImg.src = avatarUrl;
-      } else {
-        setAvatarWithInitials(imgElement, userName);
-      }
+      setAvatarWithInitials(imgElement, userName);
     };
-    
-    testImg.src = urlToUse;
+    testImg.src = avatarUrl;
   } else {
     setAvatarWithInitials(imgElement, userName);
   }
@@ -1755,23 +1946,70 @@ async function uploadToImgBB(file) {
   }
 }
 
-// Friends Management System
-async function addFriendToChat(userId) {
+// Friend Request System
+async function sendFriendRequest(userId) {
   try {
-    await db.ref(`friendsInChat/${me.uid}/${userId}`).set(true);
-    friendsInChat[userId] = true;
-    showToast('Amigo adicionado ao chat! 👥', 'success');
-    renderChatList();
+    const timestamp = now();
+    await db.ref(`friendRequests/${userId}/${me.uid}`).set({
+      from: me.uid,
+      timestamp: timestamp,
+      status: 'pending'
+    });
+    
+    // Add to our sent requests
+    await db.ref(`sentRequests/${me.uid}/${userId}`).set({
+      to: userId,
+      timestamp: timestamp,
+      status: 'pending'
+    });
+    
+    showToast('Pedido de amizade enviado! 📤', 'success');
     renderFriendsList();
   } catch (error) {
-    console.error('Erro ao adicionar amigo ao chat:', error);
-    showToast('Erro ao adicionar amigo', 'error');
+    console.error('Erro ao enviar pedido de amizade:', error);
+    showToast('Erro ao enviar pedido de amizade', 'error');
+  }
+}
+
+async function acceptFriendRequest(userId) {
+  try {
+    // Add both users to each other's friend lists
+    await db.ref(`friendsInChat/${me.uid}/${userId}`).set(true);
+    await db.ref(`friendsInChat/${userId}/${me.uid}`).set(true);
+    
+    // Remove the request
+    await db.ref(`friendRequests/${me.uid}/${userId}`).remove();
+    await db.ref(`sentRequests/${userId}/${me.uid}`).remove();
+    
+    showToast('Pedido de amizade aceito! 🎉', 'success');
+    renderChatList();
+    renderFriendsList();
+    updateFriendRequestBadge();
+  } catch (error) {
+    console.error('Erro ao aceitar pedido de amizade:', error);
+    showToast('Erro ao aceitar pedido de amizade', 'error');
+  }
+}
+
+async function declineFriendRequest(userId) {
+  try {
+    // Remove the request
+    await db.ref(`friendRequests/${me.uid}/${userId}`).remove();
+    await db.ref(`sentRequests/${userId}/${me.uid}`).remove();
+    
+    showToast('Pedido de amizade recusado', 'info');
+    renderFriendsList();
+    updateFriendRequestBadge();
+  } catch (error) {
+    console.error('Erro ao recusar pedido de amizade:', error);
+    showToast('Erro ao recusar pedido de amizade', 'error');
   }
 }
 
 async function removeFriendFromChat(userId) {
   try {
     await db.ref(`friendsInChat/${me.uid}/${userId}`).remove();
+    await db.ref(`friendsInChat/${userId}/${me.uid}`).remove();
     delete friendsInChat[userId];
     showToast('Amigo removido do chat', 'info');
     renderChatList();
@@ -1784,6 +2022,27 @@ async function removeFriendFromChat(userId) {
 
 function isFriendInChat(userId) {
   return friendsInChat && friendsInChat[userId] === true;
+}
+
+function hasSentRequest(userId) {
+  return friendRequests[userId] && friendRequests[userId].status === 'pending';
+}
+
+function hasReceivedRequest(userId) {
+  return receivedRequests[userId] && receivedRequests[userId].status === 'pending';
+}
+
+function updateFriendRequestBadge() {
+  const requestCount = Object.keys(receivedRequests).filter(uid => 
+    receivedRequests[uid].status === 'pending'
+  ).length;
+  
+  if (requestCount > 0) {
+    friendRequestBadge.textContent = requestCount;
+    friendRequestBadge.style.display = 'inline';
+  } else {
+    friendRequestBadge.style.display = 'none';
+  }
 }
 
 // Função para verificar se usuário está bloqueado
@@ -1909,11 +2168,9 @@ function updateBlockButtons() {
     const isBlocked = isUserBlocked(currentChatUser.uid);
     blockBtn.style.display = isBlocked ? 'none' : 'block';
     unblockBtn.style.display = isBlocked ? 'block' : 'none';
-    clearChatBtn.style.display = 'block';
   } else {
     blockBtn.style.display = 'none';
     unblockBtn.style.display = 'none';
-    clearChatBtn.style.display = 'none';
   }
 }
 
@@ -1937,7 +2194,7 @@ function renderBlockedUsers() {
     
     const avatar = document.createElement('img');
     avatar.className = 'avatar';
-    loadAvatar(avatar, user.avatar, user.name, userId);
+    loadAvatar(avatar, user.avatar, user.name);
     
     const info = document.createElement('div');
     info.className = 'info';
@@ -1990,6 +2247,27 @@ function getStatusIcon(status) {
   }
 }
 
+// Delete Message Function
+async function deleteMessage(messageKey, messageId) {
+  try {
+    const cid = chatId(me.uid, currentChat);
+    
+    // Remove from Firebase
+    await db.ref(`chats/${cid}/${messageKey}`).remove();
+    
+    // Remove from UI
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (messageElement) {
+      messageElement.remove();
+    }
+    
+    showToast('Mensagem apagada', 'info');
+  } catch (error) {
+    console.error('Erro ao apagar mensagem:', error);
+    showToast('Erro ao apagar mensagem', 'error');
+  }
+}
+
 function goToHome() {
   document.querySelector('.sidebar').classList.add('active');
   document.querySelector('.chat').classList.remove('active');
@@ -1997,7 +2275,7 @@ function goToHome() {
   currentChatUser = null;
   composer.style.display = 'none';
   chatName.textContent = 'Selecione um usuário';
-  chatStatus.textContent = '—';
+  chatStatus.textContent = '--';
   chatDot.className = 'dot offline';
   updateBlockButtons();
 }
@@ -2010,15 +2288,12 @@ function formatTime(ts){
     return d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
   }catch{ return "" }
 }
-function linkify(text){
-  return text.replace(/(https?:\/\/[^\s]+)/g,'<a class="link" href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-}
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
   updateSplashStatus('Iniciando sistema de segurança...');
-  loadAvatarCache();
   initPinSystem();
+  initEmojiPicker();
 });
 
 auth.onAuthStateChanged(async user=>{
@@ -2034,7 +2309,7 @@ auth.onAuthStateChanged(async user=>{
     bindPreviews();
     bindBlockedUsers();
     bindFriendsInChat();
-    bindHiddenMessages();
+    bindFriendRequests();
     bindMessageStatus();
     checkAllDataLoaded();
   }else{
@@ -2042,22 +2317,6 @@ auth.onAuthStateChanged(async user=>{
     splashScreen.classList.add('hidden');
   }
 });
-
-// Bind para mensagens ocultas
-function bindHiddenMessages() {
-  updateSplashStatus('Carregando mensagens ocultas...');
-  db.ref(`hiddenMessages/${me.uid}`).on('value', (snapshot) => {
-    hiddenMessages = snapshot.val() || {};
-    loadingState.hidden = true;
-    console.log('🙈 Mensagens ocultas carregadas:', Object.keys(hiddenMessages).length);
-    // Re-render messages in current chat if open
-    if (currentChat && msgListenerRef) {
-      messagesEl.innerHTML = '';
-      bindCurrentChat();
-    }
-    checkAllDataLoaded();
-  });
-}
 
 // Bind para amigos no chat
 function bindFriendsInChat() {
@@ -2067,6 +2326,28 @@ function bindFriendsInChat() {
     loadingState.friends = true;
     console.log('👥 Amigos no chat carregados:', friendsInChat);
     renderChatList();
+    renderFriendsList();
+    checkAllDataLoaded();
+  });
+}
+
+// Bind para pedidos de amizade
+function bindFriendRequests() {
+  updateSplashStatus('Carregando pedidos de amizade...');
+  
+  // Bind received requests
+  db.ref(`friendRequests/${me.uid}`).on('value', (snapshot) => {
+    receivedRequests = snapshot.val() || {};
+    console.log('📥 Pedidos recebidos:', receivedRequests);
+    renderFriendsList();
+    updateFriendRequestBadge();
+  });
+  
+  // Bind sent requests
+  db.ref(`sentRequests/${me.uid}`).on('value', (snapshot) => {
+    friendRequests = snapshot.val() || {};
+    loadingState.requests = true;
+    console.log('📤 Pedidos enviados:', friendRequests);
     renderFriendsList();
     checkAllDataLoaded();
   });
@@ -2184,7 +2465,7 @@ pFile.onchange = async (e)=>{
     const url = await uploadToImgBB(file);
     if(url){ 
       pAvatar.value = url;
-      loadAvatar(meAvatar, url, pName.value || meProfile?.name || "Usuário", me.uid);
+      loadAvatar(meAvatar, url, pName.value || meProfile?.name || "Usuário");
       showToast('Foto enviada com sucesso! 📸', 'success');
     }
   } catch(error) {
@@ -2227,12 +2508,6 @@ pSave.onclick = async ()=>{
     }).catch(()=>{});
     
     meProfile = {uid:me.uid, ...updates};
-    
-    // Cache the new avatar
-    if (avatar) {
-      cacheAvatar(me.uid, avatar);
-    }
-    
     renderMe();
     profileModal.style.display = "none";
     showToast("Perfil atualizado com sucesso!", 'success');
@@ -2272,12 +2547,6 @@ async function ensureProfile(){
     
     meProfile = profile;
     loadingState.profile = true;
-    
-    // Cache my avatar
-    if (profile.avatar) {
-      cacheAvatar(me.uid, profile.avatar);
-    }
-    
     renderMe();
     
     if(me.displayName !== profile.name || me.photoURL !== (profile.avatar||"")){
@@ -2305,9 +2574,9 @@ async function ensureProfile(){
 function renderMe(){
   if(!meProfile) return;
   
-  loadAvatar(meAvatar, meProfile.avatar, meProfile.name, me.uid);
+  loadAvatar(meAvatar, meProfile.avatar, meProfile.name);
   meName.textContent = meProfile.name || "Usuário";
-  meEmail.textContent = me.email || (me.isAnonymous ? "Conectado como Anônimo" : "—");
+  meEmail.textContent = me.email || (me.isAnonymous ? "Conectado como Anônimo" : "--");
   pName.value = meProfile.name || "";
   pAvatar.value = meProfile.avatar || "";
 }
@@ -2363,15 +2632,10 @@ function bindUsers(){
     usersCache = all;
     loadingState.users = true;
     console.log('👥 Usuários carregados:', Object.keys(all).length);
-    
-    // Cache all user avatars
-    Object.keys(all).forEach(uid => {
-      const user = all[uid];
-      if (user.avatar) {
-        cacheAvatar(uid, user.avatar);
-      }
-    });
-    
+    const arr = Object.keys(all)
+      .filter(uid=>uid!==me.uid)
+      .map(uid=>({uid, ...all[uid]}))
+      .filter(user => user.name && user.name !== "");
     renderChatList();
     renderFriendsList();
     checkAllDataLoaded();
@@ -2422,7 +2686,7 @@ function renderChatList() {
   });
   
   if (chatUsers.length === 0) {
-    chatList.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px">Nenhum amigo no chat ainda.<br>Adicione amigos na aba "Todos Amigos"</p>';
+    chatList.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px">Nenhum amigo no chat ainda.<br>Adicione amigos na aba "Adicionar Amigos"</p>';
     return;
   }
   
@@ -2434,7 +2698,7 @@ function renderChatList() {
   updateStatusIndicators();
 }
 
-// Render Friends List (all users with add/remove buttons)
+// Render Friends List (all users with add/remove/confirm buttons)
 function renderFriendsList() {
   friendsList.innerHTML = "";
   
@@ -2475,7 +2739,7 @@ function createUserListItem(user, container, listType) {
     e.stopPropagation();
     openAvatarViewer(user.avatar, user.name);
   };
-  loadAvatar(img, user.avatar, user.name, user.uid);
+  loadAvatar(img, user.avatar, user.name);
 
   const main = document.createElement("div");
   main.className = "u-main";
@@ -2514,30 +2778,64 @@ function createUserListItem(user, container, listType) {
     
     li.onclick = () => openChat(user.uid, user);
   } else {
-    // Friends list - show add/remove button
-    const actionBtn = document.createElement("button");
-    actionBtn.className = "friend-action";
-    
-    if (isFriendInChat(user.uid)) {
-      actionBtn.textContent = "Remover";
-      actionBtn.classList.add("remove");
-      actionBtn.onclick = (e) => {
-        e.stopPropagation();
-        removeFriendFromChat(user.uid);
-      };
-    } else {
-      actionBtn.textContent = "Adicionar";
-      actionBtn.onclick = (e) => {
-        e.stopPropagation();
-        addFriendToChat(user.uid);
-      };
-    }
-    
+    // Friends list - show different actions based on relationship status
     const dot = document.createElement("div");
     const userStatus = userStatusCache?.[user.uid];
     dot.className = "dot " + (userStatus?.state==="online" ? "online":"offline");
     
-    right.appendChild(actionBtn);
+    if (hasReceivedRequest(user.uid)) {
+      // Show accept/decline buttons for received requests
+      const actionsDiv = document.createElement("div");
+      actionsDiv.className = "request-actions";
+      
+      const acceptBtn = document.createElement("button");
+      acceptBtn.className = "request-btn accept";
+      acceptBtn.textContent = "Aceitar";
+      acceptBtn.onclick = (e) => {
+        e.stopPropagation();
+        acceptFriendRequest(user.uid);
+      };
+      
+      const declineBtn = document.createElement("button");
+      declineBtn.className = "request-btn decline";
+      declineBtn.textContent = "Recusar";
+      declineBtn.onclick = (e) => {
+        e.stopPropagation();
+        declineFriendRequest(user.uid);
+      };
+      
+      actionsDiv.appendChild(acceptBtn);
+      actionsDiv.appendChild(declineBtn);
+      right.appendChild(actionsDiv);
+    } else if (isFriendInChat(user.uid)) {
+      // Show remove button for existing friends
+      const actionBtn = document.createElement("button");
+      actionBtn.className = "friend-action remove";
+      actionBtn.textContent = "Remover";
+      actionBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeFriendFromChat(user.uid);
+      };
+      right.appendChild(actionBtn);
+    } else if (hasSentRequest(user.uid)) {
+      // Show pending status for sent requests
+      const actionBtn = document.createElement("button");
+      actionBtn.className = "friend-action pending";
+      actionBtn.textContent = "Pendente";
+      actionBtn.disabled = true;
+      right.appendChild(actionBtn);
+    } else {
+      // Show add button for new potential friends
+      const actionBtn = document.createElement("button");
+      actionBtn.className = "friend-action";
+      actionBtn.textContent = "Adicionar";
+      actionBtn.onclick = (e) => {
+        e.stopPropagation();
+        sendFriendRequest(user.uid);
+      };
+      right.appendChild(actionBtn);
+    }
+    
     right.appendChild(dot);
   }
 
@@ -2598,8 +2896,8 @@ let msgListenerRef = null;
 function openChat(uid, user){
   currentChat = uid;
   currentChatUser = user;
-  chatName.textContent = user.name || "—";
-  loadAvatar(chatAvatar, user.avatar, user.name, user.uid);
+  chatName.textContent = user.name || "--";
+  loadAvatar(chatAvatar, user.avatar, user.name);
   
   const st = userStatusCache?.[uid];
   chatDot.className = "dot " + (st?.state==="online" ? "online":"offline");
@@ -2613,30 +2911,22 @@ function openChat(uid, user){
   document.querySelector('.sidebar').classList.remove('active');
   document.querySelector('.chat').classList.add('active');
   
-  bindCurrentChat();
-  
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-function bindCurrentChat() {
   if(msgListenerRef) msgListenerRef.off();
-  const cid = chatId(me.uid, currentChat);
+  const cid = chatId(me.uid, uid);
   msgListenerRef = db.ref("chats/"+cid);
   msgListenerRef.off();
   msgListenerRef.limitToLast(200).on("child_added", snap=>{
     const m = snap.val();
-    
-    // Check if message is hidden for current user
-    if (!isMessageHidden(snap.key, cid)) {
-      appendMessage(m, snap.key);
-      if(m.from!==me.uid){ 
-        createNotificationSound(800, 0.2);
-        triggerAndroidNotification(); // Trigger Android notification
-        // Mark as delivered
-        updateMessageDeliveryStatus(snap.key);
-      }
+    appendMessage(m, snap.key);
+    if(m.from!==me.uid){ 
+      createNotificationSound(800, 0.2);
+      triggerAndroidNotification(); // Trigger Android notification
+      // Mark as delivered
+      updateMessageDeliveryStatus(snap.key);
     }
   });
+  
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 function updateMessageDeliveryStatus(messageId) {
@@ -2648,19 +2938,18 @@ function updateMessageDeliveryStatus(messageId) {
 function appendMessage(m, messageKey){
   const row = document.createElement("div");
   row.className = "row "+(m.from===me.uid?"out":"in");
-  row.dataset.messageId = m.id || messageKey;
-  row.dataset.messageKey = messageKey;
+  row.dataset.messageId = m.id || 'msg_' + Date.now();
   
   const messageAvatar = document.createElement("img");
   messageAvatar.className = "message-avatar";
   messageAvatar.alt = "Avatar";
   
   if(m.from === me.uid) {
-    loadAvatar(messageAvatar, meProfile?.avatar, meProfile?.name, me.uid);
+    loadAvatar(messageAvatar, meProfile?.avatar, meProfile?.name);
     messageAvatar.onclick = () => openAvatarViewer(meProfile?.avatar, meProfile?.name);
   } else {
     const senderData = usersCache[m.from] || currentChatUser;
-    loadAvatar(messageAvatar, senderData?.avatar, senderData?.name, m.from);
+    loadAvatar(messageAvatar, senderData?.avatar, senderData?.name);
     messageAvatar.onclick = () => openAvatarViewer(senderData?.avatar, senderData?.name);
   }
   
@@ -2669,32 +2958,46 @@ function appendMessage(m, messageKey){
   
   // Add delete button for own messages
   if (m.from === me.uid) {
+    const messageActions = document.createElement("div");
+    messageActions.className = "message-actions";
+    
     const deleteBtn = document.createElement("button");
-    deleteBtn.className = "message-delete";
+    deleteBtn.className = "delete-btn";
     deleteBtn.innerHTML = "×";
-    deleteBtn.title = "Remover mensagem";
+    deleteBtn.title = "Apagar mensagem";
     deleteBtn.onclick = (e) => {
       e.stopPropagation();
-      showConfirmDialog(
-        'Remover esta mensagem para você?<br><small>A mensagem só será removida para você.</small>',
-        () => {
-          // Add animation before hiding
-          row.classList.add('deleting');
-          setTimeout(() => {
-            const cid = chatId(me.uid, currentChat);
-            hideMessage(messageKey, cid);
-          }, 300);
-        }
-      );
+      showConfirmDialog("Tem certeza que deseja apagar esta mensagem?", () => {
+        deleteMessage(messageKey, m.id);
+      });
     };
-    messageWrapper.appendChild(deleteBtn);
+    
+    messageActions.appendChild(deleteBtn);
+    messageWrapper.appendChild(messageActions);
   }
   
   const bubble = document.createElement("div");
   bubble.className = "bubble";
   
   if(m.type==="text"){
-    bubble.innerHTML = linkify(m.text);
+    // Check if message is only emojis
+    const emojiText = m.text.trim();
+    const emojiRegex = /^[\p{Emoji}\s]+$/u;
+    const isOnlyEmojis = emojiRegex.test(emojiText) && emojiText.length > 0;
+    
+    if (isOnlyEmojis) {
+      const emojiCount = [...emojiText.replace(/\s/g, '')].length;
+      if (emojiCount === 1) {
+        bubble.classList.add('emoji-large');
+      } else if (emojiCount <= 3) {
+        bubble.classList.add('emoji-medium');
+      } else if (emojiCount <= 6) {
+        bubble.classList.add('emoji-small');
+      }
+    }
+    
+    // Use processTextMessage for regular text (preserves line breaks and linkifies)
+    bubble.innerHTML = processTextMessage(m.text);
   }else if(m.type==="image"){
     const img = document.createElement("img");
     img.className = "msg-img";
@@ -2705,36 +3008,12 @@ function appendMessage(m, messageKey){
     if(m.caption){
       const cap = document.createElement("div"); 
       cap.style.marginTop="6px"; 
-      cap.innerHTML = linkify(m.caption);
+      cap.innerHTML = processTextMessage(m.caption);
       bubble.appendChild(cap);
     }
-  }else if(m.type==="video"){
-    const processedUrl = processVideoUrl(m.url);
-    if(processedUrl){
-      // Check if it's a direct video file
-      if(m.url.match(/\.(mp4|webm|ogg)(\?.*)?$/i)){
-        const video = document.createElement("video");
-        video.className = "msg-video";
-        video.src = processedUrl;
-        video.controls = true;
-        video.preload = "metadata";
-        bubble.appendChild(video);
-      } else {
-        // Iframe for embedded videos
-        const iframe = document.createElement("iframe");
-        iframe.className = "msg-video";
-        iframe.src = processedUrl;
-        iframe.frameBorder = "0";
-        iframe.allowFullscreen = true;
-        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-        bubble.appendChild(iframe);
-      }
-    } else {
-      const errorDiv = document.createElement("div");
-      errorDiv.className = "video-error";
-      errorDiv.textContent = "❌ Vídeo não suportado";
-      bubble.appendChild(errorDiv);
-    }
+  }else if(m.type==="video-link"){
+    // Process video link to show player
+    bubble.innerHTML = processVideoPlayer(m.url);
   }
   
   const meta = document.createElement("div");
@@ -2760,12 +3039,9 @@ function appendMessage(m, messageKey){
 }
 
 btnSend.onclick = sendText;
-textInput.addEventListener("keydown", (e)=>{
-  if(e.key==="Enter" && !e.shiftKey){ 
-    e.preventDefault(); 
-    sendText(); 
-  }
-});
+
+// Removed automatic Enter sending - now only button sends messages
+// This allows users to create multi-line messages
 
 function sendText(){
   const txt = (textInput.value||"").trim();
@@ -2776,7 +3052,7 @@ function sendText(){
   createNotificationSound(600, 0.15);
 }
 
-btnImage.onclick = ()=> imageInput.click();
+// Image upload handler
 imageInput.onchange = async (e)=>{
   const file = e.target.files?.[0]; 
   if(!file || !currentChat) return;
@@ -2795,6 +3071,12 @@ imageInput.onchange = async (e)=>{
   }
 };
 
+// Auto resize textarea
+textInput.addEventListener('input', () => {
+  textInput.style.height = 'auto';
+  textInput.style.height = Math.min(textInput.scrollHeight, 120) + 'px';
+});
+
 function sendMessage(payload){
   const to = currentChat;
   const cid = chatId(me.uid, to);
@@ -2807,10 +3089,13 @@ function sendMessage(payload){
   updates[`/messageStatus/${me.uid}/${payload.id}`] = 'sent';
 
   let previewText;
-  if(payload.type==="text") previewText = payload.text;
-  else if(payload.type==="image") previewText = "🖼️ Imagem";
-  else if(payload.type==="video") previewText = "🎥 Vídeo";
-  else previewText = "Mensagem";
+  if (payload.type === "text") {
+    previewText = payload.text;
+  } else if (payload.type === "image") {
+    previewText = "🖼️ Imagem";
+  } else if (payload.type === "video-link") {
+    previewText = "🎥 Link de vídeo";
+  }
   
   const mePrev = { other: to, lastText: previewText, lastTime: m.time };
   const toPrev = { other: me.uid, lastText: previewText, lastTime: m.time };
@@ -2837,7 +3122,7 @@ viewerClose.onclick = ()=>{
   viewerImg.src=""; 
 };
 
-[profileModal, blockedModal, videoModal].forEach(modal => {
+[profileModal, blockedModal].forEach(modal => {
   modal.onclick = (e) => {
     if (e.target === modal) {
       modal.style.display = "none";
