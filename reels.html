@@ -86,12 +86,16 @@ a{color:inherit;text-decoration:none}
 .svp-avatar{
   width:36px;height:36px;border-radius:50%;background:#ddd;flex:0 0 36px;
   background-size:cover;background-position:center;border:2px solid var(--svp-border);
+  cursor:pointer;transition:transform .2s;
 }
+.svp-avatar:hover{transform:scale(1.05)}
 .svp-title{
   font-weight:600;line-height:1.25;margin:0 0 .15rem;font-size:.95rem;color:var(--svp-text);
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
 }
 .svp-sub{color:var(--svp-sub);font-size:.85rem;display:flex;align-items:center;gap:.25rem}
+.svp-author-name{cursor:pointer;transition:color .2s;}
+.svp-author-name:hover{color:var(--svp-accent);}
 
 .svp-actions{display:flex;align-items:center;gap:.75rem;margin-top:.4rem}
 .svp-action{
@@ -124,6 +128,28 @@ a{color:inherit;text-decoration:none}
 
 .svp-mylist{margin-top:1rem}
 .svp-empty{color:var(--svp-sub);text-align:center;padding:1rem}
+
+/* Perfil de usuário */
+.svp-profile{padding:1rem;height:100%;overflow-y:auto}
+.svp-profile-header{
+  background:var(--svp-card);border:1px solid var(--svp-border);border-radius:12px;
+  padding:1.5rem;margin-bottom:1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.1);
+}
+.svp-profile-avatar{
+  width:80px;height:80px;border-radius:50%;margin:0 auto 1rem;
+  background-size:cover;background-position:center;border:3px solid var(--svp-border);
+}
+.svp-profile-name{font-size:1.5rem;font-weight:700;margin-bottom:.5rem}
+.svp-profile-stats{display:flex;justify-content:center;gap:2rem;margin-top:1rem}
+.svp-stat{text-align:center}
+.svp-stat-number{font-size:1.25rem;font-weight:700;color:var(--svp-accent)}
+.svp-stat-label{font-size:.85rem;color:var(--svp-sub)}
+.svp-profile-back{
+  background:var(--svp-chip);color:var(--svp-text);border:1px solid var(--svp-border);
+  padding:.5rem 1rem;border-radius:20px;margin-bottom:1rem;display:inline-flex;
+  align-items:center;gap:.5rem;cursor:pointer;transition:background .2s;
+}
+.svp-profile-back:hover{background:var(--svp-hover)}
 
 /* Player Overlay - Tela Cheia Consistente */
 .svp-overlay {
@@ -593,6 +619,7 @@ a{color:inherit;text-decoration:none}
       <div class="svp-nav-btns">
         <button class="svp-nav-btn is-active" data-tab="explore">Explorar</button>
         <button class="svp-nav-btn" data-tab="studio">Estúdio</button>
+        <button class="svp-nav-btn" data-tab="profile" style="display:none;" id="profile-tab">Perfil</button>
       </div>
     </div>
     <div class="svp-cats" id="svp-cats"></div>
@@ -618,9 +645,9 @@ a{color:inherit;text-decoration:none}
             <select class="svp-select" id="svp-category"></select>
           </div>
           <div class="svp-row">
-            <label for="svp-url">URL do vídeo (YouTube, Facebook público ou MP4)</label>
+            <label for="svp-url">URL do vídeo (qualquer link de vídeo)</label>
             <input class="svp-input" id="svp-url" type="url" placeholder="https://..." />
-            <div class="svp-hint">Dica: YouTube e Facebook público usam embed; links diretos usam player nativo.</div>
+            <div class="svp-hint">Suporta: YouTube, Facebook, TikTok, Vimeo, Dailymotion, MP4, WebM e mais!</div>
           </div>
           <div class="svp-row">
             <label for="svp-cover">Capa (opcional via ImgBB)</label>
@@ -636,6 +663,37 @@ a{color:inherit;text-decoration:none}
           <h3>Meus vídeos</h3>
           <div id="svp-myfeed"></div>
         </div>
+      </div>
+    </section>
+
+    <!-- Página Perfil do Usuário -->
+    <section class="svp-page" id="svp-page-profile">
+      <div class="svp-profile">
+        <button class="svp-profile-back" id="svp-profile-back">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          Voltar
+        </button>
+        
+        <div class="svp-profile-header">
+          <div class="svp-profile-avatar" id="svp-profile-avatar"></div>
+          <div class="svp-profile-name" id="svp-profile-name">Usuário</div>
+          <div class="svp-profile-stats">
+            <div class="svp-stat">
+              <div class="svp-stat-number" id="svp-profile-videos">0</div>
+              <div class="svp-stat-label">Vídeos</div>
+            </div>
+            <div class="svp-stat">
+              <div class="svp-stat-number" id="svp-profile-likes">0</div>
+              <div class="svp-stat-label">Curtidas</div>
+            </div>
+            <div class="svp-stat">
+              <div class="svp-stat-number" id="svp-profile-views">0</div>
+              <div class="svp-stat-label">Visualizações</div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="svp-profile-videos-list" class="svp-grid"></div>
       </div>
     </section>
   </main>
@@ -777,7 +835,8 @@ const state = {
   cat: "Todos",
   cats: ["Todos","Música","Notícias","Esportes","Entretenimento","Educação","Comédia","Tecnologia","Gaming"],
   originalContainer: null,
-  isFullscreen: false
+  isFullscreen: false,
+  currentProfile: null
 };
 
 /* ===== Util: SVGs inline ===== */
@@ -811,18 +870,62 @@ function isVideoVisible(video, user) {
   return reportCount < 10;
 }
 
-/* YouTube/Facebook parsing */
-function parseYouTubeId(url){
-  try{
-    const u=new URL(url);
-    if(u.hostname.includes("youtu.be")) return u.pathname.slice(1);
-    if(u.searchParams.get("v")) return u.searchParams.get("v");
-    if(u.pathname.includes("/shorts/")) return u.pathname.split("/shorts/")[1].split("?")[0];
-  }catch(e){}
-  const m = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/);
-  return m?m[1]:null;
+/* Video parsing - Suporte universal */
+function parseVideoId(url) {
+  try {
+    const u = new URL(url);
+    
+    // YouTube
+    if (u.hostname.includes("youtu.be")) return { type: 'youtube', id: u.pathname.slice(1) };
+    if (u.hostname.includes("youtube.com")) {
+      if (u.searchParams.get("v")) return { type: 'youtube', id: u.searchParams.get("v") };
+      if (u.pathname.includes("/shorts/")) return { type: 'youtube', id: u.pathname.split("/shorts/")[1].split("?")[0] };
+      if (u.pathname.includes("/embed/")) return { type: 'youtube', id: u.pathname.split("/embed/")[1].split("?")[0] };
+    }
+    
+    // Vimeo
+    if (u.hostname.includes("vimeo.com")) {
+      const vimeoId = u.pathname.split('/').pop();
+      return { type: 'vimeo', id: vimeoId };
+    }
+    
+    // TikTok
+    if (u.hostname.includes("tiktok.com")) {
+      return { type: 'tiktok', url: url };
+    }
+    
+    // Dailymotion
+    if (u.hostname.includes("dailymotion.com")) {
+      const dmMatch = url.match(/dailymotion\.com\/video\/([^_?]+)/);
+      if (dmMatch) return { type: 'dailymotion', id: dmMatch[1] };
+    }
+    
+    // Facebook
+    if (u.hostname.includes("facebook.com") || u.hostname.includes("fb.watch")) {
+      return { type: 'facebook', url: url };
+    }
+    
+    // Twitch
+    if (u.hostname.includes("twitch.tv")) {
+      return { type: 'twitch', url: url };
+    }
+    
+    // Arquivo de vídeo direto
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv', '.m4v'];
+    const hasVideoExt = videoExtensions.some(ext => url.toLowerCase().includes(ext));
+    if (hasVideoExt) {
+      return { type: 'direct', url: url };
+    }
+    
+    // Default: tentar como iframe genérico
+    return { type: 'generic', url: url };
+    
+  } catch (e) {
+    return { type: 'direct', url: url };
+  }
 }
-function isFacebookUrl(url){ return /facebook\.com/.test(url) }
+
+function isFacebookUrl(url){ return /facebook\.com|fb\.watch/.test(url) }
 
 /* ImgBB upload */
 async function uploadToImgBB(file){
@@ -903,11 +1006,25 @@ function renderMyFeed(){
   el.innerHTML = my.length ? my.map(cardHTML).join("") : `<div class="svp-empty">Você ainda não publicou vídeos.</div>`;
 }
 
+function renderProfileFeed(userId) {
+  const userVideos = state.videos.filter(v => v.authorId === userId && isVideoVisible(v, state.user)).sort(byDateDesc);
+  const el = $("#svp-profile-videos-list");
+  el.innerHTML = userVideos.length ? userVideos.map(cardHTML).join("") : `<div class="svp-empty">Este usuário ainda não publicou vídeos.</div>`;
+  
+  // Atualizar estatísticas
+  const totalLikes = userVideos.reduce((sum, v) => sum + (v.likesCount || 0), 0);
+  const totalViews = userVideos.reduce((sum, v) => sum + (v.views || 0), 0);
+  
+  $("#svp-profile-videos").textContent = userVideos.length;
+  $("#svp-profile-likes").textContent = totalLikes;
+  $("#svp-profile-views").textContent = totalViews;
+}
+
 /* Card HTML */
 function cardHTML(v){
   const cover = v.coverUrl || thumbFromVideo(v);
-  const youId = parseYouTubeId(v.url);
-  const durationBadge = youId ? "YouTube" : (isFacebookUrl(v.url) ? "Facebook" : "Vídeo");
+  const videoInfo = parseVideoId(v.url);
+  const durationBadge = getDurationBadge(videoInfo);
   const liked = !!(v.likesBy && state.user && v.likesBy[state.user.uid]);
   const authorAvatar = getAuthorAvatar(v.authorId, v.authorPhotoURL);
   
@@ -925,10 +1042,12 @@ function cardHTML(v){
       ${reportBadge}
     </div>
     <div class="svp-meta">
-      <div class="svp-avatar" style="background-image:url('${authorAvatar}')"></div>
+      <div class="svp-avatar" style="background-image:url('${authorAvatar}')" data-action="profile" data-author-id="${v.authorId}" data-author-name="${escapeHtml(v.authorName||'')}" data-author-photo="${v.authorPhotoURL||''}"></div>
       <div class="svp-info">
         <h4 class="svp-title">${escapeHtml(v.title)}</h4>
-        <div class="svp-sub">${escapeHtml(v.authorName||"")} • ${escapeHtml(v.category||"")} • ${Icons.views} ${v.views||0}</div>
+        <div class="svp-sub">
+          <span class="svp-author-name" data-action="profile" data-author-id="${v.authorId}" data-author-name="${escapeHtml(v.authorName||'')}" data-author-photo="${v.authorPhotoURL||''}">${escapeHtml(v.authorName||"")}</span> • ${escapeHtml(v.category||"")} • ${Icons.views} ${v.views||0}
+        </div>
         <div class="svp-actions">
           <button class="svp-action ${liked?"is-like":""}" data-action="like" data-id="${v.id}" aria-label="Curtir">
             ${liked?Icons.liked:Icons.like} <span>${(v.likesCount||0)}</span>
@@ -943,14 +1062,64 @@ function cardHTML(v){
   `;
 }
 
+function getDurationBadge(videoInfo) {
+  switch(videoInfo.type) {
+    case 'youtube': return 'YouTube';
+    case 'vimeo': return 'Vimeo';
+    case 'tiktok': return 'TikTok';
+    case 'dailymotion': return 'Dailymotion';
+    case 'facebook': return 'Facebook';
+    case 'twitch': return 'Twitch';
+    case 'direct': return 'Vídeo';
+    default: return 'Vídeo';
+  }
+}
+
 function thumbFromVideo(v){
-  const youId = parseYouTubeId(v.url);
-  if(youId) return `https://i.ytimg.com/vi/${youId}/hqdefault.jpg`;
-  if(isFacebookUrl(v.url)) return "https://static.xx.fbcdn.net/rsrc.php/yV/r/B8q7QmN8QSh.svg";
-  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'><rect width='100%' height='100%' fill='#ddd'/><polygon points='260,180 260,120 340,150' fill='#666'/></svg>`);
+  const videoInfo = parseVideoId(v.url);
+  
+  switch(videoInfo.type) {
+    case 'youtube':
+      return `https://i.ytimg.com/vi/${videoInfo.id}/hqdefault.jpg`;
+    case 'vimeo':
+      return `https://vumbnail.com/${videoInfo.id}.jpg`;
+    case 'dailymotion':
+      return `https://www.dailymotion.com/thumbnail/video/${videoInfo.id}`;
+    case 'facebook':
+      return "https://static.xx.fbcdn.net/rsrc.php/yV/r/B8q7QmN8QSh.svg";
+    default:
+      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'><rect width='100%' height='100%' fill='#ddd'/><polygon points='260,180 260,120 340,150' fill='#666'/></svg>`);
+  }
 }
 
 function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m]))}
+
+/* ===== Profile functions ===== */
+function openProfile(authorId, authorName, authorPhotoURL) {
+  state.currentProfile = { authorId, authorName, authorPhotoURL };
+  
+  // Atualizar header do perfil
+  const avatar = getAuthorAvatar(authorId, authorPhotoURL);
+  $("#svp-profile-avatar").style.backgroundImage = `url('${avatar}')`;
+  $("#svp-profile-name").textContent = authorName || "Usuário";
+  
+  // Renderizar vídeos do usuário
+  renderProfileFeed(authorId);
+  
+  // Mostrar aba do perfil e ativá-la
+  $("#profile-tab").style.display = "block";
+  $$(".svp-nav-btn").forEach(b => b.classList.toggle("is-active", b.dataset.tab === "profile"));
+  $$(".svp-page").forEach(p => p.classList.toggle("is-active", p.id === "svp-page-profile"));
+}
+
+function closeProfile() {
+  state.currentProfile = null;
+  $("#profile-tab").style.display = "none";
+  
+  // Voltar para explorar
+  $$(".svp-nav-btn").forEach(b => b.classList.toggle("is-active", b.dataset.tab === "explore"));
+  $$(".svp-page").forEach(p => p.classList.toggle("is-active", p.id === "svp-page-explore"));
+}
 
 /* ===== Player Overlay ===== */
 let currentVideo = null;
@@ -985,25 +1154,39 @@ function closePlayer(){
 }
 
 function buildPlayerHTML(v){
-  const youId = parseYouTubeId(v.url);
-  if(youId){
-    const src = `https://www.youtube.com/embed/${youId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`;
-    return `<iframe 
-  id="video-iframe"
-  src="${src}"
-  frameborder="0"
-  allow="autoplay; encrypted-media; picture-in-picture"
-  allowfullscreen></iframe>`;}
-  if(isFacebookUrl(v.url)){
-    const enc = encodeURIComponent(v.url);
-    const src = `https://www.facebook.com/plugins/video.php?href=${enc}&show_text=false&autoplay=true`;
-    return `<iframe
-  id="video-iframe"
-  src="${src}"
-  frameborder="0"
-  allow="autoplay; encrypted-media; picture-in-picture"
-  allowfullscreen></iframe>`;  }
-  return `<video id="video-iframe" src="${v.url}" controls autoplay playsinline></video>`;
+  const videoInfo = parseVideoId(v.url);
+  
+  switch(videoInfo.type) {
+    case 'youtube':
+      const ytSrc = `https://www.youtube.com/embed/${videoInfo.id}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3`;
+      return `<iframe id="video-iframe" src="${ytSrc}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+      
+    case 'vimeo':
+      const vimeoSrc = `https://player.vimeo.com/video/${videoInfo.id}?autoplay=1`;
+      return `<iframe id="video-iframe" src="${vimeoSrc}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+      
+    case 'dailymotion':
+      const dmSrc = `https://www.dailymotion.com/embed/video/${videoInfo.id}?autoplay=1`;
+      return `<iframe id="video-iframe" src="${dmSrc}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      
+    case 'facebook':
+      const fbSrc = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(videoInfo.url)}&show_text=false&autoplay=true`;
+      return `<iframe id="video-iframe" src="${fbSrc}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+      
+    case 'tiktok':
+      // TikTok embed é complexo, vamos usar iframe genérico
+      return `<iframe id="video-iframe" src="${videoInfo.url}" frameborder="0" allowfullscreen></iframe>`;
+      
+    case 'twitch':
+      return `<iframe id="video-iframe" src="${videoInfo.url}" frameborder="0" allowfullscreen></iframe>`;
+      
+    case 'direct':
+      return `<video id="video-iframe" src="${videoInfo.url}" controls autoplay playsinline></video>`;
+      
+    default:
+      // Tentar iframe genérico para outros casos
+      return `<iframe id="video-iframe" src="${videoInfo.url}" frameborder="0" allowfullscreen></iframe>`;
+  }
 }
 
 function updatePlayerLikeButton(v){
@@ -1237,12 +1420,16 @@ $("#svp-clear-btn").addEventListener("click", ()=>{
   renderFeed();
 });
 
+// Profile events
+$("#svp-profile-back").addEventListener("click", closeProfile);
+
 document.body.addEventListener("click",(e)=>{
   const open = e.target.closest('[data-action="open"]');
   const openRelated = e.target.closest('[data-action="open-related"]');
   const like = e.target.closest('[data-action="like"]');
   const del = e.target.closest('[data-action="delete"]');
   const delComment = e.target.closest('[data-action="delete-comment"]');
+  const profile = e.target.closest('[data-action="profile"]');
 
   if(open){
     const id = open.dataset.id;
@@ -1270,6 +1457,12 @@ document.body.addEventListener("click",(e)=>{
     const commentId = delComment.dataset.commentId;
     const videoId = delComment.dataset.videoId;
     deleteComment(commentId, videoId);
+  }
+  if(profile){
+    const authorId = profile.dataset.authorId;
+    const authorName = profile.dataset.authorName;
+    const authorPhoto = profile.dataset.authorPhoto;
+    openProfile(authorId, authorName, authorPhoto);
   }
 });
 
@@ -1498,6 +1691,11 @@ onValue(ref(db, "videos"), snap=>{
   state.videos = items;
   renderFeed();
   renderMyFeed();
+  
+  // Atualizar perfil se estiver aberto
+  if (state.currentProfile) {
+    renderProfileFeed(state.currentProfile.authorId);
+  }
   
   if(currentVideo){
     const updatedVideo = items.find(v => v.id === currentVideo.id);
