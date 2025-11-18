@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brevemente — Ideias que viram apps</title>
+  <meta name="description" content="Brevemente: novos aplicativos originais e mods autorizados, compra e venda de apps, projetos e sites. Cada ideia merece valor." />
+  <style>
+    :root{
+      --bg:#0b0f14; --card:#121822; --muted:#8aa0b8; --text:#eaf0ff; --accent:#5ad1ff; --accent2:#65f1a5; --border:#1e2a3a;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; color:var(--text);
+      background:radial-gradient(1200px 600px at 20% -10%, #152035 0%, var(--bg) 40%, #0a0d12 100%);}
+    .wrap{max-width:880px; margin:0 auto; padding:24px}
+    header{display:flex; justify-content:space-between; align-items:center; gap:12px}
+    .brand{display:flex; align-items:center; gap:10px; font-weight:700}
+    .logo{width:30px; height:30px; border-radius:8px; background:conic-gradient(from 210deg, var(--accent), var(--accent2), #8aa2ff, var(--accent));
+      border:1px solid rgba(255,255,255,.12); box-shadow:0 4px 16px rgba(90,209,255,.25)}
+    .badge{font-size:12px; padding:4px 8px; border:1px solid var(--border); border-radius:999px; color:var(--muted)}
+    .card{margin-top:16px; padding:20px; background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--border); border-radius:14px}
+    h1{margin:0 0 8px; font-size:28px}
+    p{margin:8px 0; color:var(--muted)}
+    .list{display:grid; gap:10px; margin:12px 0}
+    .item{padding:12px; border:1px solid var(--border); border-radius:12px; background:#0f1622}
+    .item b{color:#cfe3ff}
+    .cta{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap}
+    .btn{padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:#172233; color:var(--text); font-weight:600; cursor:pointer}
+    .btn-primary{background:linear-gradient(180deg, #1e2e47, #1a2940); border-color:#254062}
+    small{color:var(--muted)}
+    footer{margin:18px 0 6px; color:var(--muted); font-size:12px; display:flex; justify-content:space-between; align-items:center}
+    @media (max-width:560px){h1{font-size:24px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>Nova Loja <span class="badge">Brevemente</span></div>
+      </div>
+      <div class="badge">Versão pré-lançamento</div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h1>Brevemente: novos apps, projetos e ideias valorizadas</h1>
+        <p>Uma plataforma simples para lançar e descobrir aplicativos, projetos e sites. Aqui, cada usuário é reconhecido pelo valor de sua ideia.</p>
+
+        <div class="list">
+          <div class="item"><b>Apps originais e mods autorizados</b><br>Catálogo com aplicativos inéditos e mods legais, com fontes e atualizações transparentes.</div>
+          <div class="item"><b>Comprar e vender</b><br>Marketplace para vender e comprar aplicativos, projetos e sites com segurança e clareza.</div>
+          <div class="item"><b>Valorização de ideias</b><br>Perfis de criadores, atribuição justa e formas de apoio para quem constrói.</div>
+        </div>
+
+        <div class="cta">
+          <button class="btn btn-primary" id="notify">Quero ser avisado</button>
+          <button class="btn" id="more">Saiba mais</button>
+        </div>
+
+        <div id="note" class="item" style="display:none; margin-top:12px">
+          Função na versão futura: painel de submissão, verificação de mods, contratos simples de compra e venda, e vitrine personalizada por criador.
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 style="margin:0 0 6px; font-size:20px">Assine para ser avisado</h2>
+        <form id="form" style="display:grid; grid-template-columns:1fr auto; gap:10px" novalidate>
+          <input type="email" id="email" placeholder="Seu e-mail" aria-label="Seu e-mail"
+            style="padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:#0e1520; color:var(--text)" />
+          <button class="btn btn-primary" type="submit">Assinar</button>
+        </form>
+        <small id="status" style="display:none; margin-top:8px"></small>
+      </section>
+    </main>
+
+    <footer>
+      <div>© 2025 Nova Loja</div>
+      <div>Estado: brevemente · Versão futura: marketplace & painel</div>
+    </footer>
+  </div>
+
+  <script>
+    const q = s => document.querySelector(s);
+    q('#notify').addEventListener('click', () => {
+      const note = q('#note'); note.style.display = '';
+      note.setAttribute('role','status');
+    });
+    q('#more').addEventListener('click', () => {
+      const note = q('#note'); note.style.display = '';
+      note.textContent = 'Em construção: catálogo de apps originais e mods autorizados, marketplace seguro e valorização de criadores.';
+    });
+
+    q('#form').addEventListener('submit', e => {
+      e.preventDefault();
+      const email = q('#email').value.trim();
+      const status = q('#status');
+      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      status.style.display = '';
+      status.textContent = ok ? 'Inscrição registrada (demo). Você será avisado no lançamento.' : 'E-mail inválido. Tente novamente.';
+      status.style.color = ok ? '#65f1a5' : '#ff6b6b';
+      if(ok) setTimeout(() => { status.style.display = 'none'; q('#email').value = ''; }, 3500);
+    });
+  </script>
+</body>
+</html>
