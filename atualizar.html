@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atualização Disponível - Cine Plus AO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-red: #e50914;
+      --dark-red: #b20710;
+      --deep-black: #0a0a0a;
+      --card-bg: #1a1a1a;
+      --text-gray: #b3b3b3;
+      --gold: #ffd700;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--deep-black);
+      color: #fff;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Animated background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(229, 9, 20, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(229, 9, 20, 0.1) 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a0a 0%, #1a0505 100%);
+      overflow: hidden;
+    }
+
+    .bg-animation::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(229, 9, 20, 0.03) 2px, rgba(229, 9, 20, 0.03) 4px);
+      animation: scan 8s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(50%); }
+    }
+
+    /* Film strip effect */
+    .film-strip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 30px;
+      height: 100%;
+      background: linear-gradient(to bottom,
+        var(--card-bg) 0%, var(--card-bg) 8%,
+        transparent 8%, transparent 12%,
+        var(--card-bg) 12%, var(--card-bg) 20%,
+        transparent 20%, transparent 24%);
+      background-size: 100% 50px;
+      opacity: 0.4;
+      z-index: 1;
+    }
+
+    .film-strip.right {
+      left: auto;
+      right: 0;
+    }
+
+    /* Main container */
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 700;
+      letter-spacing: 4px;
+      background: linear-gradient(135deg, var(--primary-red) 0%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      text-shadow: 0 0 30px rgba(229, 9, 20, 0.5);
+    }
+
+    .version-badge {
+      display: inline-block;
+      background: rgba(255, 215, 0, 0.2);
+      border: 2px solid var(--gold);
+      color: var(--gold);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-top: 10px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+
+    /* Update card */
+    .update-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(229, 9, 20, 0.3);
+      max-width: 600px;
+      width: 100%;
+      animation: fadeInUp 0.8s ease-out 0.2s backwards;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .update-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(229, 9, 20, 0.1), transparent);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .update-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      font-weight: 700;
+      color: var(--primary-red);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .update-subtitle {
+      color: var(--text-gray);
+      font-size: 16px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .version-info {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      gap: 20px;
+    }
+
+    .version-box {
+      flex: 1;
+      text-align: center;
+      padding: 20px;
+      background: rgba(229, 9, 20, 0.1);
+      border-radius: 12px;
+      border: 1px solid rgba(229, 9, 20, 0.3);
+    }
+
+    .version-label {
+      font-size: 12px;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .version-number {
+      font-family: 'Oswald', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Features list */
+    .features {
+      margin-bottom: 30px;
+    }
+
+    .features-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+      animation: fadeInLeft 0.6s ease-out backwards;
+    }
+
+    .feature-item:nth-child(1) { animation-delay: 0.4s; }
+    .feature-item:nth-child(2) { animation-delay: 0.5s; }
+    .feature-item:nth-child(3) { animation-delay: 0.6s; }
+    .feature-item:nth-child(4) { animation-delay: 0.7s; }
+    .feature-item:nth-child(5) { animation-delay: 0.8s; }
+
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--primary-red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .feature-text {
+      color: var(--text-gray);
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    /* Download button */
+    .btn-download {
+      display: block;
+      width: 100%;
+      padding: 18px 32px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-red) 100%);
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out 0.9s backwards;
+    }
+
+    .btn-download::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-download:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(229, 9, 20, 0.6);
+    }
+
+    .btn-download:active {
+      transform: translateY(0);
+    }
+
+    .btn-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--text-gray);
+      font-size: 14px;
+      animation: fadeIn 1s ease-out 1s backwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .footer-icon {
+      display: inline-block;
+      margin: 0 4px;
+      color: var(--primary-red);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 16px;
+      }
+
+      .update-card {
+        padding: 30px 20px;
+      }
+
+      .version-info {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .film-strip {
+        width: 20px;
+      }
+
+      .feature-item {
+        font-size: 14px;
+      }
+    }
+
+    /* Loading indicator on button */
+    .btn-download.downloading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .btn-download.downloading .btn-text::after {
+      content: '...';
+      animation: dots 1.5s infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background animation -->
+  <div class="bg-animation"></div>
+
+  <!-- Film strip decorations -->
+  <div class="film-strip"></div>
+  <div class="film-strip right"></div>
+
+  <!-- Main container -->
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="logo">CINE PLUS AO</h1>
+      <div class="version-badge">ATUALIZAÇÃO DISPONÍVEL</div>
+    </div>
+
+    <!-- Update card -->
+    <div class="update-card">
+      <h2 class="update-title">Nova Versão Disponível!</h2>
+      <p class="update-subtitle">
+        Atualize agora para aproveitar as últimas melhorias, novos recursos e correções de bugs.
+      </p>
+
+      <!-- Version comparison -->
+      <div class="version-info">
+        <div class="version-box">
+          <div class="version-label">Versão Atual</div>
+          <div class="version-number">2.0.0</div>
+        </div>
+        <div class="version-box">
+          <div class="version-label">Nova Versão</div>
+          <div class="version-number">2.1.0</div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="features">
+        <h3 class="features-title">🎬 Novidades desta versão</h3>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <div class="feature-text">Interface completamente renovada com modo cinema</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <div class="feature-text">Streaming em qualidade HD</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <div class="feature-text">Agora possui modo visitante e modo publicador</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <div class="feature-text">Download offline para assistir sem internet</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <div class="feature-text">Correções de bugs e melhorias de desempenho</div>
+        </div>
+      </div>
+
+      <!-- Download button -->
+      <a class="btn-download" onclick="window.location.href='https://www.mediafire.com/file/i5nfn1vtiplwo3n/Cine+Plus+AO+2.1.apk/file'" id="downloadBtn">
+        <span class="btn-text">Baixar Atualização</span>
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Cine Plus AO <span class="footer-icon">★</span> 2025</p>
+      <p style="font-size: 12px; margin-top: 8px; opacity: 0.7;">
+        Seus filmes e séries favoritos em um só lugar
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Add click effect to download button
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    downloadBtn.addEventListener('click', function(e) {
+      // Add downloading state
+      this.classList.add('downloading');
+
+      // Remove after animation
+      setTimeout(() => {
+        this.classList.remove('downloading');
+      }, 2000);
+    });
+
+    // Create floating particles effect
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.style.cssText = `
+        position: fixed;
+        width: 2px;
+        height: 2px;
+        background: rgba(229, 9, 20, 0.5);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1;
+        animation: float 4s linear;
+      `;
+
+      particle.style.left = Math.random() * 100 + 'vw';
+      particle.style.top = '100vh';
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes float {
+          to {
+            transform: translateY(-100vh) translateX(${(Math.random() - 0.5) * 100}px);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      document.body.appendChild(particle);
+
+      setTimeout(() => {
+        particle.remove();
+        style.remove();
+      }, 4000);
+    }
+
+    // Generate particles periodically
+    setInterval(createParticle, 800);
+  </script>
+   <script>
+    function openExternal() {
+      var currentUrl = window.location.href;
+      // Chama a interface Java exposta no WebView
+      AT.openInBrowser(currentUrl);
+    }
+
+    // Ao carregar a página, espera 1 segundo e aciona automaticamente
+    window.onload = function() {
+      setTimeout(function() {
+        openExternal();
+      }, 1000); // 1000 ms = 1 segundo
+    };
+  </script>
+</body>
+</html>
+
