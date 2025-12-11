@@ -2834,21 +2834,32 @@
 
     // Send Notification Modal
     async function openSendNotificationModal() {
+      console.log('openSendNotificationModal chamado');
+      console.log('isPublisher:', isPublisher);
+
       if (!isPublisher) {
         showCustomAlert('Apenas publicadores podem enviar notificações.');
         return;
       }
 
-      // Count total tokens
-      const { ref, get } = window.firebaseModules;
-      const database = window.firebaseDatabase;
-      const tokensRef = ref(database, 'fcmTokens');
-      const snapshot = await get(tokensRef);
+      try {
+        // Count total tokens
+        const { ref, get } = window.firebaseModules;
+        const database = window.firebaseDatabase;
+        const tokensRef = ref(database, 'fcmTokens');
+        const snapshot = await get(tokensRef);
 
-      const totalTokens = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-      document.getElementById('totalTokensCount').textContent = totalTokens;
+        const totalTokens = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+        console.log('Total de tokens:', totalTokens);
 
-      document.getElementById('sendNotificationModal').classList.add('active');
+        document.getElementById('totalTokensCount').textContent = totalTokens;
+        document.getElementById('sendNotificationModal').classList.add('active');
+
+        console.log('Modal aberto com sucesso');
+      } catch (error) {
+        console.error('Erro ao abrir modal:', error);
+        showCustomAlert('Erro ao abrir modal: ' + error.message);
+      }
     }
 
     function closeSendNotificationModal() {
@@ -2859,6 +2870,7 @@
     // Handle Send Notification
     async function handleSendNotification(e) {
       e.preventDefault();
+      console.log('handleSendNotification chamado');
 
       if (!isPublisher) {
         showCustomAlert('Apenas publicadores podem enviar notificações.');
@@ -2868,6 +2880,8 @@
       const title = document.getElementById('notificationTitle').value;
       const body = document.getElementById('notificationBody').value;
       const link = document.getElementById('notificationLink').value;
+
+      console.log('Dados da notificação:', { title, body, link });
 
       try {
         const { ref, get, push, set } = window.firebaseModules;
@@ -2885,6 +2899,8 @@
         const tokens = snapshot.val();
         const tokenList = Object.values(tokens).map(t => t.token);
 
+        console.log('Tokens encontrados:', tokenList.length);
+
         // Save notification to database for Cloud Function to process
         const notificationData = {
           title: title,
@@ -2898,9 +2914,13 @@
           totalDevices: tokenList.length
         };
 
+        console.log('Salvando notificação no banco...');
+
         const notificationsRef = ref(database, 'notifications');
         const newNotificationRef = push(notificationsRef);
         await set(newNotificationRef, notificationData);
+
+        console.log('Notificação salva com sucesso!');
 
         closeSendNotificationModal();
         showCustomAlert(`Notificação enviada com sucesso para ${tokenList.length} dispositivo(s)!\n\nNota: As notificações serão processadas pelo servidor. Configure Firebase Cloud Functions para envio automático.`);
@@ -2974,4 +2994,5 @@
   </script>
 </body>
 </html>
+
 
