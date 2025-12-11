@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Game Plus AO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getDatabase, ref, set, get, update, remove, onValue, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCUh73zCleTz-_CqFiS2FkO3JWAG1pnoPw",
+      authDomain: "cineplusao-e5002.firebaseapp.com",
+      databaseURL: "https://cineplusao-e5002-default-rtdb.firebaseio.com",
+      projectId: "cineplusao-e5002",
+      storageBucket: "cineplusao-e5002.firebasestorage.app",
+      messagingSenderId: "53442432876",
+      appId: "1:53442432876:web:0335e80b24e6c3db06ad49",
+      measurementId: "G-LK7KWM9RBH"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    window.firebaseApp = app;
+    window.firebaseAuth = auth;
+    window.firebaseDatabase = database;
+    window.firebaseModules = {
+      signInWithEmailAndPassword,
+      onAuthStateChanged,
+      signOut,
+      ref,
+      set,
+      get,
+      update,
+      remove,
+      onValue,
+      push
+    };
+  </script>
+
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #141414;
+      --bg-card: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --text-muted: #666666;
+      --accent: #ffffff;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      line-height: 1.6;
+      opacity: 0;
+      animation: fadeInBody 0.6s ease forwards;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes fadeInBody {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .header {
+      background: #0f0f0f;
+      color: #e6e8ee;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 12px 16px;
+      gap: 12px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .app-name {
+      font-size: 14px;
+      font-weight: bold;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 1px;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 260px;
+      height: 100%;
+      background: #0f0f0f;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.5);
+      transition: left 0.3s ease;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 100;
+      overflow-y: auto;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+      font-size: 16px;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--accent);
+    }
+
+    .btn svg {
+      width: 18px;
+      height: 18px;
+      fill: #fff;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .search-container {
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+      display: none;
+      gap: 10px;
+      align-items: center;
+      padding: 16px 20px 12px;
+      flex-shrink: 0;
+    }
+
+    .search-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 44px 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--bg-secondary);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    .history-btn {
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-left: auto;
+    }
+
+    .history-btn:hover {
+      border-color: var(--accent);
+      background: var(--bg-secondary);
+    }
+
+    .history-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--accent);
+      color: var(--bg-primary);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    .filter-tabs {
+      display: none;
+      gap: 8px;
+      padding: 8px 20px 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeIn 0.6s ease 0.2s backwards;
+      flex-shrink: 0;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .filter-btn {
+      padding: 8px 20px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .content-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+        padding: 12px;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      opacity: 0;
+      animation: cardFadeIn 0.4s ease forwards;
+    }
+
+    @keyframes cardFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-img-container {
+      position: relative;
+      overflow: hidden;
+      padding-top: 150%;
+      background: var(--bg-secondary);
+    }
+
+    .card img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover img {
+      transform: scale(1.05);
+    }
+
+    .card-type {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 2;
+      backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--bg-primary);
+    }
+
+    .card-downloads {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      z-index: 2;
+      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-info {
+      padding: 10px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      line-height: 1.3;
+      color: var(--text-primary);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.96);
+      backdrop-filter: blur(8px);
+      display: none;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      min-height: 100vh;
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .modal-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .modal-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-meta-label {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-description {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .genre-tag {
+      display: inline-block;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .download-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .download-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .download-cost {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .download-cost-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .insufficient-points {
+      background: rgba(255, 107, 107, 0.15);
+      border: 1px solid #ff6b6b;
+      color: #ff6b6b;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .main-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-main {
+      flex: 1;
+      min-width: 150px;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-download {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .btn-download:hover {
+      background: var(--text-secondary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-download:disabled {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-close {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-close:hover {
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+      background: var(--bg-card);
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    /* History Modal */
+    .history-modal {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+      animation: modalSlideIn 0.3s ease;
+      max-height: 80vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-header h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .clear-history-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .clear-history-btn:hover {
+      border-color: #ff6b6b;
+      color: #ff6b6b;
+    }
+
+    .history-list {
+      overflow-y: auto;
+      padding: 16px 24px;
+    }
+
+    .history-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .history-item:hover {
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    .history-item-img {
+      width: 50px;
+      height: 75px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: var(--bg-secondary);
+    }
+
+    .history-item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .history-item-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .history-item-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .history-item-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .empty-history {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-history-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    /* Custom Modal */
+    .custom-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .custom-modal.active {
+      display: flex;
+    }
+
+    .custom-modal-content {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+    }
+
+    .custom-modal h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: var(--accent);
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .custom-modal p {
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    .custom-modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .custom-modal-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .custom-modal-btn.primary {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+
+    .custom-modal-btn.secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .user-info {
+      padding: 12px;
+      background: var(--bg-card);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .user-info p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+
+    .points-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .points-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .points-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+
+    .overlay.history-overlay {
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .overlay.history-overlay.active {
+      display: flex;
+    }
+
+    .redeem-section {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .redeem-section h3 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      color: var(--accent);
+    }
+
+    .redeem-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .redeem-input {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .redeem-btn {
+      padding: 12px 24px;
+      background: var(--accent);
+      color: var(--bg-primary);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .redeem-btn:hover {
+      background: var(--text-secondary);
+    }
+
+    .create-code-section {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .create-code-section h3 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      color: var(--accent);
+    }
+
+    .create-code-input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .generated-code {
+      padding: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--accent);
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      text-align: center;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* Comments Section */
+    .comments-section {
+      margin-top: 24px;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+    }
+
+    .comments-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .comments-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--accent);
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .comment-form {
+      margin-bottom: 20px;
+    }
+
+    .comment-input {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      min-height: 80px;
+      margin-bottom: 8px;
+    }
+
+    .comment-submit {
+      padding: 10px 20px;
+      background: var(--accent);
+      color: var(--bg-primary);
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .comment-submit:hover {
+      background: var(--text-secondary);
+    }
+
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comment-item {
+      padding: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .comment-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .comment-time {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .no-comments {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-secondary);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #0a0a0a;
+        --bg-secondary: #141414;
+        --bg-card: #1a1a1a;
+      }
+    }
+
+    /* YouTube Player */
+    .youtube-player {
+      position: relative;
+      padding-top: 56.25%;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .youtube-player iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <button class="menu-btn" onclick="toggleSidebar()">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
+    </button>
+    <div class="app-name">GAME PLUS AO</div>
+    <button onclick="toggleSearch()" style="margin-left: auto; display: flex; align-items: center; background: #222; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 6px;">
+        <path d="M10 2a8 8 0 105.293 14.293l4.707 4.707 1.414-1.414-4.707-4.707A8 8 0 0010 2zm0 2a6 6 0 110 12A6 6 0 0110 4z"/>
+      </svg>
+      Buscar
+    </button>
+    <button onclick="toggleCatalogs()" style="display: flex; align-items: center; background: #222; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 6px;">
+        <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+      </svg>
+      Ver
+    </button>
+    <button class="history-btn" id="historyBtn" onclick="openHistory()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" style="display:block;margin:auto;background:#222;">
+        <path fill="white" d="M13 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7v2l4-4-4-4v2zM12 7v6l4.5 2.7.8-1.3-3.8-2.2V7h-1.5z"/>
+      </svg>
+      <span class="history-badge" id="historyBadge" style="display: none;">0</span>
+    </button>
+  </div>
+
+  <!-- Sidebar -->
+  <div id="sidebar" class="sidebar">
+    <h2>Game Plus AO</h2>
+
+    <div id="userInfoSection" style="display: none;">
+      <div class="user-info">
+        <p><strong>Conta:</strong> <span id="userEmail">-</span></p>
+        <p><strong>Tipo:</strong> <span id="userType">Visitante</span></p>
+      </div>
+
+      <div class="points-display">
+        <div style="flex: 1;">
+          <div class="points-value" id="userPoints">0</div>
+          <div class="points-label">Pontos Disponíveis</div>
+        </div>
+      </div>
+
+      <!-- Redeem Points Section -->
+      <div class="redeem-section">
+        <h3>Resgatar Pontos</h3>
+        <div class="redeem-input-group">
+          <input type="text" class="redeem-input" id="redeemCodeInput" placeholder="Cole o código aqui">
+          <button class="redeem-btn" onclick="redeemCode()">Resgatar</button>
+        </div>
+      </div>
+
+      <!-- Create Code Section (only for publishers) -->
+      <div id="createCodeSection" class="create-code-section" style="display: none;">
+        <h3>Criar Código de Pontos</h3>
+        <div class="create-code-input-group">
+          <input type="number" class="redeem-input" id="codePointsInput" placeholder="Quantidade de pontos" min="1">
+          <button class="redeem-btn" onclick="createPointsCode()">Gerar</button>
+        </div>
+        <div id="generatedCodeDisplay" class="generated-code"></div>
+      </div>
+    </div>
+
+    <button class="btn" id="loginBtn" onclick="openLoginModal()">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Entrar
+    </button>
+
+    <button class="btn" id="publishBtn" onclick="openPublishModal()" style="display: none;">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      Publicar Jogo
+    </button>
+
+    <button class="btn" id="manageBtn" onclick="openManageModal()" style="display: none;">
+      <svg viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+      Meus Jogos
+    </button>
+
+    <button class="btn" id="logoutBtn" onclick="logout()" style="display: none;">
+      <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+      Sair
+    </button>
+  </div>
+
+  <div id="search-container" class="search-container">
+    <div class="search-wrapper">
+      <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar jogos...">
+      <span class="search-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 122.88" width="20" height="20" style="display:block;margin:auto;">
+          <path fill="#fff" d="M42.31,0A42.31,42.31,0,0,1,77.52,65.75l8.56,8.56.09-.09a5.38,5.38,0,0,1,7.59,0l27.55,27.55a5.39,5.39,0,0,1,0,7.59l-12,12a5.39,5.39,0,0,1-7.59,0L74.22,93.76a5.38,5.38,0,0,1,0-7.59l.09-.09-8.56-8.56A42.31,42.31,0,1,1,42.31,0Zm0,9.5A32.81,32.81,0,1,1,9.5,42.31,32.81,32.81,0,0,1,42.31,9.5Z"/>
+        </svg>
+      </span>
+    </div>
+  </div>
+
+  <div id="filter-tabs" class="filter-tabs">
+    <button class="filter-btn active" data-filter="all">Todos</button>
+    <button class="filter-btn" data-filter="android">Android</button>
+    <button class="filter-btn" data-filter="ppsspp">PPSSPP</button>
+    <button class="filter-btn" data-filter="sega">Sega</button>
+    <button class="filter-btn" data-filter="apkobb">APK + OBB</button>
+    <button class="filter-btn" data-filter="aplicativos">Aplicativos</button>
+  </div>
+
+  <div class="content-wrapper">
+    <div class="grid" id="contentGrid">
+      <div class="loading">Carregando jogos...</div>
+    </div>
+
+    <div id="noResults" class="no-results" style="display: none;">
+      Nenhum resultado encontrado
+    </div>
+  </div>
+
+  <!-- Modal Overlay -->
+  <div id="overlay" class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Título</h2>
+        <div class="modal-meta" id="modalMeta"></div>
+      </div>
+      <div class="modal-body">
+        <div id="youtubePlayerContainer"></div>
+        <div id="genreContainer"></div>
+        <div class="modal-description" id="modalDescription"></div>
+
+        <!-- Download Section -->
+        <div class="download-section">
+          <div class="download-header">
+            <div>
+              <div class="download-cost-label">Custo do Download</div>
+              <div class="download-cost" id="downloadCost">0 pontos</div>
+            </div>
+            <div>
+              <div class="download-cost-label">Downloads</div>
+              <div class="download-cost" id="downloadCount">0</div>
+            </div>
+          </div>
+
+          <div id="insufficientPointsMsg" class="insufficient-points" style="display: none;">
+            Pontos insuficientes! Resgate um código para continuar.
+          </div>
+
+          <div class="main-actions" id="mainActions">
+            <button id="btnDownload1" class="btn-main btn-download">Download Opção 1</button>
+            <button id="btnDownload2" class="btn-main btn-download">Download Opção 2</button>
+          </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="comments-section">
+          <div class="comments-header">
+            <h3>Comentários</h3>
+          </div>
+
+          <div id="commentFormContainer" style="display: none;">
+            <div class="comment-form">
+              <textarea class="comment-input" id="commentInput" placeholder="Escreva seu comentário..."></textarea>
+              <button class="comment-submit" onclick="submitComment()">Enviar Comentário</button>
+            </div>
+          </div>
+
+          <div class="comments-list" id="commentsList">
+            <div class="no-comments">Sem comentários ainda.</div>
+          </div>
+        </div>
+
+        <button class="btn-close" onclick="closeOverlay()">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Overlay -->
+  <div id="historyOverlay" class="overlay history-overlay">
+    <div class="history-modal">
+      <div class="history-header">
+        <h2>Histórico</h2>
+        <button class="clear-history-btn" onclick="clearHistory()">Limpar</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="empty-history">
+          <div class="empty-history-icon">📭</div>
+          <p>Nenhum histórico ainda</p>
+        </div>
+      </div>
+      <div style="padding: 16px 24px;">
+        <button class="btn-close" onclick="closeHistory()">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="custom-modal">
+    <div class="custom-modal-content">
+      <h2>Entrar</h2>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="loginEmail" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" class="form-input" id="loginPassword" required>
+        </div>
+        <div class="custom-modal-buttons">
+          <button type="button" class="custom-modal-btn secondary" onclick="closeLoginModal()">Cancelar</button>
+          <button type="submit" class="custom-modal-btn primary">Entrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Publish Content Modal -->
+  <div id="publishModal" class="custom-modal">
+    <div class="custom-modal-content">
+      <h2 id="publishModalTitle">Publicar Jogo</h2>
+      <form id="publishForm" onsubmit="handlePublish(event)">
+        <input type="hidden" id="editContentId">
+
+        <div class="form-group">
+          <label class="form-label">Categoria</label>
+          <select class="form-select" id="contentType" required>
+            <option value="android">Android</option>
+            <option value="ppsspp">PPSSPP</option>
+            <option value="sega">Sega</option>
+            <option value="apkobb">APK + OBB</option>
+            <option value="aplicativos">Aplicativos</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nome do Jogo/App</label>
+          <input type="text" class="form-input" id="contentTitle" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Gênero</label>
+          <input type="text" class="form-input" id="contentGenre" placeholder="Ex: Ação, Aventura" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tamanho</label>
+          <input type="text" class="form-input" id="contentSize" placeholder="Ex: 500MB, 2GB" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descrição</label>
+          <textarea class="form-textarea" id="contentDescription" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">URL do Poster (imagem)</label>
+          <input type="url" class="form-input" id="contentPoster" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">YouTube Video ID (opcional)</label>
+          <input type="text" class="form-input" id="contentYouTube" placeholder="Ex: dQw4w9WgXcQ">
+          <small style="color: var(--text-muted); font-size: 12px;">Cole apenas o ID do vídeo, não o link completo</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Custo de Download (pontos)</label>
+          <input type="number" class="form-input" id="contentCost" min="0" value="10" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Link Download 1</label>
+          <input type="url" class="form-input" id="linkDownload1" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Link Download 2</label>
+          <input type="url" class="form-input" id="linkDownload2" required>
+        </div>
+
+        <div class="custom-modal-buttons">
+          <button type="button" class="custom-modal-btn secondary" onclick="closePublishModal()">Cancelar</button>
+          <button type="submit" class="custom-modal-btn primary">Publicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Manage Content Modal -->
+  <div id="manageModal" class="custom-modal">
+    <div class="custom-modal-content">
+      <h2>Meus Jogos</h2>
+      <div id="manageContentList" class="loading">Carregando...</div>
+      <div class="custom-modal-buttons" style="margin-top: 16px;">
+        <button class="custom-modal-btn secondary" onclick="closeManageModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dark mode detection
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      if (event.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    });
+
+    // Global state
+    let currentUser = null;
+    let isPublisher = false;
+    let allContent = {};
+    let currentFilter = 'all';
+    let searchTerm = '';
+    let historyData = [];
+    let currentItemData = null;
+    let userPoints = 100; // Inicial
+
+    const AUTHORIZED_PUBLISHERS = ['sibemcesar@gmail.com', 'sibemcesar02@gmail.com'];
+
+    // ===== FIREBASE INITIALIZATION =====
+    window.addEventListener('load', () => {
+      const { onAuthStateChanged } = window.firebaseModules;
+      const auth = window.firebaseAuth;
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user && !user.isAnonymous) {
+          currentUser = user;
+          isPublisher = AUTHORIZED_PUBLISHERS.includes(user.email);
+          await loadUserPoints();
+          updateUIForUser();
+          loadContent();
+          loadHistory();
+        } else {
+          // Não logado
+          currentUser = null;
+          isPublisher = false;
+          updateUIForUser();
+          loadContent();
+          loadHistory();
+        }
+      });
+    });
+
+    // ===== USER POINTS MANAGEMENT =====
+    async function loadUserPoints() {
+      if (!currentUser) return;
+
+      const { ref, get } = window.firebaseModules;
+      const database = window.firebaseDatabase;
+
+      try {
+        const pointsRef = ref(database, `users/${currentUser.uid}/points`);
+        const snapshot = await get(pointsRef);
+
+        if (snapshot.exists()) {
+          userPoints = snapshot.val();
+        } else {
+          // Inicializa com 100 pontos
+          userPoints = 100;
+          await updateUserPoints(userPoints);
+        }
+
+        updatePointsDisplay();
+      } catch (error) {
+        console.error('Erro ao carregar pontos:', error);
+      }
+    }
+
+    async function updateUserPoints(points) {
+      if (!currentUser) return;
+
+      const { ref, set } = window.firebaseModules;
+      const database = window.firebaseDatabase;
+
+      try {
+        await set(ref(database, `users/${currentUser.uid}/points`), points);
+        userPoints = points;
+        updatePointsDisplay();
+      } catch (error) {
+        console.error('Erro ao atualizar pontos:', error);
+      }
+    }
+
+    function updatePointsDisplay() {
+      const pointsEl = document.getElementById('userPoints');
+      if (pointsEl) {
+        pointsEl.textContent = userPoints;
+      }
+    }
+
+    // ===== POINTS CODE SYSTEM =====
+    async function createPointsCode() {
+      if (!isPublisher) {
+        showCustomAlert('Apenas publicadores podem criar códigos.');
+        return;
+      }
+
+      const pointsInput = document.getElementById('codePointsInput');
+      const points = parseInt(pointsInput.value);
+
+      if (!points || points <= 0) {
+        showCustomAlert('Digite uma quantidade válida de pontos.');
+        return;
+      }
+
+      const code = generateRandomCode();
+      const { ref, set } = window.firebaseModules;
+      const database = window.firebaseDatabase;
+
+      try {
+        await set(ref(database, `redeemCodes/${code}`), {
+          points: points,
+          createdBy: currentUser.email,
+          createdAt: Date.now(),
+          used: false
+        });
+
+        const displayEl = document.getElementById('generatedCodeDisplay');
+        displayEl.textContent = `Código: ${code}`;
+        displayEl.style.display = 'block';
+        pointsInput.value = '';
+
+        setTimeout(() => {
+          displayEl.style.display = 'none';
+        }, 30000);
+
+        showCustomAlert(`Código criado: ${code}\n${points} pontos`);
+      } catch (error) {
+        showCustomAlert('Erro ao criar código: ' + error.message);
+      }
+    }
+
+    async function redeemCode() {
+      if (!currentUser) {
+        showCustomAlert('Você precisa estar logado para resgatar códigos.');
+        return;
+      }
+
+      const codeInput = document.getElementById('redeemCodeInput');
+      const code = codeInput.value.trim();
+
+      if (!code) {
+        showCustomAlert('Digite um código válido.');
+        return;
+      }
+
+      const { ref, get, update } = window.firebaseModules;
+      const database = window.firebaseDatabase;
+
+      try {
+        const codeRef = ref(database, `redeemCodes/${code}`);
+        const snapshot = await get(codeRef);
+
+        if (!snapshot.exists()) {
+          showCustomAlert('Código inválido.');
+          return;
+        }
+
+        const codeData = snapshot.val();
+
+        if (codeData.used) {
+          showCustomAlert('Este código já foi usado.');
+          return;
+        }
+
+        // Marcar como usado
+        await update(codeRef, {
+          used: true,
+          usedBy: currentUser.email,
+          usedAt: Date.now()
+        });
+
+        // Adicionar pontos
+        const newPoints = userPoints + codeData.points;
+        await updateUserPoints(newPoints);
+
+        codeInput.value = '';
+        showCustomAlert(`Código resgatado! +${codeData.points} pontos`);
+      } catch (error) {
+        showCustomAlert('Erro ao resgatar código: ' + error.message);
+      }
+    }
+
+    function generateRandomCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    // ===== UI UPDATES =====
+    function updateUIForUser() {
+      const userInfoSection = document.getElementById('userInfoSection');
+      const userEmail = document.getElementById('userEmail');
+      const userType = document.getElementById('userType');
+      const loginBtn = document.getElementById('loginBtn');
+      const publishBtn = document.getElementById('publishBtn');
+      const manageBtn = document.getElementById('manageBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const createCodeSection = document.getElementById('createCodeSection');
+
+      if (!currentUser) {
+        userInfoSection.style.display = 'none';
+        loginBtn.style.display = 'flex';
+        publishBtn.style.display = 'none';
+        manageBtn.style.display = 'none';
+        logoutBtn.style.display = 'none';
+      } else {
+        userInfoSection.style.display = 'block';
+        userEmail.textContent = currentUser.email;
+        userType.textContent = isPublisher ? 'Publicador' : 'Usuário';
+        loginBtn.style.display = 'none';
+        publishBtn.style.display = isPublisher ? 'flex' : 'none';
+        manageBtn.style.display = isPublisher ? 'flex' : 'none';
+        logoutBtn.style.display = 'flex';
+        createCodeSection.style.display = isPublisher ? 'block' : 'none';
+        updatePointsDisplay();
+      }
+    }
+
+    // ===== CONTENT LOADING =====
+    async function loadContent() {
+      const { ref, onValue } = window.firebaseModules;
+      const database = window.firebaseDatabase;
+
+      const contentRef = ref(database, 'games');
+      onValue(contentRef, (snapshot) => {
+        allContent = snapshot.val() || {};
+        renderGrid();
+        updateHistoryBadge();
+      });
+    }
+
+    // ===== HISTORY MANAGEMENT =====
+    function loadHistory() {
+      // Histórico mantido apenas em memória durante a sessão
+      // Não usa localStorage devido às restrições do iframe
+    }
+
+    function saveHistory() {
+      // Histórico salvo apenas em memória durante a sessão
+      // Não usa localStorage devido às restrições do iframe
+    }
+
+    function addToHistory(id) {
+      const item = allContent[id];
+      if (!item) return;
+
+      historyData = historyData.filter(h => h.id !== id);
+      historyData.unshift({
+        id: id,
+        titulo: item.titulo,
+        type: item.type,
+        genero: item.genero,
+        tamanho: item.tamanho,
+        poster: item.poster,
+        timestamp: Date.now()
+      });
+
+      if (historyData.length > 20) {
+        historyData = historyData.slice(0, 20);
+      }
+
+      saveHistory();
+      updateHistoryBadge();
+    }
+
+    function updateHistoryBadge() {
+      const badge = document.getElementById('historyBadge');
+      if (historyData.length > 0) {
+        badge.textContent = historyData.length;
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function clearHistory() {
+      showCustomConfirm('Deseja realmente limpar todo o histórico?', () => {
+        historyData = [];
+        saveHistory();
+        updateHistoryBadge();
+        renderHistory();
+      });
+    }
+
+    function formatTimeAgo(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+
+      if (minutes < 1) return 'Agora mesmo';
+      if (minutes < 60) return `${minutes} min atrás`;
+      if (hours < 24) return `${hours}h atrás`;
+      return `${days}d atrás`;
+    }
+
+    function getTypeLabel(type) {
+      const labels = {
+        android: 'Android',
+        ppsspp: 'PPSSPP',
+        sega: 'Sega',
+        apkobb: 'APK + OBB',
+        aplicativos: 'Aplicativos'
+      };
+      return labels[type] || type;
+    }
+
+    function renderHistory() {
+      const historyList = document.getElementById('historyList');
+
+      if (historyData.length === 0) {
+        historyList.innerHTML = `
+          <div class="empty-history">
+            <div class="empty-history-icon">📭</div>
+            <p>Nenhum histórico ainda</p>
+          </div>
+        `;
+        return;
+      }
+
+      historyList.innerHTML = historyData.map(item => `
+        <div class="history-item" onclick="openFromHistory('${item.id}')">
+          <img src="${item.poster}" alt="${item.titulo}" class="history-item-img">
+          <div class="history-item-info">
+            <div class="history-item-title">${item.titulo}</div>
+            <div class="history-item-meta">${item.tamanho} • ${item.genero} • ${getTypeLabel(item.type)}</div>
+            <div class="history-item-time">${formatTimeAgo(item.timestamp)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openHistory() {
+      renderHistory();
+      document.getElementById('historyOverlay').classList.add('active');
+    }
+
+    function closeHistory() {
+      document.getElementById('historyOverlay').classList.remove('active');
+    }
+
+    function openFromHistory(id) {
+      closeHistory();
+      openOverlay(id);
+    }
+
+    // ===== GRID RENDERING =====
+    function renderGrid() {
+      const grid = document.getElementById('contentGrid');
+      const noResults = document.getElementById('noResults');
+      grid.innerHTML = '';
+
+      let filtered = Object.entries(allContent).filter(([id, item]) => {
+        const matchFilter = currentFilter === 'all' || item.type === currentFilter;
+        const matchSearch = item.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           item.genero.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchFilter && matchSearch;
+      });
+
+      // Ordenar por número de downloads (mais baixados primeiro)
+      filtered.sort((a, b) => {
+        const downloadsA = (a[1].downloads || 0);
+        const downloadsB = (b[1].downloads || 0);
+        return downloadsB - downloadsA;
+      });
+
+      if (filtered.length === 0) {
+        grid.style.display = 'none';
+        noResults.style.display = 'block';
+        return;
+      }
+
+      grid.style.display = 'grid';
+      noResults.style.display = 'none';
+
+      filtered.forEach(([id, item], index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.animationDelay = `${index * 0.05}s`;
+
+        card.addEventListener('click', function() {
+          openOverlay(id);
+        });
+
+        const downloads = item.downloads || 0;
+
+        card.innerHTML = `
+          <div class="card-img-container">
+            <img src="${item.poster}" alt="${item.titulo}">
+            <div class="card-type">${getTypeLabel(item.type)}</div>
+            <div class="card-downloads">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                <path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/>
+              </svg>
+              ${downloads}
+            </div>
+          </div>
+          <div class="card-info">
+            <div class="card-title">${item.titulo}</div>
+            <div class="card-meta">
+              <span>${item.tamanho}</span>
+              <span>•</span>
+              <span>${item.genero}</span>
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderGrid();
+      });
+    });
+
+    // Search input
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchTerm = e.target.value;
+      renderGrid();
+    });
+
+    // ===== DOWNLOAD HANDLING =====
+    async function handleDownload(itemId, downloadLink) {
+      if (!currentUser) {
+        showCustomAlert('Você precisa estar logado para baixar.');
+        return;
+      }
+
+      const item = allContent[itemId];
+      const cost = item.cost || 0;
+
+      if (userPoints < cost) {
+        showCustomAlert('Pontos insuficientes! Resgate um código para continuar.');
+        return;
+      }
+
+      // Deduzir pontos
+      const newPoints = userPoints - cost;
+      await updateUserPoints(newPoints);
+
+      // Incrementar contador de downloads
+      const { ref, update, get } = window.firebaseModules;
+      const database = window.firebaseDatabase;
+
+      try {
+        const itemRef = ref(database, `games/${itemId}`);
+        const snapshot = await get(itemRef);
+
+        if (snapshot.exists()) {
+          const currentDownloads = snapshot.val().downloads || 0;
+          await update(itemRef, {
+            downloads: currentDownloads + 1
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao atualizar downloads:', error);
+      }
+
+      // Abrir link de download
+      window.open(downloadLink, '_blank');
+
+      showCustomAlert(`Download iniciado! -${cost} pontos`);
+    }
+
+    // ===== COMMENTS SYSTEM =====
+    async function submitComment() {
+      if (!currentUser) {
+        showCustomAlert('Você precisa estar logado para comentar.');
+        return;
+      }
+
+      const commentInput = document.getElementById('commentInput');
+      const commentText = commentInput.value.trim();
+
+      if (!commentText) {
+        showCustomAlert('Digite um comentário.');
+        return;
+      }
+
+      const { ref, push, set } = window.firebaseModules;
+      const database = window.firebaseDatabase;
+
+      try {
+        const commentRef = push(ref(database, `comments/${currentItemData.id}`));
+        await set(commentRef, {
+          author: currentUser.email,
+          text: commentText,
+          timestamp: Date.now()
+        });
+
+        commentInput.value = '';
+        showCustomAlert('Comentário enviado!');
+        loadComments(currentItemData.id);
+      } catch (error) {
+        showCustomAlert('Erro ao enviar comentário: ' + error.message);
+      }
+    }
+
+    async function loadComments(itemId) {
+      const { ref, onValue } = window.firebaseModules;
+      const database = window.firebaseDatabase;
+
+      const commentsRef = ref(database, `comments/${itemId}`);
+      onValue(commentsRef, (snapshot) => {
+        const comments = snapshot.val() || {};
+        renderComments(comments);
+      });
+    }
+
+    function renderComments(comments) {
+      const commentsList = document.getElementById('commentsList');
+
+      const commentsArray = Object.values(comments);
+
+      if (commentsArray.length === 0) {
+        commentsList.innerHTML = '<div class="no-comments">Sem comentários ainda.</div>';
+        return;
+      }
+
+      // Ordenar por mais recente
+      commentsArray.sort((a, b) => b.timestamp - a.timestamp);
+
+      commentsList.innerHTML = commentsArray.map(comment => `
+        <div class="comment-item">
+          <div class="comment-author">${comment.author}</div>
+          <div class="comment-text">${comment.text}</div>
+          <div class="comment-time">${formatTimeAgo(comment.timestamp)}</div>
+        </div>
+      `).join('');
+    }
+
+    // ===== CONTENT MODAL =====
+    function openOverlay(id) {
+      const item = allContent[id];
+      if (!item) return;
+
+      addToHistory(id);
+      currentItemData = { ...item, id: id };
+
+      document.getElementById('modalTitle').textContent = item.titulo;
+      document.getElementById('modalMeta').innerHTML = `
+        <div class="modal-meta-item">
+          <span class="modal-meta-label">Tamanho:</span>
+          <span>${item.tamanho}</span>
+        </div>
+        <div class="modal-meta-item">
+          <span class="modal-meta-label">Gênero:</span>
+          <span>${item.genero}</span>
+        </div>
+        <div class="modal-meta-item">
+          <span class="modal-meta-label">Categoria:</span>
+          <span>${getTypeLabel(item.type)}</span>
+        </div>
+      `;
+
+      document.getElementById('genreContainer').innerHTML = `
+        <span class="genre-tag">${item.genero}</span>
+      `;
+
+      document.getElementById('modalDescription').textContent = item.descricao;
+
+      // YouTube player
+      const youtubeContainer = document.getElementById('youtubePlayerContainer');
+      if (item.youtubeId) {
+        youtubeContainer.innerHTML = `
+          <div class="youtube-player">
+            <iframe src="https://www.youtube.com/embed/${item.youtubeId}"
+                    allowfullscreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+            </iframe>
+          </div>
+        `;
+      } else {
+        youtubeContainer.innerHTML = '';
+      }
+
+      // Download section
+      const cost = item.cost || 0;
+      const downloads = item.downloads || 0;
+      document.getElementById('downloadCost').textContent = `${cost} pontos`;
+      document.getElementById('downloadCount').textContent = downloads;
+
+      const insufficientMsg = document.getElementById('insufficientPointsMsg');
+      const btn1 = document.getElementById('btnDownload1');
+      const btn2 = document.getElementById('btnDownload2');
+
+      if (currentUser && userPoints < cost) {
+        insufficientMsg.style.display = 'block';
+        btn1.disabled = true;
+        btn2.disabled = true;
+      } else {
+        insufficientMsg.style.display = 'none';
+        btn1.disabled = !currentUser;
+        btn2.disabled = !currentUser;
+      }
+
+      // Remove old listeners
+      const newBtn1 = btn1.cloneNode(true);
+      const newBtn2 = btn2.cloneNode(true);
+      btn1.parentNode.replaceChild(newBtn1, btn1);
+      btn2.parentNode.replaceChild(newBtn2, btn2);
+
+      newBtn1.addEventListener('click', () => handleDownload(id, item.linkDownload1));
+      newBtn2.addEventListener('click', () => handleDownload(id, item.linkDownload2));
+
+      // Comments section
+      const commentFormContainer = document.getElementById('commentFormContainer');
+      if (currentUser) {
+        commentFormContainer.style.display = 'block';
+      } else {
+        commentFormContainer.style.display = 'none';
+      }
+
+      loadComments(id);
+
+      location.hash = id;
+      document.getElementById('overlay').classList.add('active');
+    }
+
+    function closeOverlay() {
+      document.getElementById('overlay').classList.remove('active');
+      currentItemData = null;
+      location.hash = '';
+    }
+
+    // ===== AUTH FUNCTIONS =====
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const { signInWithEmailAndPassword } = window.firebaseModules;
+        await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+        closeLoginModal();
+        showCustomAlert('Login realizado com sucesso!');
+      } catch (error) {
+        showCustomAlert('Erro ao fazer login: ' + error.message);
+      }
+    }
+
+    async function logout() {
+      showCustomConfirm('Deseja realmente sair?', async () => {
+        try {
+          const { signOut } = window.firebaseModules;
+          await signOut(window.firebaseAuth);
+          showCustomAlert('Você saiu da conta.');
+        } catch (error) {
+          showCustomAlert('Erro ao sair: ' + error.message);
+        }
+      });
+    }
+
+    // ===== PUBLISH CONTENT =====
+    async function handlePublish(e) {
+      e.preventDefault();
+
+      if (!isPublisher) {
+        showCustomAlert('Apenas publicadores autorizados podem publicar jogos.');
+        return;
+      }
+
+      const editId = document.getElementById('editContentId').value;
+      const contentData = {
+        type: document.getElementById('contentType').value,
+        titulo: document.getElementById('contentTitle').value,
+        genero: document.getElementById('contentGenre').value,
+        tamanho: document.getElementById('contentSize').value,
+        descricao: document.getElementById('contentDescription').value,
+        poster: document.getElementById('contentPoster').value,
+        youtubeId: document.getElementById('contentYouTube').value || '',
+        cost: parseInt(document.getElementById('contentCost').value) || 0,
+        linkDownload1: document.getElementById('linkDownload1').value,
+        linkDownload2: document.getElementById('linkDownload2').value,
+        authorId: currentUser.uid,
+        authorEmail: currentUser.email,
+        createdAt: Date.now(),
+        downloads: 0
+      };
+
+      try {
+        const { ref, set, push } = window.firebaseModules;
+        const database = window.firebaseDatabase;
+
+        if (editId) {
+          await set(ref(database, `games/${editId}`), contentData);
+          showCustomAlert('Jogo atualizado com sucesso!');
+        } else {
+          const newRef = push(ref(database, 'games'));
+          await set(newRef, contentData);
+          showCustomAlert('Jogo publicado com sucesso!');
+        }
+
+        closePublishModal();
+        document.getElementById('publishForm').reset();
+        document.getElementById('editContentId').value = '';
+      } catch (error) {
+        console.error('Erro completo:', error);
+        showCustomAlert('Erro ao publicar: ' + error.message);
+      }
+    }
+
+    // ===== MANAGE CONTENT =====
+    async function openManageModal() {
+      if (!isPublisher) {
+        showCustomAlert('Apenas publicadores podem gerenciar jogos.');
+        return;
+      }
+
+      const manageList = document.getElementById('manageContentList');
+      manageList.innerHTML = '<div class="loading">Carregando...</div>';
+
+      document.getElementById('manageModal').classList.add('active');
+
+      const userContent = Object.entries(allContent).filter(([id, item]) => item.authorId === currentUser.uid);
+
+      if (userContent.length === 0) {
+        manageList.innerHTML = '<p style="color: var(--text-muted);">Você ainda não publicou nenhum jogo.</p>';
+        return;
+      }
+
+      manageList.innerHTML = userContent.map(([id, item]) => `
+        <div style="background: var(--bg-card); padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border-color);">
+          <h3 style="margin: 0 0 8px 0; font-size: 16px;">${item.titulo}</h3>
+          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 12px;">${item.genero} • ${item.tamanho} • ${item.downloads || 0} downloads</p>
+          <div style="display: flex; gap: 8px;">
+            <button class="custom-modal-btn primary" onclick="editContent('${id}')" style="font-size: 14px; padding: 8px 16px;">Editar</button>
+            <button class="custom-modal-btn secondary" onclick="deleteContent('${id}')" style="font-size: 14px; padding: 8px 16px; color: #ff6b6b; border-color: #ff6b6b;">Apagar</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function editContent(id) {
+      const item = allContent[id];
+      if (!item) return;
+
+      closeManageModal();
+
+      document.getElementById('publishModalTitle').textContent = 'Editar Jogo';
+      document.getElementById('editContentId').value = id;
+      document.getElementById('contentType').value = item.type;
+      document.getElementById('contentTitle').value = item.titulo;
+      document.getElementById('contentGenre').value = item.genero;
+      document.getElementById('contentSize').value = item.tamanho;
+      document.getElementById('contentDescription').value = item.descricao;
+      document.getElementById('contentPoster').value = item.poster;
+      document.getElementById('contentYouTube').value = item.youtubeId || '';
+      document.getElementById('contentCost').value = item.cost || 0;
+      document.getElementById('linkDownload1').value = item.linkDownload1 || '';
+      document.getElementById('linkDownload2').value = item.linkDownload2 || '';
+
+      openPublishModal();
+    }
+
+    async function deleteContent(id) {
+      showCustomConfirm('Deseja realmente apagar este jogo?', async () => {
+        try {
+          const { ref, remove } = window.firebaseModules;
+          await remove(ref(window.firebaseDatabase, `games/${id}`));
+          showCustomAlert('Jogo apagado com sucesso!');
+          openManageModal();
+        } catch (error) {
+          showCustomAlert('Erro ao apagar: ' + error.message);
+        }
+      });
+    }
+
+    // ===== MODAL FUNCTIONS =====
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    // Sidebar swipe to close
+    const sidebar = document.getElementById('sidebar');
+    let startX = 0;
+    let endX = 0;
+
+    sidebar.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+    });
+
+    sidebar.addEventListener('touchmove', (e) => {
+      endX = e.touches[0].clientX;
+    });
+
+    sidebar.addEventListener('touchend', () => {
+      const diffX = endX - startX;
+      if (diffX < -50) {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    function toggleSearch() {
+      const box = document.getElementById('search-container');
+      box.style.display = box.style.display === 'none' || box.style.display === '' ? 'flex' : 'none';
+    }
+
+    function toggleCatalogs() {
+      const box = document.getElementById('filter-tabs');
+      box.style.display = box.style.display === 'none' || box.style.display === '' ? 'flex' : 'none';
+    }
+
+    function openLoginModal() {
+      document.getElementById('loginModal').classList.add('active');
+    }
+
+    function closeLoginModal() {
+      document.getElementById('loginModal').classList.remove('active');
+      document.getElementById('loginForm').reset();
+    }
+
+    function openPublishModal() {
+      if (!isPublisher) {
+        showCustomAlert('Apenas publicadores autorizados podem publicar jogos.');
+        return;
+      }
+      document.getElementById('publishModalTitle').textContent = 'Publicar Jogo';
+      document.getElementById('editContentId').value = '';
+      document.getElementById('publishModal').classList.add('active');
+    }
+
+    function closePublishModal() {
+      document.getElementById('publishModal').classList.remove('active');
+      document.getElementById('publishForm').reset();
+      document.getElementById('editContentId').value = '';
+    }
+
+    function closeManageModal() {
+      document.getElementById('manageModal').classList.remove('active');
+    }
+
+    // ===== CUSTOM ALERT/CONFIRM =====
+    function showCustomAlert(message) {
+      const modal = document.createElement('div');
+      modal.className = 'custom-modal active';
+      modal.innerHTML = `
+        <div class="custom-modal-content">
+          <p style="margin: 0 0 16px 0;">${message}</p>
+          <div class="custom-modal-buttons">
+            <button class="custom-modal-btn primary" onclick="this.closest('.custom-modal').remove()">OK</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function showCustomConfirm(message, onConfirm) {
+      const modal = document.createElement('div');
+      modal.className = 'custom-modal active';
+      modal.innerHTML = `
+        <div class="custom-modal-content">
+          <p style="margin: 0 0 16px 0;">${message}</p>
+          <div class="custom-modal-buttons">
+            <button class="custom-modal-btn secondary" onclick="this.closest('.custom-modal').remove()">Cancelar</button>
+            <button class="custom-modal-btn primary" id="confirmBtn">Confirmar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#confirmBtn').addEventListener('click', () => {
+        modal.remove();
+        onConfirm();
+      });
+    }
+
+    // Close modals on outside click
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'overlay') {
+        closeOverlay();
+      }
+      if (e.target.id === 'historyOverlay') {
+        closeHistory();
+      }
+    });
+
+    // Handle hash on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const hash = location.hash.replace('#', '');
+      if (hash && allContent[hash]) {
+        openOverlay(hash);
+      }
+    });
+
+    // Handle hash change
+    window.addEventListener('hashchange', () => {
+      const hash = location.hash.replace('#', '');
+      if (hash && allContent[hash]) {
+        openOverlay(hash);
+      } else if (!hash) {
+        closeOverlay();
+      }
+    });
+  </script>
+</body>
+</html>
+
