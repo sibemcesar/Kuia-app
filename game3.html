@@ -1478,8 +1478,18 @@
       if (snapshot.exists()) {
         userPoints = snapshot.val();
       } else {
+        // Initial bonus is enforced server-side by Firebase rules (exactly 100 points)
         userPoints = 100;
-        await set(userRef, userPoints);
+        try {
+          await set(userRef, userPoints);
+        } catch (error) {
+          console.error('Erro ao definir pontos iniciais:', error);
+          // If setting fails, try to read again
+          const retrySnapshot = await get(userRef);
+          if (retrySnapshot.exists()) {
+            userPoints = retrySnapshot.val();
+          }
+        }
       }
 
       updatePointsDisplay();
