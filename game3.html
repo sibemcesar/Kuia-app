@@ -1014,6 +1014,11 @@
       Ativar Notificações
     </button>
 
+    <button class="btn" id="debugTokensBtn" onclick="openDebugTokensModal()" style="display: none;">
+      <svg viewBox="0 0 24 24"><path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5c-.49 0-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z"/></svg>
+      🐛 Ver Tokens (Debug)
+    </button>
+
     <button class="btn" id="logoutBtn" onclick="logout()" style="display: none;">
       <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
       Sair
@@ -1332,6 +1337,20 @@
     </div>
   </div>
 
+  <!-- Debug Tokens Modal -->
+  <div id="debugTokensModal" class="custom-modal">
+    <div class="custom-modal-content" style="max-width: 600px;">
+      <h2>🐛 Debug - Tokens FCM</h2>
+      <div id="debugTokensContent" style="margin: 20px 0; font-family: monospace; font-size: 13px; line-height: 1.6;">
+        <p style="text-align: center; color: var(--text-muted);">Carregando informações...</p>
+      </div>
+      <div class="custom-modal-buttons">
+        <button class="custom-modal-btn secondary" onclick="closeDebugTokensModal()">Fechar</button>
+        <button class="custom-modal-btn primary" onclick="forcarSalvarTokenUI()">🔧 Forçar Salvar Token</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Send Notification Modal -->
   <div id="sendNotificationModal" class="custom-modal">
     <div class="custom-modal-content">
@@ -1496,6 +1515,7 @@
       const publishAdBtn = document.getElementById('publishAdBtn');
       const manageAdBtn = document.getElementById('manageAdBtn');
       const sendNotificationBtn = document.getElementById('sendNotificationBtn');
+      const debugTokensBtn = document.getElementById('debugTokensBtn');
       const enableNotificationsBtn = document.getElementById('enableNotificationsBtn');
       const earnPointsBtn = document.getElementById('earnPointsBtn');
       const logoutBtn = document.getElementById('logoutBtn');
@@ -1510,6 +1530,7 @@
         publishAdBtn.style.display = 'none';
         manageAdBtn.style.display = 'none';
         sendNotificationBtn.style.display = 'none';
+        debugTokensBtn.style.display = 'none';
         enableNotificationsBtn.style.display = 'none';
         earnPointsBtn.style.display = 'none';
         logoutBtn.style.display = 'none';
@@ -1532,6 +1553,7 @@
           publishAdBtn.style.display = 'flex';
           manageAdBtn.style.display = 'flex';
           sendNotificationBtn.style.display = 'flex';
+          debugTokensBtn.style.display = 'flex'; // Show debug button for publishers
         } else {
           userType.textContent = 'Usuário';
           publishBtn.style.display = 'none';
@@ -1540,6 +1562,7 @@
           publishAdBtn.style.display = 'none';
           manageAdBtn.style.display = 'none';
           sendNotificationBtn.style.display = 'none';
+          debugTokensBtn.style.display = 'none';
         }
       }
     }
@@ -1568,6 +1591,8 @@
 
     // FCM - Request notification permission
     async function requestNotificationPermission() {
+      console.log('=== requestNotificationPermission iniciado ===');
+
       if (!('Notification' in window)) {
         showCustomAlert('Seu navegador não suporta notificações.');
         return;
@@ -1578,11 +1603,15 @@
         return;
       }
 
+      console.log('Usuário autenticado:', currentUser.email);
+
       try {
         const permission = await Notification.requestPermission();
+        console.log('Permissão obtida:', permission);
 
         if (permission === 'granted') {
           showCustomAlert('Notificações ativadas com sucesso! Você receberá avisos sobre novos jogos e atualizações.');
+          console.log('Iniciando FCM...');
           await initializeFCM();
           checkNotificationPermission();
         } else if (permission === 'denied') {
@@ -1590,32 +1619,43 @@
         }
       } catch (error) {
         console.error('Erro ao solicitar permissão:', error);
-        showCustomAlert('Erro ao solicitar permissão para notificações.');
+        showCustomAlert('Erro ao solicitar permissão para notificações: ' + error.message);
       }
     }
 
     // FCM - Initialize and get token
     async function initializeFCM() {
-      if (!currentUser || currentUser.isAnonymous) return;
+      console.log('=== initializeFCM iniciado ===');
+
+      if (!currentUser || currentUser.isAnonymous) {
+        console.log('Usuário não autenticado ou anônimo');
+        return;
+      }
 
       try {
         const { getToken, onMessage } = window.firebaseModules;
         const messaging = window.firebaseMessaging;
 
+        console.log('Firebase Messaging disponível:', messaging !== undefined);
+
         // Register service worker
         if ('serviceWorker' in navigator) {
+          console.log('Registrando Service Worker...');
           const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-          console.log('Service Worker registrado:', registration);
+          console.log('Service Worker registrado com sucesso:', registration);
 
           // Get FCM token
+          console.log('Obtendo token FCM...');
           const token = await getToken(messaging, {
             vapidKey: 'BJ6UVRv08KRrRt73n8BgNANvBxN-9X12OhBUCVkn3wFfjGnGJsZZI4_fC5eiA2oNBokDuLUQZOoTGyFtL8CCn8M',
             serviceWorkerRegistration: registration
           });
 
           if (token) {
-            console.log('FCM Token:', token);
+            console.log('✅ FCM Token obtido:', token);
+            console.log('Salvando token no banco de dados...');
             await saveFCMToken(token);
+            console.log('✅ Token salvo com sucesso!');
 
             // Listen for foreground messages
             onMessage(messaging, (payload) => {
@@ -1633,33 +1673,64 @@
               // Show custom notification modal
               showNotificationModal(notificationTitle, notificationOptions.body);
             });
+          } else {
+            console.error('❌ Token FCM não foi obtido');
           }
+        } else {
+          console.error('❌ Service Worker não suportado');
         }
       } catch (error) {
-        console.error('Erro ao inicializar FCM:', error);
-        // Silently fail - FCM is optional
+        console.error('❌ Erro ao inicializar FCM:', error);
+        console.error('Detalhes do erro:', error.message);
+        console.error('Stack:', error.stack);
+        showCustomAlert('Erro ao ativar notificações: ' + error.message);
       }
     }
 
     // FCM - Save token to database
     async function saveFCMToken(token) {
-      if (!currentUser || currentUser.isAnonymous) return;
+      console.log('=== saveFCMToken iniciado ===');
+      console.log('Token recebido:', token);
+
+      if (!currentUser || currentUser.isAnonymous) {
+        console.log('❌ Usuário não autenticado');
+        return;
+      }
 
       try {
         const { ref, set } = window.firebaseModules;
         const database = window.firebaseDatabase;
 
-        await set(ref(database, `fcmTokens/${currentUser.uid}`), {
+        console.log('Usuário atual:', currentUser.uid);
+        console.log('Email:', currentUser.email);
+
+        const tokenData = {
           token: token,
           userId: currentUser.uid,
           userEmail: currentUser.email,
           createdAt: Date.now(),
           lastUpdated: Date.now()
-        });
+        };
 
-        console.log('Token FCM salvo no banco de dados');
+        console.log('Dados a serem salvos:', tokenData);
+        console.log('Path do banco:', `fcmTokens/${currentUser.uid}`);
+
+        await set(ref(database, `fcmTokens/${currentUser.uid}`), tokenData);
+
+        console.log('✅ Token FCM salvo no banco de dados com sucesso!');
+
+        // Verificar se foi salvo
+        const { get } = window.firebaseModules;
+        const savedData = await get(ref(database, `fcmTokens/${currentUser.uid}`));
+        console.log('Verificação - Token salvo?', savedData.exists());
+        if (savedData.exists()) {
+          console.log('Dados salvos:', savedData.val());
+        }
       } catch (error) {
-        console.error('Erro ao salvar token FCM:', error);
+        console.error('❌ Erro ao salvar token FCM:', error);
+        console.error('Mensagem de erro:', error.message);
+        console.error('Código de erro:', error.code);
+        showCustomAlert('Erro ao salvar token: ' + error.message);
       }
     }
 
@@ -2832,6 +2903,135 @@
       document.getElementById('resetPasswordForm').reset();
     }
 
+    // Debug Tokens Modal
+    async function openDebugTokensModal() {
+      const content = document.getElementById('debugTokensContent');
+      content.innerHTML = '<p style="text-align: center; color: var(--text-muted);">🔄 Carregando informações...</p>';
+
+      document.getElementById('debugTokensModal').classList.add('active');
+
+      try {
+        let html = '<div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; margin-bottom: 16px;">';
+
+        // 1. Info do usuário
+        html += '<h3 style="margin: 0 0 12px 0; color: var(--accent-primary);">👤 Usuário Atual</h3>';
+        html += `<p style="margin: 4px 0;">Email: <strong>${currentUser?.email || 'Não logado'}</strong></p>`;
+        html += `<p style="margin: 4px 0;">UID: <strong>${currentUser?.uid || 'N/A'}</strong></p>`;
+        html += `<p style="margin: 4px 0;">Anônimo: <strong>${currentUser?.isAnonymous ? 'Sim ❌' : 'Não ✅'}</strong></p>`;
+        html += `<p style="margin: 4px 0;">É Publisher: <strong>${isPublisher ? 'Sim ✅' : 'Não ❌'}</strong></p>`;
+        html += '</div>';
+
+        // 2. Permissões
+        html += '<div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; margin-bottom: 16px;">';
+        html += '<h3 style="margin: 0 0 12px 0; color: var(--accent-primary);">🔔 Permissões</h3>';
+        html += `<p style="margin: 4px 0;">Notificação: <strong>${Notification.permission}</strong> ${Notification.permission === 'granted' ? '✅' : '❌'}</p>`;
+        html += `<p style="margin: 4px 0;">Service Worker: <strong>${'serviceWorker' in navigator ? 'Suportado ✅' : 'Não suportado ❌'}</strong></p>`;
+        html += '</div>';
+
+        // 3. Tokens no banco
+        const { ref, get } = window.firebaseModules;
+        const database = window.firebaseDatabase;
+        const tokensRef = ref(database, 'fcmTokens');
+        const snapshot = await get(tokensRef);
+
+        html += '<div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; margin-bottom: 16px;">';
+        html += '<h3 style="margin: 0 0 12px 0; color: var(--accent-primary);">💾 Tokens no Firebase</h3>';
+
+        if (snapshot.exists()) {
+          const tokens = snapshot.val();
+          const tokenArray = Object.entries(tokens);
+
+          html += `<p style="margin: 4px 0; color: #10b981; font-weight: bold;">✅ ${tokenArray.length} token(s) encontrado(s)!</p>`;
+          html += '<div style="margin-top: 12px; max-height: 200px; overflow-y: auto;">';
+
+          tokenArray.forEach(([userId, data], index) => {
+            html += `<div style="background: var(--bg-primary); padding: 8px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid var(--accent-primary);">`;
+            html += `<p style="margin: 2px 0; font-size: 12px;"><strong>Token ${index + 1}</strong></p>`;
+            html += `<p style="margin: 2px 0; font-size: 11px;">Email: ${data.userEmail}</p>`;
+            html += `<p style="margin: 2px 0; font-size: 11px;">Token: ${data.token.substring(0, 30)}...</p>`;
+            html += `<p style="margin: 2px 0; font-size: 11px;">Criado: ${new Date(data.createdAt).toLocaleString('pt-BR')}</p>`;
+            html += `</div>`;
+          });
+
+          html += '</div>';
+        } else {
+          html += '<p style="margin: 4px 0; color: #ef4444; font-weight: bold;">❌ NENHUM token encontrado!</p>';
+          html += '<p style="margin: 8px 0; font-size: 12px; color: var(--text-muted);">Ninguém ativou notificações ainda ou os tokens não estão sendo salvos.</p>';
+        }
+
+        html += '</div>';
+
+        // 4. Service Workers registrados
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        html += '<div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px;">';
+        html += '<h3 style="margin: 0 0 12px 0; color: var(--accent-primary);">⚙️ Service Workers</h3>';
+        html += `<p style="margin: 4px 0;">Registrados: <strong>${registrations.length}</strong></p>`;
+
+        registrations.forEach((reg, i) => {
+          html += `<p style="margin: 4px 0; font-size: 11px;">SW ${i + 1}: ${reg.scope}</p>`;
+        });
+
+        html += '</div>';
+
+        content.innerHTML = html;
+      } catch (error) {
+        content.innerHTML = `<p style="color: #ef4444;">❌ Erro: ${error.message}</p>`;
+      }
+    }
+
+    function closeDebugTokensModal() {
+      document.getElementById('debugTokensModal').classList.remove('active');
+    }
+
+    // Forçar salvar token (UI)
+    async function forcarSalvarTokenUI() {
+      if (!currentUser || currentUser.isAnonymous) {
+        showCustomAlert('❌ Você precisa estar logado com uma conta real!');
+        return;
+      }
+
+      try {
+        showCustomAlert('🔄 Registrando token... Aguarde.');
+
+        const { getToken, ref, set, get } = window.firebaseModules;
+        const messaging = window.firebaseMessaging;
+
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+
+        const token = await getToken(messaging, {
+          vapidKey: 'BJ6UVRv08KRrRt73n8BgNANvBxN-9X12OhBUCVkn3wFfjGnGJsZZI4_fC5eiA2oNBokDuLUQZOoTGyFtL8CCn8M',
+          serviceWorkerRegistration: registration
+        });
+
+        if (!token) {
+          throw new Error('Não foi possível obter o token FCM');
+        }
+
+        const tokenData = {
+          token: token,
+          userId: currentUser.uid,
+          userEmail: currentUser.email,
+          createdAt: Date.now(),
+          lastUpdated: Date.now()
+        };
+
+        await set(ref(window.firebaseDatabase, `fcmTokens/${currentUser.uid}`), tokenData);
+
+        // Verificar
+        const allTokens = await get(ref(window.firebaseDatabase, 'fcmTokens'));
+        const total = allTokens.exists() ? Object.keys(allTokens.val()).length : 0;
+
+        showCustomAlert(`✅ SUCESSO!\n\nToken registrado com sucesso!\n\nTotal de dispositivos cadastrados: ${total}`);
+
+        // Reabrir modal atualizado
+        closeDebugTokensModal();
+        setTimeout(() => openDebugTokensModal(), 500);
+
+      } catch (error) {
+        showCustomAlert(`❌ Erro ao registrar token:\n\n${error.message}`);
+      }
+    }
+
     // Send Notification Modal
     async function openSendNotificationModal() {
       console.log('openSendNotificationModal chamado');
@@ -2994,5 +3194,4 @@
   </script>
 </body>
 </html>
-
 
