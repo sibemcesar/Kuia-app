@@ -20,7 +20,7 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('Notificação recebida em background:', payload);
 
-  const notificationTitle = payload.notification.title || 'Game Plus AO';
+  const notificationTitle = payload.notification.title || 'Portal Digital';
   const notificationOptions = {
     body: payload.notification.body || 'Nova notificação',
     icon: payload.notification.icon || '/icon.png',
@@ -56,5 +56,4 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
-
 
