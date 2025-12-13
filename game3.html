@@ -3123,6 +3123,11 @@
     });
   </script>
   <script>
+    window.onload = function() {
+      Atualizar.verificarVersao("1.0");
+    };
+  </script>
+  <script>
     function isWebView() {
       const ua = navigator.userAgent || "";
       const isAndroidWebView = ua.includes("wv"); // Android WebView
@@ -3159,11 +3164,7 @@
       };
     };
   </script>
-  <script>
-    window.onload = function() {
-      Atualizar.verificarVersao("1.0");
-    };
-  </script>
+
 </body>
 </html>
 
