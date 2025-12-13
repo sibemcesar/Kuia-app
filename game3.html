@@ -10,7 +10,7 @@
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut, sendPasswordResetEmail, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
     import { getDatabase, ref, set, get, update, remove, onValue, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
     const firebaseConfig = {
@@ -38,6 +38,7 @@
       onAuthStateChanged,
       signOut,
       sendPasswordResetEmail,
+      updateProfile,
       ref,
       set,
       get,
@@ -543,11 +544,33 @@
       border: 1px solid var(--border-color);
     }
 
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
     .comment-author {
       font-weight: 600;
       font-size: 14px;
-      margin-bottom: 4px;
       color: var(--text-primary);
+    }
+
+    .comment-delete-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      opacity: 0.7;
+      transition: opacity 0.2s, background 0.2s;
+    }
+
+    .comment-delete-btn:hover {
+      opacity: 1;
+      background: rgba(244, 67, 54, 0.1);
     }
 
     .comment-text {
@@ -950,7 +973,7 @@
         <p><strong>Status:</strong> <span id="userStatus">-</span></p>
       </div>
       <div class="points-display">
-        Meus Pontos: <span id="userPoints">0</span>
+       Meus Pontos: <span id="userPoints">0</span>
       </div>
     </div>
 
@@ -1012,8 +1035,30 @@
     <button class="btn" id="logoutBtn" onclick="logout()" style="display: none;">
       <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
       Sair
-    </button>
+    </button>   
+<button class="btn" id="meuBotao" style="display:none;">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+       viewBox="0 0 24 24" aria-label="Android app icon" 
+       style="vertical-align:middle; margin-right:8px;">
+    <g fill="#3DDC84">
+      <rect x="5" y="7" width="14" height="8" rx="3"/>
+      <circle cx="9" cy="11" r="1.2" fill="#ffffff"/>
+      <circle cx="15" cy="11" r="1.2" fill="#ffffff"/>
+      <rect x="7" y="3" width="1.8" height="4" rx="0.9" transform="rotate(-25 7.9 5)"/>
+      <rect x="15.2" y="3" width="1.8" height="4" rx="0.9" transform="rotate(25 16.1 5)"/>
+      <rect x="6" y="13" width="12" height="7" rx="2"/>
+      <rect x="3" y="13" width="2" height="6" rx="1.2"/>
+      <rect x="19" y="13" width="2" height="6" rx="1.2"/>
+      <rect x="8" y="20" width="3" height="3" rx="1"/>
+      <rect x="13" y="20" width="3" height="3" rx="1"/>
+    </g>
+  </svg>
+  Baixar o Aplicativo
+</button>
   </div>
+  <span id="textoInstalar" class="btn" >
+    <small>Continue usando no nosso aplicativo </small> <strong id="instalarLink">Instalar</strong>
+  </span>
 
   <div id="search-container" class="search-container">
     <div class="search-wrapper">
@@ -1063,7 +1108,7 @@
           <div class="modal-description" id="modalDescription"></div>
 
           <div class="main-actions" id="mainActions">
-            <button id="btnGA" class="btn-main">Baixar G.A Navegador</button>
+            <button id="btnGA" class="btn-main">Baixar </button>
             <button id="btnADM" class="btn-main">Baixar ADM</button>
           </div>
         </div>
@@ -1109,7 +1154,7 @@
       <h2>Criar Conta</h2>
       <form id="registerForm" onsubmit="handleRegister(event)">
         <div class="form-group">
-          <label class="form-label">Nome Completo</label>
+          <label class="form-label">Primeiro e Ultimo Nome</label>
           <input type="text" class="form-input" id="registerName" placeholder="Seu nome" required>
         </div>
         <div class="form-group">
@@ -1152,7 +1197,7 @@
 
   <div id="publishModal" class="custom-modal">
     <div class="custom-modal-content">
-      <h2 id="publishModalTitle">Publicar</h2>
+      <h2 id="publishModalTitle">Publicar Jogo</h2>
       <form id="publishForm" onsubmit="handlePublish(event)">
         <input type="hidden" id="editGameId">
 
@@ -1269,7 +1314,7 @@
 
   <div id="historyModal" class="custom-modal">
     <div class="custom-modal-content">
-      <h2>Histórico de Jogos Visualizados</h2>
+      <h2>Histórico de Post Visualizados</h2>
       <div id="historyList"></div>
       <div class="custom-modal-buttons" style="margin-top: 16px;">
         <button class="custom-modal-btn secondary" onclick="clearHistory()" style="margin-right: auto;">Limpar Histórico</button>
@@ -1416,9 +1461,9 @@
           currentUser = user;
           isPublisher = PUBLISHER_EMAILS.includes(user.email);
 
-          // Only load points if not anonymous
+          // Only load user data if not anonymous
           if (!user.isAnonymous) {
-            await loadUserPoints();
+            await loadUserData();
           }
 
           updateUIForUser();
@@ -1442,7 +1487,7 @@
     async function loadUserData() {
       if (!currentUser) return;
 
-      const { ref, get, set } = window.firebaseModules;
+      const { ref, get, set, update } = window.firebaseModules;
       const database = window.firebaseDatabase;
 
       const userRef = ref(database, `users/${currentUser.uid}`);
@@ -1453,14 +1498,21 @@
         userPoints = userData.points || 0;
         userStatus = userData.status || 'pending';
         userName = userData.name || '';
+
+        // Se o usuário não tem nome guardado, tenta usar o displayName do Auth
+        if (!userName && currentUser.displayName) {
+          userName = currentUser.displayName;
+          // Atualiza no banco de dados
+          await update(userRef, { name: userName });
+        }
       } else {
         userPoints = 0;
         userStatus = 'pending';
-        userName = '';
+        userName = currentUser.displayName || '';
         await set(userRef, {
           points: 0,
           status: 'pending',
-          name: '',
+          name: userName,
           email: currentUser.email,
           createdAt: Date.now()
         });
@@ -1890,13 +1942,40 @@
         return;
       }
 
-      commentsList.innerHTML = commentsArray.map(comment => `
-        <div class="comment-item">
-          <div class="comment-author">${comment.authorEmail}</div>
-          <div class="comment-text">${comment.text}</div>
-          <div class="comment-time">${formatTimeAgo(comment.timestamp)}</div>
-        </div>
-      `).join('');
+      const currentUserId = currentUser ? currentUser.uid : null;
+
+      commentsList.innerHTML = commentsArray.map(comment => {
+        const authorDisplayName = comment.authorName || comment.authorEmail.split('@')[0];
+        const isAuthor = currentUserId && comment.authorId === currentUserId;
+        const deleteBtn = isAuthor ? `<button class="comment-delete-btn" onclick="deleteComment('${currentGameData.id}', '${comment.id}')" title="Apagar comentário"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="red" viewBox="0 0 24 24">
+  <path d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5a1 1 0 0 1-1 .5H7.5a1 1 0 0 1-1-.5L5 9zm5 2v8h2v-8H10zm4 0v8h2v-8h-2zM9 4V2h6v2h5v2H4V4h5z"/>
+</svg></button>` : '';
+
+        return `
+          <div class="comment-item">
+            <div class="comment-header">
+              <div class="comment-author">${authorDisplayName}</div>
+              ${deleteBtn}
+            </div>
+            <div class="comment-text">${comment.text}</div>
+            <div class="comment-time">${formatTimeAgo(comment.timestamp)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function deleteComment(gameId, commentId) {
+      showCustomConfirm('Deseja apagar este comentário?', async () => {
+        try {
+          const { ref, remove } = window.firebaseModules;
+          const database = window.firebaseDatabase;
+
+          await remove(ref(database, `comments/${gameId}/${commentId}`));
+          showCustomAlert('Comentário apagado!');
+        } catch (error) {
+          showCustomAlert('Erro ao apagar comentário: ' + error.message);
+        }
+      });
     }
 
     async function postComment() {
@@ -1925,6 +2004,7 @@
 
       const commentData = {
         text: text,
+        authorName: userName || currentUser.email.split('@')[0],
         authorEmail: currentUser.email,
         authorId: currentUser.uid,
         timestamp: Date.now()
@@ -2053,7 +2133,7 @@
       const userGames = Object.entries(allGames).filter(([id, game]) => game.authorId === currentUser.uid);
 
       if (userGames.length === 0) {
-        manageList.innerHTML = '<p style="color: var(--text-muted);">Você ainda não publicou nenhum post.</p>';
+        manageList.innerHTML = '<p style="color: var(--text-muted);">Você ainda não publicou nenhum jogo.</p>';
         return;
       }
 
@@ -2236,13 +2316,16 @@
       }
 
       try {
-        const { createUserWithEmailAndPassword } = window.firebaseModules;
+        const { createUserWithEmailAndPassword, updateProfile } = window.firebaseModules;
         const { ref, set } = window.firebaseModules;
         const database = window.firebaseDatabase;
 
         // Create user in Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
         const user = userCredential.user;
+
+        // Update Firebase Auth profile with display name
+        await updateProfile(user, { displayName: name });
 
         // Create user data in Realtime Database
         await set(ref(database, `users/${user.uid}`), {
@@ -2256,8 +2339,13 @@
         userName = name;
         userStatus = 'pending';
         userPoints = 0;
+        currentUser = user;
+        isPublisher = PUBLISHER_EMAILS.includes(email);
 
         closeRegisterModal();
+        updateUIForUser();
+        updateUserInfoDisplay();
+        updatePointsDisplay();
         showCustomAlert('Conta criada com sucesso! Sua conta está aguardando aprovação do administrador.');
       } catch (error) {
         let errorMessage = 'Erro ao criar conta: ';
@@ -3033,6 +3121,48 @@
         sidebar.classList.remove('open');
       }
     });
+  </script>
+  <script>
+    function isWebView() {
+      const ua = navigator.userAgent || "";
+      const isAndroidWebView = ua.includes("wv"); // Android WebView
+      const isIOSWebView = /iPhone|iPod|iPad/.test(ua) && !ua.includes("Safari"); // iOS WebView
+      return isAndroidWebView || isIOSWebView;
+    }
+
+    window.onload = function() {
+      const botao = document.getElementById("meuBotao");
+      const textoInstalar = document.getElementById("textoInstalar");
+      const instalarLink = document.getElementById("instalarLink");
+
+      if (!isWebView()) {
+        botao.style.display = "inline-block";
+
+        if (localStorage.getItem("instalarClicado") !== "true") {
+          textoInstalar.style.display = "inline-block";
+        } else {
+          textoInstalar.style.display = "none";
+        }
+      } else {
+        botao.style.display = "none";
+        textoInstalar.style.display = "none";
+      }
+
+      botao.onclick = function() {
+        window.open("https://play.google.com/store/apps/details?id=seu.app", "_blank");
+      };
+
+      instalarLink.onclick = function() {
+        window.open("https://play.google.com/store/apps/details?id=seu.app", "_blank");
+        localStorage.setItem("instalarClicado", "true");
+        textoInstalar.style.display = "none";
+      };
+    };
+  </script>
+  <script>
+    window.onload = function() {
+      Atualizar.verificarVersao("1.0");
+    };
   </script>
 </body>
 </html>
